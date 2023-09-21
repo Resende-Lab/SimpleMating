@@ -1,0 +1,15 @@
+Package: SimpleMating
+Title: Estimation of Usefulness and Optimal Cross Selection
+Version: 0.0.0.9000
+Authors@R: 
+    person("Marco", "Peixoto", , "marco.peixotom@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0003-0564-7068"))
+Description: SimpleMating is a two core package for cross optimization. It estimates usefulness for a set of crosses, via additive and non-additive effects and also multi-trait scenarios. Furthermore, it select the best crosses based on a target criterion (BLUP, Mean parental value, or Usefulness) and constrain the inbreeding of the next generation.
+License: GPL-3
+Encoding: UTF-8
+Imports: 
+     optiSel,
+     matrixcalc,
+     stats
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
