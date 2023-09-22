@@ -3,58 +3,47 @@
 
 ### Synopsis
 
-SimpleMating provides a easily way to implemente cross prediction based on marker data and optimization of Mate cross based on relationship matrix (A or G).
+SimpleMating provides an easy way to implement cross prediction based on marker data and optimization of Mate cross based on relationship matrix (A or G).
 
 ### How to run it
 
 #### Installation
 
-SimpleMating will be at CRAN soon. However, you can downloaded and use it from our Github repository.
+SimpleMating will be at CRAN soon. However, you can download and use it from our Github repository.
 
 Run in R:
 
 ```{r}
 library(devtools)
-install_github('marcopxt/SimpleMating') # current version:  0.1.0 (July 01st 2023)
+install_github('Resende-Lab/SimpleMating') # current version:  0.1.0 (September 22th, 2023)
 ```
 #### Dataset available
 
-Two datasets are available to the implementation as a toy example of the analyses.
+Two datasets are available for the implementation as a toy example of the analyses.
 
-**SMdat1.Rdata**: four traits simulated that came from a DH maize population.  
-**SMdat2.Rdata**: four traits simulated. Additive and dominante effects are already enclosed.  
+**datLines.rda**: two traits simulated that came from a homozygous population.  
+**datGeneric.rda**: two traits simulated. Additive and dominance effects are already enclosed.  
 
-#### Running an example
-For the generation of a mating plan, SimpleMating offers two alternatives. The first one is to estimate the cross usefulness for each apir of cross.
-In this optimizion, the user should offer a list of parents to generate a cross plan.
-```{r}
-####-----------------------------------
-##############################################################################################
+#### Running
+Herein, we give an example of each function inside the package SimpleMating
 
 ###>>===========================
 ###>>---- 1. getMPA
 ###>>===========================
 
+```{r}
 rm(list=ls())
-###>>-------- 1. Environments
-(files=list.files(pattern = ''))
+# 1. Loading the data
+data('datGeneric')
 
-# Files
-for(i in 1:length(files)){
-  source(paste0(files[i]))
-}
-
-# 1.Loading the data
-load('../data/datGeneric.RData')
-
-# 2.Mating Plan
+# 2. Mating Plan
 CrossPlan = planCross(TargetPop = colnames(G) )
 
 # 3. Criterion
 Crit = data.frame(Id = colnames(G),
                   Crit = Criterion[,1])
 
-# 4.Single trait mean parental average
+# 4. Single trait mean parental average
 ST_mpa = getMPA(MatePlan = CrossPlan, 
                 Criterion = Crit, 
                 K=G)
@@ -65,7 +54,7 @@ head(ST_mpa, 20)
 CritMT = data.frame(Id = colnames(G),
                     Crit = Criterion)
 
-# 6.Multi trait mean parental average
+# 6. Multi-trait mean parental average
 MT_mpa = getMPA(MatePlan = CrossPlan, 
                 Criterion = CritMT, 
                 K=G, 
@@ -73,27 +62,24 @@ MT_mpa = getMPA(MatePlan = CrossPlan,
                 Weights = c(1,1))
 
 head(MT_mpa, 20)
+```
+
+<br>
 
 ###>>===========================
 ###>>---- 2. getTGV
 ###>>===========================
 
+```{r}
 rm(list=ls())
-###>>-------- 1. Environments
-(files=list.files(pattern = ''))
-
-# Files
-for(i in 1:length(files)){
-  source(paste0(files[i]))
-}
 
 # 1. Loading the data
-load('../data/datGeneric.RData')
+data('datGeneric')
 
 # 2. Mating Plan
 CrossPlan = planCross(colnames(G))
 
-## Single trait
+# 3. Single trait
 ST_tgv = getTGV(MatePlan = CrossPlan, 
              Markers=Markers, 
              addEff=addEff[,1], 
@@ -102,7 +88,7 @@ ST_tgv = getTGV(MatePlan = CrossPlan,
 
 head(ST_tgv, 20)
 
-## Multi trait
+# 4. Multi trait
 MT_tgv = getTGV(MatePlan = CrossPlan, 
                 Markers=Markers, 
                 addEff=addEff, 
@@ -112,21 +98,19 @@ MT_tgv = getTGV(MatePlan = CrossPlan,
 
 head(MT_tgv, 20)
 
+```
+
+<br>
+
 ###>>===========================
 ###>>---- 3. getIndex
 ###>>===========================
 
+```{r}
 rm(list=ls())
-###>>-------- 1. Environments
-(files=list.files(pattern = ''))
-
-# Files
-for(i in 1:length(files)){
-  source(paste0(files[i]))
-}
 
 # 1.Loading the data
-load('../data/datGeneric.RData')
+data('datGeneric')
 
 # 2.Index
 trait_index = getIndex(Criterion=Criterion, 
@@ -135,30 +119,26 @@ trait_index = getIndex(Criterion=Criterion,
 
 head(trait_index, 10)
 
+```
+
 ###>>===========================
 ###>>---- 4. getUsefA
 ###>>===========================
 
+```{r}
 rm(list=ls())
-###>>-------- 1. Environments
-(files=list.files(pattern = ''))
 
-# Files
-for(i in 1:length(files)){
-  source(paste0(files[i]))
-}
+# 1. Loading the dataset.
+data('datLines')
 
-# 1.Loading the dataset.
-load('../data/datLines.RData')
-
-# 2.Using just a subset for time purposes
+# 2. Using just a subset for time purposes
 Parents = colnames(G)[1:15]
 
-# 3.Creating the mating plan
+# 3. Creating the mating plan
 plan = planCross(TargetPop = Parents,
                  MateDesign = 'half')
 
-# 4.Calculating the usefulness for trait number 1
+# 4. Calculating the usefulness for trait number 1
 usef_add = getUsefA(MatePlan = plan,
                     Markers = Markers,
                     addEff = addEff[,1],
@@ -168,30 +148,25 @@ usef_add = getUsefA(MatePlan = plan,
 
 head(usef_add, 10)
 
+```
+
 ###>>===========================
 ###>>---- 5. getUsefA_mt
 ###>>===========================
 
+```{r}
 rm(list=ls())
-###>>-------- 1. Environments
-(files=list.files(pattern = ''))
+# 1. Loading the dataset.
+data('datLines')
 
-# Files
-for(i in 1:length(files)){
-  source(paste0(files[i]))
-}
-
-# 1.Loading the dataset.
-load('../data/datLines.RData')
-
-# 2.Using just a subset for time purposes
+# 2. Using just a subset for time purposes
 Parents = colnames(G)[1:15]
 
-# 3.Creating the mating plan
+# 3. Creating the mating plan
 plan = planCross(TargetPop = Parents,
                  MateDesign = 'half')
 
-# 4.Calculating the usefulness for trait number 1
+# 4. Calculating the usefulness for trait number 1
 MT_usef = getUsefA_mt(MatePlan = plan,
                        Markers = Markers,
                        addEff = addEff,
@@ -202,31 +177,26 @@ MT_usef = getUsefA_mt(MatePlan = plan,
 
 head(MT_usef, 10)
 
+```
+
 ###>>===========================
 ###>>---- 6. getUsefAD
 ###>>===========================
 
+```{r}
 rm(list=ls())
-###>>-------- 1. Environments
-(files=list.files(pattern = ''))
+# 1. Loading the dataset.
+data('datGeneric')
 
-# Files
-for(i in 1:length(files)){
-  source(paste0(files[i]))
-}
-
-# 1.Loading the dataset.
-load('../data/datGeneric.RData')
-
-# 2.Using just a subset for time purposes
+# 2. Using just a subset for time purposes
 Parents = colnames(G)[1:15]
 
-# 3.Creating the mating plan
+# 3. Creating the mating plan
 plan = planCross(TargetPop = Parents,
                  MateDesign = 'half')
 
 
-# 4.Calculating the usefulness using 'Bonk' method
+# 4. Calculating the usefulness using 'Bonk' method
 usefBonk = getUsefAD(MatePlan = plan,
                      Markers = PhasedMarkers,
                      addEff = addEff[,1],
@@ -237,7 +207,7 @@ usefBonk = getUsefAD(MatePlan = plan,
 
 head(usefBonk,10)
 
-# 5.Calculating the usefulness using 'Wolfe' method
+# 5. Calculating the usefulness using 'Wolfe' method
 usefWolfe = getUsefAD(MatePlan = plan,
                       Markers = PhasedMarkers,
                       addEff = addEff[,1],
@@ -248,7 +218,7 @@ usefWolfe = getUsefAD(MatePlan = plan,
 
 head(usefWolfe,10)
 
-# 6.Calculating the usefulness using 'NonPhased' method
+# 6. Calculating the usefulness using 'NonPhased' method
 usefNonPhased = getUsefAD(MatePlan = plan,
                           Markers = Markers,
                           addEff = addEff[,1],
@@ -259,30 +229,26 @@ usefNonPhased = getUsefAD(MatePlan = plan,
 
 head(usefNonPhased,10)
 
+```
+
 ###>>===========================
 ###>>---- 7. getUsefAD_mt
 ###>>===========================
 
+```{r}
 rm(list=ls())
-###>>-------- 1. Environments
-(files=list.files(pattern = ''))
 
-# Files
-for(i in 1:length(files)){
-  source(paste0(files[i]))
-}
+# 1. Loading the dataset.
+data('datGeneric')
 
-# 1.Loading the dataset.
-load('../data/datGeneric.RData')
-
-# 2.Using just a subset for time purposes
+# 2. Using just a subset for time purposes
 Parents = colnames(G)[1:20]
 
-# 3.Creating the mating plan
+# 3. Creating the mating plan
 plan = planCross(TargetPop = Parents,
                  MateDesign = 'half')
 
-# 4.Calculating the usefulness using 'Bonk' method
+# 4. Calculating the usefulness using 'Bonk' method
 usefBonk = getUsefAD_mt(MatePlan = plan,
                         Markers = PhasedMarkers,
                         addEff = addEff,
@@ -294,7 +260,7 @@ usefBonk = getUsefAD_mt(MatePlan = plan,
 
 head(usefBonk,10)
 
-# 5.Calculating the usefulness using 'Wolfe' method
+# 5. Calculating the usefulness using 'Wolfe' method
 usefWolfe = getUsefAD_mt(MatePlan = plan,
                          Markers = PhasedMarkers,
                          addEff = addEff,
@@ -306,7 +272,7 @@ usefWolfe = getUsefAD_mt(MatePlan = plan,
 
 head(usefWolfe,10)
 
-# 6.Calculating the usefulness using 'NonPhased' method
+# 6. Calculating the usefulness using 'NonPhased' method
 usefNonPhased = getUsefAD_mt(MatePlan = plan,
                              Markers = Markers,
                              addEff = addEff,
@@ -318,24 +284,19 @@ usefNonPhased = getUsefAD_mt(MatePlan = plan,
 
 head(usefNonPhased,10)
 
+```
+
 ###>>===========================
 ###>>---- 8. GOCS
 ###>>===========================
 
+```{r}
 rm(list=ls())
-###>>-------- 1. Environments
-(files=list.files(pattern = ''))
-
-# Files
-for(i in 1:length(files)){
-  source(paste0(files[i]))
-}
-
 
 # 1. Loading the data
-load('../data/datGeneric.RData')
+data('datGeneric')
 
-# 2.Criterion
+# 2. Criterion
 Crit = data.frame(Id = colnames(G),
                   BLUP = Criterion[,1])
 
@@ -394,85 +355,68 @@ MatePlan[[3]]
 # New population parameters
 MatePlan[[6]]
 
+```
+
 ###>>===========================
 ###>>---- 10. Maximum avoidance
 ###>>===========================
 
+```{r}
 rm(list=ls())
-###>>-------- 1. Environments
-(files=list.files(pattern = ''))
+# 1. Loading the data
+data('datGeneric')
 
-# Files
-for(i in 1:length(files)){
-  source(paste0(files[i]))
-}
-
-# 1.Loading the data
-load('../data/datGeneric.RData')
-
-# 2.Maximum avoidance
+# 2. Maximum avoidance
 Plan = MaxAvoid(nInd=100, 
                 nProgeny=1L, 
                 Ind.ID=colnames(G))
 
-# 3.Mating Plan
+# 3. Mating Plan
 Plan
+
+```
 
 ###>>===========================
 ###>>---- 11. CrossPlan
 ###>>===========================
 
+```{r}
 rm(list=ls())
-###>>-------- 1. Environments
-(files=list.files(pattern = ''))
 
-# Files
-for(i in 1:length(files)){
-  source(paste0(files[i]))
-}
+# 1. Loading the dataset.
+data('datLines')
 
-
-# 1.Loading the dataset.
-load('../data/datLines.RData')
-
-# 2.Using just a subset for time purposes
+# 2. Using just a subset for time purposes
 Parents = colnames(G)[1:15]
 
-# 3.Creating the mating plan
+# 3. Creating the mating plan
 plan1 = planCross(TargetPop = Parents,
                  MateDesign = 'half')
 
 head(plan1,10)
 
 
-# 4.Using two set of parents
+# 4. Using two set of parents
 Parents1 = colnames(G)[1:15]
 Parents2 = colnames(G)[20:30]
 
-# 5.Creating the mating plan
+# 5. Creating the mating plan
 plan2 = planCross(TargetPop = Parents1,
                   TargetPop2 = Parents2,
                   MateDesign = 'half')
 
 head(plan2,10)
 
+```
 
 ###>>===========================
 ###>>---- 12. relateThinning
 ###>>===========================
 
+```{r}
 rm(list=ls())
-###>>-------- 1. Environments
-(files=list.files(pattern = ''))
-
-# Files
-for(i in 1:length(files)){
-  source(paste0(files[i]))
-}
-
-
-# 1.Loading the data
-load('../data/datGeneric.RData')
+# 1. Loading the data
+data('datGeneric')
 
 # 2.Criterion
 Crit = data.frame(Id = colnames(G),
@@ -484,34 +428,29 @@ parents2keep = relateThinning(K = G,
                               threshold = 0.5, 
                               max.per.cluster = 2)
 
-# 4.List with the parents to keep
+# 4. List with the parents to keep
 parents2keep
+
+```
 
 ###>>===========================
 ###>>---- 13. selectCrosses
 ###>>===========================
 
+```{r}
 rm(list=ls())
 
-###>>-------- 1. Environments
-(files=list.files(pattern = ''))
+# 1. Loading the data
+data('datGeneric')
 
-# Files
-for(i in 1:length(files)){
-  source(paste0(files[i]))
-}
-
-# 1.Loading the data
-load('../data/datLines.RData')
-
-# 2.Mating Plan
+# 2. Mating Plan
 CrossPlan = planCross(TargetPop = colnames(G) )
 
 # 3. Criterion
 Crit = data.frame(Id = colnames(G),
                   Crit = Criterion[,1])
 
-# 4.Single trait mean parental average
+# 4. Single trait mean parental average
 ST_mpa = getMPA(MatePlan = CrossPlan, 
                 Criterion = Crit, 
                 K=G)
@@ -530,23 +469,18 @@ maxGainPlan[[1]]
 # 7. Mating Plan
 maxGainPlan[[2]]
 
+```
+
 ###>>===========================
 ###>>---- 14. setCrosses
 ###>>===========================
 
+```{r}
 rm(list=ls())
-###>>-------- 1. Environments
-(files=list.files(pattern = ''))
+# 1. Loading the data
+data('datLines')
 
-# Files
-for(i in 1:length(files)){
-  source(paste0(files[i]))
-}
-
-# 1.Loading the data
-load('../data/datLines.RData')
-
-# 2.Mating Plan
+# 2. Mating Plan
 CrossPlan = planCross(TargetPop = colnames(G))
 
 # 3. Criterion
@@ -564,7 +498,7 @@ Matplan = setCrosses(Criterion = Crit,
 # 5. Stats
 Matplan[[1]]
 
-# 6.Mating plan
+# 6. Mating plan
 Matplan[[2]]
 
 
@@ -587,31 +521,26 @@ MatplanMT[[1]]
 # 10.Mating plan
 MatplanMT[[2]]
 
+```
 
 ###>>===========================
 ###>>---- 14. Usef2Crosses
 ###>>===========================
 
+```{r}
 rm(list=ls())
-###>>-------- 1. Environments
-(files=list.files(pattern = ''))
 
-# Files
-for(i in 1:length(files)){
-  source(paste0(files[i]))
-}
+# 1. Loading the dataset.
+data('datLines')
 
-# 1.Loading the dataset.
-load('../data/datLines.RData')
-
-# 2.Using just a subset for time purposes
+# 2. Using just a subset for time purposes
 Parents = colnames(G)[1:15]
 
-# 3.Creating the mating plan
+# 3. Creating the mating plan
 plan = planCross(TargetPop = Parents,
                  MateDesign = 'half')
 
-# 4.Calculating the usefulness for trait number 1
+# 4. Calculating the usefulness of trait number 1
 usef_add = getUsefA(MatePlan = plan,
                     Markers = Markers,
                     addEff = addEff[,1],
@@ -630,7 +559,7 @@ head(MainTab)
 
 ***
 
-Any question about the analyses, please, contact me!
+Any questions about the analyses, please, contact me!
 
 Marco 
 
