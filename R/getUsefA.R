@@ -101,7 +101,7 @@ getUsefA = function(MatePlan = NULL, Markers=NULL, addEff=NULL, Map.In=NULL, pro
     # Marker effect by chromosome
     Map.Eff <- split(EffA, Map.In[, 1, drop = FALSE])  
     # Haldane function for Recombination matrix
-    rMat <- lapply(Map.Chr, Hal.Rec)
+    rMat <- lapply(Map.Chr, theta)
    
     #------ Function to MCov
     #Models for Covariances matrix
@@ -200,14 +200,14 @@ getUsefA = function(MatePlan = NULL, Markers=NULL, addEff=NULL, Map.In=NULL, pro
 }
 
 
-#' `Hal.Rec`
+#' `theta`
 #' Function to calculate the recombination matrix from a genetic map based on Haldane (1909).
 #' 
-#' @param map data frame with three columns: chromosome number, chromosome position, and markers number 
+#' @param map data frame with three columns: chromosome number, chromosome position, and marker number 
 #'
 #' @export
 
-Hal.Rec = function(map){
+theta = function(map){
   
   Chr_cM <- do.call(rbind, lapply(1:nrow(map), function(x) rep(map[,1][x],nrow(map))))
   Chr_cMt <- t(Chr_cM)
