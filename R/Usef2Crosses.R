@@ -56,29 +56,19 @@
 
 Usef2Crosses = function(Usefulness=NULL, K=NULL){
   
-  #Melting K
   melted_rel = meltKUsef(K)
-  
-  # Data.frame
   par_info = data.frame(Cross.ID = paste0(melted_rel$Parent2, "_", melted_rel$Parent1),
                         K = melted_rel$K)
-  
-  # Combining the information
   df = merge(Usefulness, par_info, by = "Cross.ID")
-  
-  # Build up the input for the optimization
   crosses2opt = list(data.frame(Parent1 = df$Parent1,
                                 Parent2 = df$Parent2,
                                 Y = df$Usefulness,
                                 K = df$K))
-  
   crosses2opt[[2]] = data.frame(Parent1 = df$Parent1,
                                 Parent2 = df$Parent2,
-                                Y = df$Mean,
+                                Y = df[,3],
                                 K = df$K)
-  
   return(crosses2opt)
-  
 }
 
 
