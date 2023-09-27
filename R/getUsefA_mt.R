@@ -107,34 +107,39 @@ getUsefA_mt = function(MatePlan = NULL, Markers=NULL, addEff=NULL, Map.In=NULL, 
   Map.Eff <- split(data.frame(addEff), Map.In[, 1, drop = FALSE])  
   # Haldane function for Recombination matrix
   rMat <- lapply(Map.Chr, theta)
-  
-  #------ Function to MCov
-  #Models for Covariances matrix
-  if (Type == 'DH' & Generation == 0) {
+
+  # Models for Covariance matrix
+  if (Type == 'DH'){
+    if(Generation == 0){
+      MCov <- lapply(X = rMat, FUN = function(ctheta) 1 - (2 * ctheta))
+    }else if (is.infinite(Generation)){
+      MCov <- lapply(X = rMat, FUN = function(ctheta) (1 - (2 * ctheta)) / (1 + (2 * ctheta)))
+    }else{
+      #Right 
+      RHS_MCov <- lapply(X = rMat, FUN = function(ctheta) {popInfo <- 0.5 * (1 - (2 * ctheta))
+      
+      Reduce(f = `+`, x = lapply(X = seq(Generation), FUN = function(k) popInfo ^ k)) })
+      
+      #Left
+      LHS_MCov <- lapply(X = rMat, FUN = function(ctheta) (0.5 * (1 - (2 * ctheta))) ^ Generation)
+      
+      #Total
+      MCov <- Map('+', RHS_MCov, LHS_MCov)
+    }
     
-    MCov <- lapply(X = rMat, FUN = function(cFreq) 1 - (2 * cFreq))
+  }  else if (Type == 'RIL'){
+      if (is.infinite(Generation)) {
+      MCov <- lapply(X = rMat, FUN = function(ctheta) (1 - (2 * ctheta)) / (1 + (2 * ctheta)))
+      
+      }else{
+        
+      MCov <- lapply(X = rMat, FUN = function(ctheta) {popInfo <- 0.5 * (1 - (2 * ctheta))
+      Reduce(f = `+`, x = lapply(X = seq(Generation), FUN = function(k) popInfo ^ k)) })
     
-  } else if (Type == 'DH' & Generation > 0) {
-    #Right 
-    RHS_MCov <- lapply(X = rMat, FUN = function(cFreq) {popInfo <- 0.5 * (1 - (2 * cFreq))
-    Reduce(f = `+`, x = lapply(X = seq(Generation), FUN = function(k) popInfo ^ k)) })
-    
-    #Left
-    LHS_MCov <- lapply(X = rMat, FUN = function(cFreq) (0.5 * (1 - (2 * cFreq))) ^ Generation)
-    
-    #Total
-    MCov <- mapply(FUN = `+`, RHS_MCov, LHS_MCov)
-    
-  } else if (Type == 'RIL' & is.finite(Generation)) {
-    MCov <- lapply(X = rMat, FUN = function(cFreq) {popInfo <- 0.5 * (1 - (2 * cFreq))
-    Reduce(f = `+`, x = lapply(X = seq(Generation), FUN = function(k) popInfo ^ k)) })
-    
-  } else if (Type == 'RIL' & is.infinite(Generation)) {
-    MCov <- lapply(X = rMat, FUN = function(cFreq) (1 - (2 * rMat)) / (1 + (2 * cFreq)))
+      }
   }
   
   #----- function to 4*D
-  # Estimation of cross var
   Markers <- Markers-1
   
   calc.info = function(Markers) {
@@ -145,9 +150,9 @@ getUsefA_mt = function(MatePlan = NULL, Markers=NULL, addEff=NULL, Map.In=NULL, 
   crospredPar = function(Ncross) {
     cross_variance <- vector("list", nrow(Ncross))
     
-    #Loop throughout the list positions
+    #Loop throughout the list of positions
     for (i in seq_along(cross_variance)) {
-      #Filter by pair i=10
+      #Filter by pair 
       Matepair <- as.character(Ncross[i,])
       Total_SNP <- Markers[Matepair, , drop = FALSE]
       #Drop the non-seg SNPs
