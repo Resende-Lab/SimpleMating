@@ -18,18 +18,18 @@
 #'
 #' @description
 #' Predicts usefulness component for a set of crosses. It accounts for only one
-#' trait controlled by additive effects.
+#' trait controlled by additive effects. All covariances matrices estimated here were implemented according to Lehermeier et al. (2017).
 #'
 #' @param MatePlan data frame with the two columns indicating the crosses to predict.
 #' @param Markers matrix with markers information for all candidate parents,
 #' coded as 0,1,2.
 #' @param addEff data frame with additive marker effects.
-#' @param Map.In data.frame with the mapping information, i.e., chromosome, positioning and SNP id.
+#' @param Map.In data frame with the mapping information, i.e., chromosome, positioning and SNP id.
 #' @param propSel Value representing the proportion of the selected individuals.
 #' @param Type which kind of system of mating: "DH": doubled haploids lines or
 #'  "RIL": Recombinant inbred lines.
 #' @param Generation integer. Indicates the generation where the parents come from. According to Lehermeier et al. (2017)
-#' DH from F1 generation is '0' and RILs from F1 generation is '1'.
+#' DH from F1 generation is '0' and RILs from F1 generation is '1'. Also, for infinite generation for both types, 'Inf' flag should be added.
 #'
 #' @return A data frame with means, variances, and usefulness for each pair of
 #' crosses presented in the MatePlan.
@@ -37,17 +37,17 @@
 #' @author Marco Antonio Peixoto, \email{marco.peixotom@@gmail.com}
 #'
 #' @examples
-#' # 1.Loading the dataset.
+#' # 1. Loading the dataset.
 #' data('datLines')
 #' 
-#' # 2.Using just a subset for time purposes
+#' # 2. Using just a subset for time purposes
 #' Parents = colnames(G)[1:15]
 #' 
-#' # 3.Creating the mating plan
+#' # 3. Creating the mating plan
 #' plan = planCross(TargetPop = Parents,
 #'                  MateDesign = 'half')
 #' 
-#' # 4.Calculating the usefulness for trait number 1
+#' # 4. Calculating the usefulness of trait number 1
 #' usef_add = getUsefA(MatePlan = plan,
 #'                     Markers = Markers,
 #'                     addEff = addEff[,1],
@@ -81,7 +81,7 @@ getUsefA = function(MatePlan = NULL, Markers=NULL, addEff=NULL, Map.In=NULL, pro
   colnames(MatePlan) <- c('Parent1', 'Parent2', 'Cross.ID')
   
   # Estimated additive effects
-  EffA <- as.matrix(addEff[, drop = FALSE])
+  EffA <- as.matrix(addEff)
   
   # Mean for each mate
   est.bredv <- Markers%*%EffA
@@ -92,86 +92,93 @@ getUsefA = function(MatePlan = NULL, Markers=NULL, addEff=NULL, Map.In=NULL, pro
     return(round(Mean_Cross, digits = 5))
   })
   
-    #--------Variance
-    Markers_names = colnames(Markers) = names(addEff) = Map.In[, 3]
-    # Split mapping by Chromosome
-    Map.Chr <- split(Map.In, Map.In[, 1, drop = FALSE])  
-    #Split markers names by chromosome
-    Map.Pos <- split(Markers_names, Map.In[, 1, drop = FALSE])
-    # Marker effect by chromosome
-    Map.Eff <- split(EffA, Map.In[, 1, drop = FALSE])  
-    # Haldane function for Recombination matrix
-    rMat <- lapply(Map.Chr, theta)
-   
-    #------ Function to MCov
-    #Models for Covariances matrix
-    if (Type == 'DH' & Generation == 0) {
-      
-      MCov <- lapply(X = rMat, FUN = function(cFreq) 1 - (2 * cFreq))
-      
-    } else if (Type == 'DH' & Generation > 0) {
+  #--------Variance
+  Markers_names = colnames(Markers) = rownames(addEff) = Map.In[, 3]
+  # Split mapping by Chromosome
+  Map.Chr <- split(Map.In, Map.In[, 1, drop = FALSE])  
+  #Split markers names by chromosome
+  Map.Pos <- split(Markers_names, Map.In[, 1, drop = FALSE])
+  # Marker effect by chromosome
+  Map.Eff <- split(EffA, Map.In[, 1, drop = FALSE])  
+  # Haldane function for Recombination matrix
+  rMat <- lapply(Map.Chr, theta)
+  
+  #Models for Covariances matrix
+  if (Type == 'DH'){
+    if(Generation == 0){
+      MCov <- lapply(X = rMat, FUN = function(ctheta) 1 - (2 * ctheta))
+    }else if (is.infinite(Generation)){
+      MCov <- lapply(X = rMat, FUN = function(ctheta) (1 - (2 * ctheta)) / (1 + (2 * ctheta)))
+    }else{
       #Right 
-      RHS_MCov <- lapply(X = rMat, FUN = function(cFreq) {popInfo <- 0.5 * (1 - (2 * cFreq))
+      RHS_MCov <- lapply(X = rMat, FUN = function(ctheta) {popInfo <- 0.5 * (1 - (2 * ctheta))
+      
       Reduce(f = `+`, x = lapply(X = seq(Generation), FUN = function(k) popInfo ^ k)) })
       
       #Left
-      LHS_MCov <- lapply(X = rMat, FUN = function(cFreq) (0.5 * (1 - (2 * cFreq))) ^ Generation)
+      LHS_MCov <- lapply(X = rMat, FUN = function(ctheta) (0.5 * (1 - (2 * ctheta))) ^ Generation)
       
       #Total
-      MCov <- mapply(FUN = `+`, RHS_MCov, LHS_MCov)
-      
-    } else if (Type == 'RIL' & is.finite(Generation)) {
-      MCov <- lapply(X = rMat, FUN = function(cFreq) {popInfo <- 0.5 * (1 - (2 * cFreq))
-      Reduce(f = `+`, x = lapply(X = seq(Generation), FUN = function(k) popInfo ^ k)) })
-      
-    } else if (Type == 'RIL' & is.infinite(Generation)) {
-      MCov <- lapply(X = rMat, FUN = function(cFreq) (1 - (2 * rMat)) / (1 + (2 * cFreq)))
+      MCov <- Map('+', RHS_MCov, LHS_MCov)
     }
     
-    # Estimation of cross var
-    Markers <- Markers-1
-    calc.info = function(Markers) {
-      fourD <- crossprod(Markers[1, , drop = FALSE] - Markers[2, , drop = FALSE])/4
-      return(fourD)
-      }
+  }  else if (Type == 'RIL'){
+      if (is.infinite(Generation)) {
+      MCov <- lapply(X = rMat, FUN = function(ctheta) (1 - (2 * ctheta)) / (1 + (2 * ctheta)))
+      
+      }else{
+        
+      MCov <- lapply(X = rMat, FUN = function(ctheta) {popInfo <- 0.5 * (1 - (2 * ctheta))
+      Reduce(f = `+`, x = lapply(X = seq(Generation), FUN = function(k) popInfo ^ k)) })
     
-    crospredPar = function(Ncross) {
-                  cross_variance <- vector("list", nrow(Ncross))
-                  
-                  #Loop throughout the list positions
-                  for (i in seq_along(cross_variance)) {
-                  #Filter by pair 
-                  Matepair <- as.character(Ncross[i,])
-                  Total_SNP <- Markers[Matepair, , drop = FALSE]
-                  #Drop the non-seg SNPs
-                  SNPseg <- which(!colMeans(Total_SNP) %in% c(1,-1))
-                  #Get the names of seg SNPs in each chromosome
-                  SNPseg.Chr <- lapply(Map.Pos, intersect, Markers_names[SNPseg])
-                  #Get the position of seg SNPs
-                  SNPseg.Chr_pos <- mapply(Map.Pos, SNPseg.Chr, FUN = function(.a, .b) which(.a %in% .b))
-                  #Seg SNPs for the parents and calc 4*D
-                  parGen <- lapply(SNPseg.Chr, function(tmp) Markers[Matepair, tmp, drop = FALSE])
-                  D = lapply(parGen, calc.info)
-                  #get the MCOV matrix only with the seg-SNPs position and filter MCov
-                  SNPseg.MCov <- mapply(SNPseg.Chr_pos, MCov, FUN = function(.a,.b) .b[.a,.a])
-                  #Chromosome covariance matrix
-                  VarCov <- Map('*', D, SNPseg.MCov)
-                  #get the SNP effects for the seg-SNPs only
-                  SNPseg.EffA <- mapply(SNPseg.Chr_pos, Map.Eff, FUN = function(.a,.b) .b[.a])
-                  #Calculating the cross variance using the  marker effects
-                  Pair.Var <- sum(mapply(VarCov, SNPseg.EffA,
-                                     FUN = function(.a, .b) crossprod(.b, .a %*% .b)))
-                  #Output
-                  cross_variance[[i]] <- data.frame(t(Matepair), 
-                                                    Variance = abs(Pair.Var),
-                                                    stringsAsFactors = FALSE,
-                                                    row.names = NULL)
-                                        }
+      }
+  }
+  
 
-                                        do.call("rbind", cross_variance)
-
-                                      }
-
+  # Estimation of cross var
+  Markers <- Markers-1
+  calc.info = function(Markers) {
+    fourD <- crossprod(Markers[1, , drop = FALSE] - Markers[2, , drop = FALSE])/4
+    return(fourD)
+  }
+  # Ncross = cros2cores[[1]] i=2
+  crospredPar = function(Ncross) {
+    cross_variance <- vector("list", nrow(Ncross))
+    
+    #Loop throughout the list positions
+    for (i in seq_along(cross_variance)) {
+      #Filter by pair  str(Ncross)
+      Matepair <- as.character(Ncross[i,])
+      Total_SNP <- Markers[Matepair, , drop = FALSE]
+      #Drop the non-seg SNPs
+      SNPseg <- which(!colMeans(Total_SNP) %in% c(1,-1))
+      #Get the names of seg SNPs in each chromosome
+      SNPseg.Chr <- lapply(Map.Pos, intersect, Markers_names[SNPseg])
+      #Get the position of seg SNPs
+      SNPseg.Chr_pos <- mapply(Map.Pos, SNPseg.Chr, FUN = function(.a, .b) which(.a %in% .b))
+      #Seg SNPs for the parents and calc 4*D
+      parGen <- lapply(SNPseg.Chr, function(tmp) Markers[Matepair, tmp, drop = FALSE])
+      D = lapply(parGen, calc.info)
+      #get the MCOV matrix only with the seg-SNPs position and filter MCov
+      SNPseg.MCov <- mapply(SNPseg.Chr_pos, MCov, FUN = function(.a,.b) .b[.a,.a])
+      #Chromosome covariance matrix
+      VarCov <- Map('*', D, SNPseg.MCov)
+      #get the SNP effects for the seg-SNPs only
+      SNPseg.EffA <- mapply(SNPseg.Chr_pos, Map.Eff, FUN = function(.a,.b) .b[.a])
+      #Calculating the cross variance using the  marker effects
+      Pair.Var <- sum(mapply(VarCov, SNPseg.EffA,
+                             FUN = function(.a, .b) crossprod(.b, .a %*% .b)))
+      #Output
+      cross_variance[[i]] <- data.frame(t(Matepair), 
+                                        Variance = abs(Pair.Var),
+                                        stringsAsFactors = FALSE,
+                                        row.names = NULL)
+    }
+    
+    do.call("rbind", cross_variance)
+    
+  }
+  
   #Number of crosses
   cros2cores <- split(x = MatePlan[,c(1:2)], rep(seq_len(1), length.out = nrow(MatePlan)))
   
@@ -183,14 +190,14 @@ getUsefA = function(MatePlan = NULL, Markers=NULL, addEff=NULL, Map.In=NULL, pro
   
   # Selection intensity
   selin = dnorm(qnorm(1-propSel))/propSel
-
+  
   calcuf <- function(x){
     mean <- as.numeric(x[4])
     std <- selin * sqrt(as.numeric(x[5]))
     uc <- round(mean + std, 5)
     return(uc)
   }
-
+  
   MatePlan$Usefulness <- apply(MatePlan, 1, function(x) calcuf(x))
   MatePlan <- MatePlan[order(MatePlan$Usefulness, decreasing = TRUE),]
   rownames(MatePlan) = NULL
@@ -222,6 +229,3 @@ theta = function(map){
   return(recomb_Mat)
   
 }
-
-
-
