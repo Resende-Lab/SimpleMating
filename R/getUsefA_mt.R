@@ -14,21 +14,22 @@
 # 									
 ##########################################
 
-#' Prediction of usefulness for a set of crosses (Multi additive trait)
+#' Prediction of usefulness for a set of crosses (Multi-trait additive traits)
 #'
 #' @description
-#' Predicts usefulness component for a set of crosses. It accounts for additive-based traits.
+#' Predicts usefulness component for a set of crosses. It accounts for more than one trait controlled by additive effects.
+#' All covariances matrices estimated here were implemented according to Lehermeier et al. (2017).
 #'
 #' @param MatePlan data frame with the two columns indicating the crosses to predict.
 #' @param Markers matrix with markers information for all candidate parents,
 #' coded as 0,1,2.
-#' @param addEff data frame with additive marker effects for each trait.
-#' @param Map.In data.frame with the mapping information, i.e., chromosome, positioning and SNP id.
+#' @param addEff data frame with additive marker effects.
+#' @param Map.In data frame with the mapping information, i.e., chromosome, positioning and SNP id.
 #' @param propSel Value representing the proportion of the selected individuals.
 #' @param Type which kind of system of mating: "DH": doubled haploids lines or
 #'  "RIL": Recombinant inbred lines.
 #' @param Generation integer. Indicates the generation where the parents come from. According to Lehermeier et al. (2017)
-#' DH from F1 generation is '0' and RILs from F1 generation is '1'.
+#' DH from F1 generation is '0' and RILs from F1 generation is '1'. Also, for infinite generation for both types, 'Inf' flag should be added.
 #' @param Weights Row vector containing the weights for each trait
 #' 
 #'
