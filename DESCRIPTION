@@ -1,15 +1,19 @@
 Package: SimpleMating
 Title: Estimation of Usefulness and Optimal Cross Selection
-Version: 0.0.0.9000
+Version: 0.0.9001
 Authors@R: 
-    person("Marco", "Peixoto", , "marco.peixotom@gmail.com", role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0003-0564-7068"))
+    c(person("Marco", "Peixoto", , "marco.peixotom@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0003-0564-7068")),
+      person("Rodrigo", "Amadeu", role = "ctb"),
+      person("Luis", "Ferrao", role = "ctb"),
+      person("Patricio", "Munoz", role = "ctb"),
+      person("Marcio", "Resende", role = "ctb"))
 Description: SimpleMating is a two core package for cross optimization. It estimates usefulness for a set of crosses, via additive and non-additive effects and also multi-trait scenarios. Furthermore, it select the best crosses based on a target criterion (BLUP, Mean parental value, or Usefulness) and constrain the inbreeding of the next generation.
 License: GPL-3
 Encoding: UTF-8
 Imports: 
-     optiSel,
-     matrixcalc,
-     stats
+     optiSel (>= 2.0.7),
+     matrixcalc (>= 1.0.6),
+     stats (>= 4.2.3)
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3

@@ -76,6 +76,7 @@ getUsefA = function(MatePlan = NULL, Markers=NULL, addEff=NULL, Map.In=NULL, pro
   if(!any(gnames %in% rownames(Markers))){
     stop("Some individuals from 'MatePlan are missing in 'Markers'.\n")
   }
+  
   if(!is.matrix(Markers)){stop("Markers is not a matrix.\n")}
   MatePlan$idcross <- paste0(MatePlan[,1],'_',MatePlan[,2])
   colnames(MatePlan) <- c('Parent1', 'Parent2', 'Cross.ID')
@@ -93,7 +94,7 @@ getUsefA = function(MatePlan = NULL, Markers=NULL, addEff=NULL, Map.In=NULL, pro
   })
   
   #--------Variance
-  Markers_names = colnames(Markers) = rownames(addEff) = Map.In[, 3]
+  Markers_names = colnames(Markers) = rownames(EffA) = Map.In[, 3]
   # Split mapping by Chromosome
   Map.Chr <- split(Map.In, Map.In[, 1, drop = FALSE])  
   #Split markers names by chromosome
