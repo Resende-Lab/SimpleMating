@@ -5,41 +5,6 @@
 
 SimpleMating provides an easy way to implement cross prediction based on marker data and optimization of Mating crosses based on relationship matrix (A or G).
 
-
-## Module 1: Usefulness Estimation in `SimpleMating` 
-Currently, the package computes the usefulness criterion using the following implementations:
-
-### Additive trait
-
-|         Population                         | Single trait                 | Multi trait     |
-|----------------------------------|------------------------------|------------------|
-| **Doubled haploids lines**       | Lehermeier et al. (2017)     | Bonk et al. (2016), Lehermeier et al. (2017) |
-| **Recombinant inbred lines**     | Lehermeier et al. (2017)     | Bonk et al. (2016), Lehermeier et al. (2017) |
-
-
-### Additive and dominance trait
-
-|      Method       |    Single trait                               |                        Multi trait                                 |
-|-------------------|-----------------------------------------------|--------------------------------------------------------------------|
-| **Bonk**          | Bonk et al. (2016)                            |                       Bonk et al. (2016)                           |
-| **Wolfe**         | Lehermeier et al. (2017), Wolfe et al. (2021) | Lehermeier et al. (2017), Wolfe et al. (2021),  Bonk et al. (2016) |
-| **NonPhased**     | Lehermeier et al. (2017)                      |                       Bonk et al. (2016)                           |
-
-
-## Citation
-To cite this R package:
-
-Peixoto MA, Amadeu RR, Bhering LL, Ferrão LFV, Munoz PR, Resende MFR. SimpleMating:  R-package for prediction and optimization of breeding crosses using genomic selection. 
-
-## Contact
-Marco Antonio Peixoto
-marco.peixotom at gmail dot com  
-https://marcopxt.github.io/
-
-
-
-## How to run it
-
 ### Installation
 
 SimpleMating will be at CRAN soon. However, you can download and use it from our Github repository.
@@ -53,17 +18,52 @@ install_github('Resende-Lab/SimpleMating') # current version:  0.1.0 (September 
 
 ```
 
-#### Dataset available
+### 1.2 Dataset available
 
 Two datasets are available to implement the analyses as a toy example.
 
 **datLines.rda**: two traits simulated from a homozygous population.  
-**datGeneric.rda**: two traits simulated. Additive and dominant effects are already enclosed.  
+**datGeneric.rda**: two traits simulated and controlled by additive and dominant effects.  
 
-### Criterion
+### Citation
+To cite this R package:
+
+Peixoto MA, Amadeu RR, Bhering LL, Ferrão LFV, Munoz PR, Resende MFR. SimpleMating:  R-package for prediction and optimization of breeding crosses using genomic selection. 
+
+### Contact
+Marco Antonio Peixoto
+marco.peixotom at gmail dot com  
+https://marcopxt.github.io/
+
+***  
 
 
-#### Usefulness for an additive trait
+## Module 1: Usefulness Estimation in `SimpleMating` 
+Currently, the package computes the usefulness criterion using the following implementations:
+
+### 1. Additive trait
+
+|         Population                         | Single trait                 | Multi trait     |
+|----------------------------------|------------------------------|------------------|
+| **Doubled haploids lines**       | Lehermeier et al. (2017)     | Bonk et al. (2016), Lehermeier et al. (2017) |
+| **Recombinant inbred lines**     | Lehermeier et al. (2017)     | Bonk et al. (2016), Lehermeier et al. (2017) |
+
+
+### 2. Additive and dominance trait
+
+|      Method       |    Single trait                               |                        Multi trait                                 |
+|-------------------|-----------------------------------------------|--------------------------------------------------------------------|
+| **Bonk**          | Bonk et al. (2016)                            |                       Bonk et al. (2016)                           |
+| **Wolfe**         | Lehermeier et al. (2017), Wolfe et al. (2021) | Lehermeier et al. (2017), Wolfe et al. (2021),  Bonk et al. (2016) |
+| **NonPhased**     | Lehermeier et al. (2017)                      |                       Bonk et al. (2016)                           |
+
+
+### 3. Target criterion
+
+The first module of the package is the generation of a criterion that represents the performance of the crosses in-between each individual who is a candidate to be a parent in the population. Several authors have put some effort together to unravel such contributions. The **usefulness** concept has been shown to work pretty well in the definition of such an aspect, as proposed by Schnell and Utz (1976). Here, the implementation required the marker's effects, the markers' position in the genome, and a matrix of markers' dosage for each one of the candidates. 
+In the absence of markers, the mean parental average can be calculated and used as input in the second part of the implementation (see getMPA function below). Also, in case the user wants to use markers to capture the non-additive effects of the F1 progeny, the function getTGV() can be implemented (below exemplified). 
+
+### 4. Usefulness for an additive trait
 
 ```{r}
 rm(list=ls())
@@ -128,7 +128,7 @@ head(MTRIL_usef, 10)
 
 ```
 
-#### Usefulness for an additive and dominance-controlled trait
+### 5. Usefulness for an additive and dominance-controlled trait
 
 
 ```{r}
@@ -216,7 +216,7 @@ head(usefNonPhased,10)
 
 ```
 
-#### Targetting another criterion other than usefulness
+### 6. Targetting another criterion other than usefulness
 
 
 ```{r}
@@ -273,14 +273,54 @@ head(MT_tgv, 20)
 
 ```
 
+## Module 2: Optimization and Mating Allocation in `SimpleMating` 
 
-#### Usefulness for an additive and dominance-controlled trait
+For the optimization part, a data frame with four columns is required. It encompasses: Parent 1, Parent 2, a target Criterion (Y), and a covariance between individuals (K). The values in the K column can be derived from a relationship matrix based on markers (G) or based on pedigree (A).
 
+### 1. selectCrosses() function
 
+```{r}
+rm(list=ls())
 
-###>>===========================  
-###>>---- 8. GOCS  
-###>>===========================  
+# 1. Loading the dataset.
+data('datLines')
+
+# 2. Using just a subset for time purposes
+Parents = colnames(G)[1:15]
+
+# 3. Creating the mating plan
+plan = planCross(TargetPop = Parents,
+                 MateDesign = 'half')
+
+# 4. Calculating the usefulness of trait number 1
+usef_add = getUsefA(MatePlan = plan,
+                    Markers = Markers,
+                    addEff = addEff[,1],
+                    Map.In = Map.In,
+                    propSel = 0.05,
+                    Type = 'DH')
+
+head(usef_add, 10)
+
+# 5. Main table to be optimized
+MatingCrosses = Usef2Crosses(Usefulness=usef_add, K=G)
+
+# 6. Crosses selected
+maxGainPlan = selectCrosses(data = MatingCrosses,
+                            K = G,
+                            n.cross = 20,
+                            max.cross = 3,
+                            min.cross = 1,
+                            culling.pairwise.k = 1) 
+
+# Crosses parameters
+maxGainPlan[[1]]
+
+# Mating Plan
+maxGainPlan[[2]]
+```
+
+### 2. Optimum contribution selection implementation
 
 ```{r}
 rm(list=ls())
@@ -294,9 +334,9 @@ Crit = data.frame(Id = colnames(G),
 
 # 3. Optimization targeting criterion
 MatePlanCrit = GOCS(K = G, 
-                Criterion = Crit, 
-                nCross = 100, 
-                Target = 'MaxCrit')
+                    Criterion = Crit, 
+                    nCross = 100, 
+                    Target = 'MaxCrit')
 
 # Individuals contribution
 MatePlanCrit[[1]]
@@ -349,125 +389,8 @@ MatePlan[[6]]
 
 ```
 
-###>>===========================  
-###>>---- 10. Maximum avoidance  
-###>>===========================  
 
-```{r}
-rm(list=ls())
-
-# 1. Loading the data
-data('datGeneric')
-
-# 2. Maximum avoidance
-Plan = MaxAvoid(nInd=100, 
-                nProgeny=1L, 
-                Ind.ID=colnames(G))
-
-# 3. Mating Plan
-Plan
-
-```
-
-###>>===========================  
-###>>---- 11. CrossPlan  
-###>>===========================  
-
-```{r}
-rm(list=ls())
-
-# 1. Loading the dataset.
-data('datLines')
-
-# 2. Using just a subset for time purposes
-Parents = colnames(G)[1:15]
-
-# 3. Creating the mating plan
-plan1 = planCross(TargetPop = Parents,
-                 MateDesign = 'half')
-
-head(plan1,10)
-
-
-# 4. Using two set of parents
-Parents1 = colnames(G)[1:15]
-Parents2 = colnames(G)[20:30]
-
-# 5. Creating the mating plan
-plan2 = planCross(TargetPop = Parents1,
-                  TargetPop2 = Parents2,
-                  MateDesign = 'half')
-
-head(plan2,10)
-
-```
-
-###>>===========================  
-###>>---- 12. relateThinning  
-###>>===========================  
-
-```{r}
-rm(list=ls())
-
-# 1. Loading the data
-data('datGeneric')
-
-# 2.Criterion
-Crit = data.frame(Id = colnames(G),
-                  Criterion = Criterion[,1])
-
-# 3.Thinning
-parents2keep = relateThinning(K = G, 
-                              Criterion = Crit, 
-                              threshold = 0.5, 
-                              max.per.cluster = 2)
-
-# 4. List with the parents to keep
-parents2keep
-
-```
-
-###>>===========================  
-###>>---- 13. selectCrosses  
-###>>===========================  
-
-```{r}
-rm(list=ls())
-
-# 1. Loading the data
-data('datGeneric')
-
-# 2. Mating Plan
-CrossPlan = planCross(TargetPop = colnames(G) )
-
-# 3. Criterion
-Crit = data.frame(Id = colnames(G),
-                  Crit = Criterion[,1])
-
-# 4. Single trait mean parental average
-ST_mpa = getMPA(MatePlan = CrossPlan, 
-                Criterion = Crit, 
-                K=G)
-
-# 5 Crosses selected
-maxGainPlan = selectCrosses(data = ST_mpa,
-                            K = G,
-                            n.cross = 80,
-                            max.cross = 3,
-                            min.cross = 1,
-                            culling.pairwise.k = 1) 
-
-# 6. Crosses parameters
-maxGainPlan[[1]]
-
-# 7. Mating Plan
-maxGainPlan[[2]]
-
-```
-
-###>>===========================  
-###>>---- 14. setCrosses  
-###>>===========================  
+### 3. Select crosses based on the mean parental average only
 
 ```{r}
 rm(list=ls())
@@ -518,46 +441,15 @@ MatplanMT[[2]]
 
 ```
 
-###>>===========================  
-###>>---- 14. Usef2Crosses  
-###>>===========================  
+## Bibliography
 
-```{r}
-rm(list=ls())
 
-# 1. Loading the dataset.
-data('datLines')
+Akdemir & Sánchez (2016). Efficient breeding by genomic mating. Frontiers in Genetics. https://doi.org/10.3389/fgene.2016.00210
+Allier et al. (2019). Usefulness criterion and post-selection parental contributions in multi-parental crosses: Application to polygenic trait introgression. G3: Genes, Genomes, Genetics. https://doi.org/10.1534/g3.119.400129
+Bonk et al. (2016). Mendelian sampling covariability of marker effects and genetic values. Genetics Selection Evolution. https://gsejournal.biomedcentral.com/articles/10.1186/s12711-016-0214-0
+Lehermeier (2017). Genetic gain increases by applying the usefulness criterion with improved variance prediction in selection of crosses. Genetics. https://doi.org/10.1534/genetics.117.300403
+Schnell & Utz (1976). F1 Leistung und Elternwahl in der Zuchtung von Selbstbefruchtern. Ber Arbeitstag Arbeitsgem Saatzuchtleiter.
+Toro & Varona (2010). A note on mate allocation for dominance handling in genomic selection. Genetics Selection Evolution. https://doi.org/10.1186/1297-9686-42-33
+Varona et al. (2018). Non-additive effects in genomic selection. Frontiers in Genetics. https://doi.org/10.3389/fgene.2018.00078
+Wolfe et al. (2021). Genomic mating in outbred species: Predicting cross usefulness with additive and total genetic covariance matrices. Genetics. https://doi.org/10.1093/genetics/iyab122
 
-# 2. Using just a subset for time purposes
-Parents = colnames(G)[1:15]
-
-# 3. Creating the mating plan
-plan = planCross(TargetPop = Parents,
-                 MateDesign = 'half')
-
-# 4. Calculating the usefulness of trait number 1
-usef_add = getUsefA(MatePlan = plan,
-                    Markers = Markers,
-                    addEff = addEff[,1],
-                    Map.In = Map.In,
-                    propSel = 0.05,
-                    Type = 'DH')
-
-head(usef_add, 10)
-
-# 5. Optimization
-MainTab = Usef2Crosses(Usefulness=usef_add, K=G)
-
-head(MainTab)
-
-```
-
-***
-
-Any questions about the analyses, please, contact me!
-
-Marco 
-
-Dr. Marco Antonio Peixoto  
-Email: marco.peixotom@gmail.com
-Page: https://marcopxt.github.io/  
