@@ -18,7 +18,7 @@ install_github('Resende-Lab/SimpleMating') # current version:  0.1.0 (September 
 
 ```
 
-### 1.2 Dataset available
+### Dataset available
 
 Two datasets are available to implement the analyses as a toy example.
 
@@ -31,12 +31,12 @@ To cite this R package:
 Peixoto MA, Amadeu RR, Bhering LL, Ferrão LFV, Munoz PR, Resende MFR. SimpleMating:  R-package for prediction and optimization of breeding crosses using genomic selection. 
 
 ### Contact
-Marco Antonio Peixoto
+Marco Antonio Peixoto  
 marco.peixotom at gmail dot com  
 https://marcopxt.github.io/
 
 ***  
-
+<br>  
 
 ## Module 1: Usefulness Estimation in `SimpleMating` 
 Currently, the package computes the usefulness criterion using the following implementations:
