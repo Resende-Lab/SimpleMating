@@ -3,126 +3,67 @@
 
 ### Synopsis
 
-SimpleMating provides an easy way to implement cross prediction based on marker data and optimization of Mate cross based on relationship matrix (A or G).
+SimpleMating provides an easy way to implement cross prediction based on marker data and optimization of Mating crosses based on relationship matrix (A or G).
 
-### How to run it
 
-#### Installation
+## Module 1: Usefulness Estimation in `SimpleMating` 
+Currently, the package computes the usefulness criterion using the following implementations:
+
+### Additive trait
+
+|         Population                         | Single trait                 | Multi trait     |
+|----------------------------------|------------------------------|------------------|
+| **Doubled haploids lines**       | Lehermeier et al. (2017)     | Bonk et al. (2016), Lehermeier et al. (2017) |
+| **Recombinant inbred lines**     | Lehermeier et al. (2017)     | Bonk et al. (2016), Lehermeier et al. (2017) |
+
+
+### Additive and dominance trait
+
+|      Method       |    Single trait                               |                        Multi trait                                 |
+|-------------------|-----------------------------------------------|--------------------------------------------------------------------|
+| **Bonk**          | Bonk et al. (2016)                            |                       Bonk et al. (2016)                           |
+| **Wolfe**         | Lehermeier et al. (2017), Wolfe et al. (2021) | Lehermeier et al. (2017), Wolfe et al. (2021),  Bonk et al. (2016) |
+| **NonPhased**     | Lehermeier et al. (2017)                      |                       Bonk et al. (2016)                           |
+
+
+## Citation
+To cite this R package:
+
+Peixoto MA, Amadeu RR, Bhering LL, Ferrão LFV, Munoz PR, Resende MFR. SimpleMating:  R-package for prediction and optimization of breeding crosses using genomic selection. 
+
+## Contact
+Marco Antonio Peixoto
+marco.peixotom at gmail dot com  
+https://marcopxt.github.io/
+
+
+
+## How to run it
+
+### Installation
 
 SimpleMating will be at CRAN soon. However, you can download and use it from our Github repository.
 
 Run in R:
 
 ```{r}
+
 library(devtools)
 install_github('Resende-Lab/SimpleMating') # current version:  0.1.0 (September 22th, 2023)
+
 ```
+
 #### Dataset available
 
-Two datasets are available for the implementation as a toy example of the analyses.
+Two datasets are available to implement the analyses as a toy example.
 
-**datLines.rda**: two traits simulated that came from a homozygous population.  
-**datGeneric.rda**: two traits simulated. Additive and dominance effects are already enclosed.  
+**datLines.rda**: two traits simulated from a homozygous population.  
+**datGeneric.rda**: two traits simulated. Additive and dominant effects are already enclosed.  
 
-#### Running
-Herein, we give an example of each function inside the package SimpleMating
-
-###>>===========================  
-###>>---- 1. getMPA  
-###>>===========================  
-
-```{r}
-rm(list=ls())
-
-# 1. Loading the data
-data('datGeneric')
-
-# 2. Mating Plan
-CrossPlan = planCross(TargetPop = colnames(G) )
-
-# 3. Criterion
-Crit = data.frame(Id = colnames(G),
-                  Crit = Criterion[,1])
-
-# 4. Single trait mean parental average
-ST_mpa = getMPA(MatePlan = CrossPlan, 
-                Criterion = Crit, 
-                K=G)
-
-head(ST_mpa, 20)
-
-# 5. Criterion
-CritMT = data.frame(Id = colnames(G),
-                    Crit = Criterion)
-
-# 6. Multi-trait mean parental average
-MT_mpa = getMPA(MatePlan = CrossPlan, 
-                Criterion = CritMT, 
-                K=G, 
-                Scale = TRUE, 
-                Weights = c(1,1))
-
-head(MT_mpa, 20)
-```
+### Criterion
 
 
-###>>===========================  
-###>>---- 2. getTGV  
-###>>===========================  
-
-```{r}
-rm(list=ls())
-
-# 1. Loading the data
-data('datGeneric')
-
-# 2. Mating Plan
-CrossPlan = planCross(colnames(G))
-
-# 3. Single trait
-ST_tgv = getTGV(MatePlan = CrossPlan, 
-             Markers=Markers, 
-             addEff=addEff[,1], 
-             domEff=domEff[,1], 
-             K = G)
-
-head(ST_tgv, 20)
-
-# 4. Multi trait
-MT_tgv = getTGV(MatePlan = CrossPlan, 
-                Markers=Markers, 
-                addEff=addEff, 
-                domEff=domEff, 
-                Weights = c(0.2,0.8),
-                K = G)
-
-head(MT_tgv, 20)
-
-```
-
-
-###>>===========================  
-###>>---- 3. getIndex  
-###>>===========================  
-
-```{r}
-rm(list=ls())
-
-# 1. Loading the data
-data('datGeneric')
-
-# 2. Index
-trait_index = getIndex(Criterion=Criterion, 
-                       Weights= c(0.5,0.5), 
-                       Scale = TRUE)
-
-head(trait_index, 10)
-
-```
-
-###>>===========================  
-###>>---- 4. getUsefA  
-###>>===========================  
+#### Usefulness for an additive trait
 
 ```{r}
 rm(list=ls())
@@ -137,51 +78,58 @@ Parents = colnames(G)[1:15]
 plan = planCross(TargetPop = Parents,
                  MateDesign = 'half')
 
-# 4. Calculating the usefulness for trait number 1
+# 4.  Usefulness of trait number 1 (DH)
 usef_add = getUsefA(MatePlan = plan,
                     Markers = Markers,
                     addEff = addEff[,1],
                     Map.In = Map.In,
                     propSel = 0.05,
-                    Type = 'RIL')
+                    Type = 'DH',
+                    Generation = 0)
 
 head(usef_add, 10)
 
-```
+# 5. Usefulness of trait number 1 (RIL)
 
-###>>===========================  
-###>>---- 5. getUsefA_mt   
-###>>===========================  
+usef_add = getUsefA(MatePlan = plan,
+                    Markers = Markers,
+                    addEff = addEff[,1],
+                    Map.In = Map.In,
+                    propSel = 0.05,
+                    Type = 'RIL',
+                    Generation = 1)
 
-```{r}
-rm(list=ls())
+head(usef_add, 10)
 
-# 1. Loading the dataset.
-data('datLines')
-
-# 2. Using just a subset for time purposes
-Parents = colnames(G)[1:15]
-
-# 3. Creating the mating plan
-plan = planCross(TargetPop = Parents,
-                 MateDesign = 'half')
-
-# 4. Calculating the usefulness for trait number 1
+# 6. Usefulness for two traits (DH)
 MT_usef = getUsefA_mt(MatePlan = plan,
                        Markers = Markers,
                        addEff = addEff,
                        Map.In = Map.In,
                        propSel = 0.05,
                        Type = 'DH',
-                       Weights = c(0.4,0.6))
+                       Weights = c(0.4,0.6),
+                       Generation = 0)
 
 head(MT_usef, 10)
 
+
+# 7. Usefulness for two traits (RIL)
+MTRIL_usef = getUsefA_mt(MatePlan = plan,
+                         Markers = Markers,
+                         addEff = addEff,
+                         Map.In = Map.In,
+                         propSel = 0.05,
+                         Type = 'RIL',
+                         Weights = c(0.4,0.6),
+                         Generation = 1)
+
+head(MTRIL_usef, 10)
+
 ```
 
-###>>===========================  
-###>>---- 6. getUsefAD  
-###>>===========================  
+#### Usefulness for an additive and dominance-controlled trait
+
 
 ```{r}
 rm(list=ls())
@@ -230,26 +178,7 @@ usefNonPhased = getUsefAD(MatePlan = plan,
 
 head(usefNonPhased,10)
 
-```
-
-###>>===========================  
-###>>---- 7. getUsefAD_mt  
-###>>===========================  
-
-```{r}
-rm(list=ls())
-
-# 1. Loading the dataset.
-data('datGeneric')
-
-# 2. Using just a subset for time purposes
-Parents = colnames(G)[1:20]
-
-# 3. Creating the mating plan
-plan = planCross(TargetPop = Parents,
-                 MateDesign = 'half')
-
-# 4. Calculating the usefulness using 'Bonk' method
+# 7. Calculating the usefulness using 'Bonk' method
 usefBonk = getUsefAD_mt(MatePlan = plan,
                         Markers = PhasedMarkers,
                         addEff = addEff,
@@ -261,7 +190,7 @@ usefBonk = getUsefAD_mt(MatePlan = plan,
 
 head(usefBonk,10)
 
-# 5. Calculating the usefulness using 'Wolfe' method
+# 8. Calculating the usefulness using 'Wolfe' method
 usefWolfe = getUsefAD_mt(MatePlan = plan,
                          Markers = PhasedMarkers,
                          addEff = addEff,
@@ -273,7 +202,7 @@ usefWolfe = getUsefAD_mt(MatePlan = plan,
 
 head(usefWolfe,10)
 
-# 6. Calculating the usefulness using 'NonPhased' method
+# 9. Calculating the usefulness using 'NonPhased' method
 usefNonPhased = getUsefAD_mt(MatePlan = plan,
                              Markers = Markers,
                              addEff = addEff,
@@ -286,6 +215,68 @@ usefNonPhased = getUsefAD_mt(MatePlan = plan,
 head(usefNonPhased,10)
 
 ```
+
+#### Targetting another criterion other than usefulness
+
+
+```{r}
+rm(list=ls())
+
+# 1. Loading the data
+data('datGeneric')
+
+# 2. Mating Plan
+CrossPlan = planCross(TargetPop = colnames(G) )
+
+# 3. Criterion
+Crit = data.frame(Id = colnames(G),
+                  Crit = Criterion[,1])
+
+# 4. Single trait mean parental average
+ST_mpa = getMPA(MatePlan = CrossPlan, 
+                Criterion = Crit, 
+                K=G)
+
+head(ST_mpa, 20)
+
+# 5. Criterion
+CritMT = data.frame(Id = colnames(G),
+                    Crit = Criterion)
+
+# 6. Multi-trait mean parental average
+MT_mpa = getMPA(MatePlan = CrossPlan, 
+                Criterion = CritMT, 
+                K=G, 
+                Scale = TRUE, 
+                Weights = c(1,1))
+
+head(MT_mpa, 20)
+
+# 7. Single trait total genetic value
+ST_tgv = getTGV(MatePlan = CrossPlan, 
+             Markers=Markers, 
+             addEff=addEff[,1], 
+             domEff=domEff[,1], 
+             K = G)
+
+head(ST_tgv, 20)
+
+# 8. Multi-trait total genetic value
+MT_tgv = getTGV(MatePlan = CrossPlan, 
+                Markers=Markers, 
+                addEff=addEff, 
+                domEff=domEff, 
+                Weights = c(0.2,0.8),
+                K = G)
+
+head(MT_tgv, 20)
+
+```
+
+
+#### Usefulness for an additive and dominance-controlled trait
+
+
 
 ###>>===========================  
 ###>>---- 8. GOCS  
