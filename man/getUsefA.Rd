@@ -22,7 +22,7 @@ coded as 0,1,2.}
 
 \item{addEff}{data frame with additive marker effects.}
 
-\item{Map.In}{data.frame with the mapping information, i.e., chromosome, positioning and SNP id.}
+\item{Map.In}{data frame with the mapping information, i.e., chromosome, positioning and SNP id.}
 
 \item{propSel}{Value representing the proportion of the selected individuals.}
 
@@ -30,7 +30,7 @@ coded as 0,1,2.}
 "RIL": Recombinant inbred lines.}
 
 \item{Generation}{integer. Indicates the generation where the parents come from. According to Lehermeier et al. (2017)
-DH from F1 generation is '0' and RILs from F1 generation is '1'.}
+DH from F1 generation is '0' and RILs from F1 generation is '1'. Also, for infinite generation for both types, 'Inf' flag should be added.}
 }
 \value{
 A data frame with means, variances, and usefulness for each pair of
@@ -38,20 +38,20 @@ crosses presented in the MatePlan.
 }
 \description{
 Predicts usefulness component for a set of crosses. It accounts for only one
-trait controlled by additive effects.
+trait controlled by additive effects. All covariances matrices estimated here were implemented according to Lehermeier et al. (2017).
 }
 \examples{
-# 1.Loading the dataset.
+# 1. Loading the dataset.
 data('datLines')
 
-# 2.Using just a subset for time purposes
+# 2. Using just a subset for time purposes
 Parents = colnames(G)[1:15]
 
-# 3.Creating the mating plan
+# 3. Creating the mating plan
 plan = planCross(TargetPop = Parents,
                  MateDesign = 'half')
 
-# 4.Calculating the usefulness for trait number 1
+# 4. Calculating the usefulness of trait number 1
 usef_add = getUsefA(MatePlan = plan,
                     Markers = Markers,
                     addEff = addEff[,1],

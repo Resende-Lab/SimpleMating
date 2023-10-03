@@ -2,7 +2,7 @@
 % Please edit documentation in R/getUsefA_mt.R
 \name{getUsefA_mt}
 \alias{getUsefA_mt}
-\title{Prediction of usefulness for a set of crosses (Multi additive trait)}
+\title{Prediction of usefulness for a set of crosses (Multi-trait additive traits)}
 \usage{
 getUsefA_mt(
   MatePlan = NULL,
@@ -21,9 +21,9 @@ getUsefA_mt(
 \item{Markers}{matrix with markers information for all candidate parents,
 coded as 0,1,2.}
 
-\item{addEff}{data frame with additive marker effects for each trait.}
+\item{addEff}{data frame with additive marker effects.}
 
-\item{Map.In}{data.frame with the mapping information, i.e., chromosome, positioning and SNP id.}
+\item{Map.In}{data frame with the mapping information, i.e., chromosome, positioning and SNP id.}
 
 \item{propSel}{Value representing the proportion of the selected individuals.}
 
@@ -31,7 +31,7 @@ coded as 0,1,2.}
 "RIL": Recombinant inbred lines.}
 
 \item{Generation}{integer. Indicates the generation where the parents come from. According to Lehermeier et al. (2017)
-DH from F1 generation is '0' and RILs from F1 generation is '1'.}
+DH from F1 generation is '0' and RILs from F1 generation is '1'. Also, for infinite generation for both types, 'Inf' flag should be added.}
 
 \item{Weights}{Row vector containing the weights for each trait}
 }
@@ -40,7 +40,8 @@ A data frame with means, variances, and usefulness for each pair of
 crosses presented in the MatePlan.
 }
 \description{
-Predicts usefulness component for a set of crosses. It accounts for additive-based traits.
+Predicts usefulness component for a set of crosses. It accounts for more than one trait controlled by additive effects.
+All covariances matrices estimated here were implemented according to Lehermeier et al. (2017).
 }
 \examples{
 # 1.Loading the dataset.
