@@ -1,4 +1,4 @@
-# SimpleMating: R package for crosses optimization based on relationship matrix <img align="right" width="300" height="250" src="https://github.com/marcopxt/Pkg_cross4opt/assets/59318360/8a81f7eb-caff-4a16-a106-efcfe8274214"> 
+# SimpleMating: R package for crosses optimization based on relationship matrix <img align="right" width="300" height="250" src="https://github.com/marcopxt/Miscellaneous/blob/main/ppt.png"> 
 
 
 ### Synopsis
