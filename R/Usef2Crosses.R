@@ -64,12 +64,20 @@ Usef2Crosses = function(Usefulness=NULL, K=NULL){
                                 Parent2 = df$Parent2,
                                 Y = df$Usefulness,
                                 K = df$K))
+  
   crosses2opt[[2]] = data.frame(Parent1 = df$Parent1,
                                 Parent2 = df$Parent2,
-                                Y = df[,3],
+                                Y = df[,4],
                                 K = df$K)
+  
+  #Ordering
+  crosses2opt[[1]] = crosses2opt[[1]][order(crosses2opt[[1]]$Y, decreasing = TRUE),]
+  crosses2opt[[2]] = crosses2opt[[2]][order(crosses2opt[[2]]$Y, decreasing = TRUE),]
+  
+  
   return(crosses2opt)
 }
+
 
 
 
