@@ -24,8 +24,8 @@ install_github('Resende-Lab/SimpleMating') # current version:  0.1.0 (September 
 
 Two datasets are available to implement the analyses as a toy example.
 
-**datLines.rda**: two traits simulated from a homozygous population.  
-**datGeneric.rda**: two traits simulated and controlled by additive and dominant effects.  
+**lines**: two traits were simulated from a homozygous population. We have a genetic map, markers, breeding values, and a relationship matrix (realized) for all candidates to be parents.  
+**generic**: two traits simulated and controlled by additive and dominant effects.  We have a genetic map, markers, breeding values, and a relationship matrix (realized) for all candidates to be parents. 
 
 
 ## Citation
