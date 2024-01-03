@@ -5,6 +5,7 @@
 
 SimpleMating provides an easy way to implement cross prediction based on marker data and optimization of Mating crosses based on relationship matrix (A or G).
 
+
 ### Installation
 
 SimpleMating will be at CRAN soon. However, you can download and use it from our Github repository.
@@ -18,6 +19,7 @@ install_github('Resende-Lab/SimpleMating') # current version:  0.1.0 (September 
 
 ```
 
+
 ### Dataset available
 
 Two datasets are available to implement the analyses as a toy example.
@@ -25,10 +27,13 @@ Two datasets are available to implement the analyses as a toy example.
 **datLines.rda**: two traits simulated from a homozygous population.  
 **datGeneric.rda**: two traits simulated and controlled by additive and dominant effects.  
 
+
 ### Citation
 To cite this R package:
 
 Peixoto MA, Amadeu RR, Bhering LL, Ferrão LFV, Munoz PR, Resende MFR. SimpleMating:  R-package for prediction and optimization of breeding crosses using genomic selection. 
+
+
 
 ### Contact
 Marco Antonio Peixoto  
