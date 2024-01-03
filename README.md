@@ -74,6 +74,10 @@ In the absence of markers, the mean parental average can be calculated and used 
 For the optimization part, a data frame with four columns is required. It encompasses Parent 1, Parent 2, a target Criterion (Y), and a covariance between individuals (K). The values in the K column can be derived from a relationship matrix based on markers (G) or pedigree (A).
 
 
+<br>
+
+
+
 ## Bibliography
 
 
