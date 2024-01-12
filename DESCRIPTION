@@ -12,7 +12,6 @@ Authors@R:
 Description: SimpleMating is a two core package for cross optimization. It estimates usefulness for a set of crosses, using additive and/or non-additive effects, allowing for multi-trait scenarios. Furthermore, it uses a mate allocation algorithm to create a mating plan aiming to maximize a target criterion (mean parental average, total genetic value, or usefulness) and constrains the next generation inbreeding levels.
 Depends: R (>= 3.6.0)
 Imports: 
-     optiSel (>= 2.0.5),
      stats (>= 4.2.3),
      ggplot2 (>= 3.3.6),
      AGHmatrix (>= 2.1.0)
