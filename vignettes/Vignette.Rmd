@@ -1,0 +1,447 @@
+---
+title: "SimpleMating: A R package to breeding crosses optimization"
+author: "Marco Antonio Peixoto"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{SimpleMating}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+## Introduction
+
+**SimpleMating** predicts cross usefulness (cross mean and variance) and creates a mating plan based on the balancing of usefulness and inbreeding, through optimum cross selection. It has two modules:  
+i. Cross prediction;  
+ii. Mating optimization.  
+
+In this tutorial we will explain the implementation of both modules. It is worth mentioning is that the prediction of usefulness is not needed for the optimization. If only genetic values (BLUP, for example) and a relationship matrix is given (pedigree- or marker-based relationship matrix) for the parents, we can implement the optimization. However, it has been shown that use usefulness may improve the genetic gain in the long term for several crops.
+
+## Input files
+
+Four files are needed but not all required, to run an analyses in **SimpleMating**:  
+
+(i) Matrix with markers from the parental population;  
+(ii) markers effects for the target trait (or traits);  
+(iii) Genetic map for recombination estimation;  
+(iv) relationship matrix (pedigree- or marker-based).  
+
+
+```{r}
+# 1. Install and require the package
+# install.packages(SimpleMating)
+require(SimpleMating)
+```
+
+#### 1) Marker matrix
+
+The marker matrix has the information of genotypes in the lines and the information of SNPs in the columns, coded as 0,1,2 meaning the number of copies of the alternative allele that is presented for each loci.
+
+```{r, eval = TRUE}
+# Marker matrix
+data(lines_geno)
+lines_geno[1:5, 1:10]
+```
+
+#### 2) Marker effects
+
+This is a data frame with the information of the effects for each marker from the matrix before mentioned. In this case, each row represents one marker and each column one trait (two traits and 1230 markers).
+
+```{r, eval = TRUE}
+# Marker Effects
+data(lines_addEffects)
+head(lines_addEffects)
+```
+
+#### 3) Genetic map
+
+The genetic map is a data frame with the information about position, in the genome, of the markers. There are three columns in the file, being the first the chromosome, the second represents the actual position of the marker (in centimorgan), and the third is the marker name. 
+
+```{r, eval = TRUE}
+# Genetic Map
+data(lines_GenMap)
+head(lines_GenMap)
+```
+
+#### 4) Relationship matrix
+
+For the optimization itself, to restrict inbreeding levels, we need a relationship matrix. It could be a numerator relationship matrix based on pedigree data or a realized relationship matrix based on markers.
+
+
+## Examples
+
+We going to cover four examples, as follows:
+
+1)  Optimization based on usefulness for one additive trait using molecular markers. [shortcut](#pt1)\
+2)  Optimization based on usefulness for two additive traits using molecular markers. [shortcut](#pt2)\
+3)  Optimization based on usefulness for one additive/dominance trait using molecular markers. [shortcut](#pt3)\
+4)  Optimization based on total genetic value for one additive trait using molecular markers. [shortcut](#pt4)\
+5)  Optimization based on mean parental average for one additive trait using pedigree information. [shortcut](#pt5)
+
+<div id="pt1" />
+
+## Optimization: Usefulness on additive trait
+
+Here, we will create a mating plan based on usefulness for one additive trait. 
+
+We need the cross plan, with all individuals candidates to be parents. We may use the function `planCross()` for doing so. The parents are all individuals genotyped (*TargetPop*). We may choose which mate design we want (*MateDesign*). The upcoming step is to use the function `getUsefA()` to predict the usefulness for each cross in the cross plan, using the markers, markers' effects, and the genetic map. For this function, we may set the proportion of selection individuals (*proSel*), the population type (*Type*), and the generation (*Generation*).
+
+```{r}
+# 1. Assigning the parents
+Parents <- rownames(lines_geno)
+
+# 2. Creating the cross plan
+Cross_plan <- planCross(TargetPop = Parents,
+                        MateDesign = "half")
+
+# 3.  Usefulness of trait number 1 (DH)
+usef_add <- getUsefA(MatePlan = Cross_plan,
+                     Markers = lines_geno,
+                     addEff = lines_addEffects[, 1],
+                     Map.In = lines_GenMap,
+                     propSel = 0.05,
+                     Type = "DH",
+                     Generation = 1)
+
+head(usef_add, 10)
+```
+
+The second part is using criterion for each cross (usefulness in this example) together with a relationship matrix (based on markers in this example) and create a optimum cross selection-based mating plan. The idea is to restrict the levels of inbreeding, by means of the covariance in the individual-cross level, and maximize the criterion used (usefulness in this example). There is needed to set the target number of crosses in the mating plan (*n.cross*), with the maximum and minimum number of crosses that each parent can be part of (*max.cross* and *min.cross*), together with the level of covariance between cross via relationship matrix for the restriction (*culling.pairwise.k*).
+
+The output will be the mating plan based on the parameters before mentioned.
+
+```{r}
+# 1. Creating a relationship matrix from markers
+relMat <- (lines_geno %*% t(lines_geno)) / ncol(lines_geno)
+
+# 2. Generating the input for the optimization
+MatingCrosses <- usef2Crosses(Usefulness = usef_add, K = relMat)
+
+# 3. Crosses selected
+maxGainPlan <- selectCrosses(data = MatingCrosses[[1]],
+                             K = relMat,
+                             n.cross = 10,
+                             max.cross = 3,
+                             min.cross = 1,
+                             culling.pairwise.k = 0.8)
+
+# Crosses parameters
+maxGainPlan[[1]]
+
+# Mating Plan
+maxGainPlan[[2]]
+```
+
+
+```{r, fig.width=5, fig.height=4}
+# Plot
+maxGainPlan[[3]]
+```
+
+<div id="pt2" />
+
+## Optimization: Usefulness on Multi traits scenario
+
+Here, we will create a mating plan based on usefulness for two additive traits. 
+
+We need the cross plan, with all individuals candidates to be parents. We may use the function `planCross()` for doing so. The parents are all individuals genotyped (*TargetPop*). We may choose which mate design we want (*MateDesign*). The upcoming step is to use the function `getUsefA_mt()` to predict the usefulness for each cross in the cross plan, using the markers, markers' effects, and the genetic map. In addition, we need to set weights for each trait (*Weights*), in a way to build a trait-based index for the estimation of usefulness. For this function, we may set the proportion of selection individuals (*proSel*), the population type (*Type*), and the generation (*Generation*).
+
+```{r}
+# 1. Assigning the parents
+Parents <- rownames(lines_geno)
+
+# 2. Creating the mating plan
+Cross_plan <- planCross(TargetPop = Parents,
+                        MateDesign = "half")
+
+
+# 3.  Usefulness for two traits
+Multitrait_usef <- getUsefA_mt(MatePlan = Cross_plan,
+                               Markers = lines_geno,
+                               addEff = lines_addEffects,
+                               Map.In = lines_GenMap,
+                               propSel = 0.05,
+                               Type = "RIL",
+                               Generation = 1,
+                               Weights = c(0.4, 0.6))
+
+
+head(Multitrait_usef, 10)
+```
+
+The second part is using criterion for each cross (usefulness in this example) together with a relationship matrix (based on markers in this example) and create a optimum cross selection-based mating plan. The idea is to restrict the levels of inbreeding, by means of the covariance in the individual-cross level, and maximize the criterion used (usefulness in this example). There is needed to set the target number of crosses in the mating plan (*n.cross*), with the maximum and minimum number of crosses that each parent can be part of (*max.cross* and *min.cross*), together with the level of covariance between cross via relationship matrix for the restriction (*culling.pairwise.k*).
+
+The output will be the mating plan based on the parameters before mentioned.
+
+```{r}
+# 1. Creating a relationship matrix from markers
+relMat <- (lines_geno %*% t(lines_geno)) / ncol(lines_geno)
+
+# 2. Generating the input for the optimization
+MatingCrossesMT <- usef2Crosses(Usefulness = Multitrait_usef, K = relMat)
+
+# 3. Crosses selected
+maxGainPlan <- selectCrosses(data = MatingCrossesMT[[1]],
+                             K = relMat,
+                             n.cross = 10,
+                             max.cross = 3,
+                             min.cross = 1,
+                             culling.pairwise.k = 0.8)
+
+# Crosses parameters
+maxGainPlan[[1]]
+
+# Mating Plan
+head(maxGainPlan[[2]], 10)
+```
+
+```{r, fig.width=5, fig.height=4}
+# Plot
+maxGainPlan[[3]]
+```
+
+<div id="pt3" />
+
+## Optimization: Usefulness and additive/non-additive effects
+
+Here, we will create a mating plan based on usefulness for a trait with additive and dominance effects. 
+
+We need the cross plan, with all individuals candidates to be parents. We may use the function `planCross()` for doing so. The parents are all individuals genotyped (*TargetPop*). We may choose which mate design we want (*MateDesign*). The upcoming step is to use the function `getUsefAD()` to predict the usefulness for each cross in the cross plan, using the markers, markers' effects (additive marker effects and dominance marker effects), and the genetic map. For this function, we may set the proportion of selection individuals (*proSel*), the population type (*Type*), and the generation (*Generation*).
+
+There are two options for prediction of usefulness implemented in **SimpleMating**. One of them are based on phased haplotypes (basically a marker set where we know from each chromosome the copy of the allele came from) (*Method = Phased*). The method is a proposition that we implemented to estimate the usefulness without the need for phased haplotypes (*Method = NonPhased*).
+
+
+```{r}
+# Loading the data
+data(generic_GenMap)
+data(generic_geno)
+data(generic_MrkEffects)
+data(generic_Phasedgeno)
+```
+
+Implementation
+
+```{r}
+# 1. Assigning the parents
+Parents <- rownames(generic_geno)
+
+# 2. Creating the mating plan
+Cross_plan <- planCross(TargetPop = Parents,
+                        MateDesign = "half")
+
+# 3.  Usefulness of trait number 1 - Phased
+usef_Phased <- getUsefAD(MatePlan = Cross_plan,
+                       Markers = generic_Phasedgeno, # Phased haplotypes
+                       addEff = generic_MrkEffects[, 1],
+                       domEff = generic_MrkEffects[, 3],
+                       Map.In = generic_GenMap,
+                       propSel = 0.05,
+                       Method = "Phased")
+
+head(usef_Phased, 10)
+
+# 3.  Usefulness of trait number 1 - Non phased
+usefNonPhased <- getUsefAD(MatePlan = Cross_plan,
+                           Markers = generic_geno, # non Phased haplotypes
+                           addEff = generic_MrkEffects[, 1],
+                           domEff = generic_MrkEffects[, 3],
+                           Map.In = generic_GenMap,
+                           propSel = 0.05,
+                           Method = "NonPhased")
+
+head(usefNonPhased, 10)
+
+```
+
+The second part is using criterion for each cross (usefulness in this example) together with a relationship matrix (based on markers in this example) and create a optimum cross selection-based mating plan. The idea is to restrict the levels of inbreeding, by means of the covariance in the individual-cross level, and maximize the criterion used (usefulness in this example). There is needed to set the target number of crosses in the mating plan (*n.cross*), with the maximum and minimum number of crosses that each parent can be part of (*max.cross* and *min.cross*), together with the level of covariance between cross via relationship matrix for the restriction (*culling.pairwise.k*).
+
+The output will be the mating plan based on the parameters before mentioned. Same step-by-step approach can be implemented for several traits (using the function `getUsefAD_mt()`)
+
+
+```{r}
+# 1. Relationship matrix
+relMat <- (generic_geno %*% t(generic_geno)) / ncol(generic_geno)
+
+# 1. Main table to be optimized
+MatingCrosses <- usef2Crosses(Usefulness = usefNonPhased, K = relMat) # Using the non phasing output
+
+# 2. Crosses selected
+maxGainPlan <- selectCrosses(data = MatingCrosses[[1]],
+                             K = relMat,
+                             n.cross = 25,
+                             max.cross = 10,
+                             min.cross = 1,
+                             culling.pairwise.k = 1)
+
+# Crosses parameters
+maxGainPlan[[1]]
+
+# Mating Plan
+maxGainPlan[[2]]
+```
+
+```{r, fig.width=5, fig.height=4}
+# Plot
+maxGainPlan[[3]]
+```
+
+<div id="pt4" />
+
+
+## Optimization: Using total genetic value
+
+Here, we will create a mating plan through an optimization based on total genetic value for one trait controlled by additive and dominance effects, using molecular markers. 
+
+We need the cross plan, with all individuals candidates to parents. We may use the function `planCross()` for doing so. The parents are all individuals genotyped (*TargetPop*). We may choose which mate design we want (*MateDesign*). The upcoming step is to use the function `getTGV()` to predict the total genetic value for each cross in the cross plan, using the markers, markers' effects, and the relationship matrix for generating the input for the new optimization function itself.
+
+```{r}
+# Loading the data
+data(generic_GenMap)
+data(generic_geno)
+data(generic_MrkEffects)
+data(generic_geno)
+```
+
+Implementation
+
+```{r}
+# 1. Creating relationship matrix based on markers
+relMat <- (generic_geno %*% t(generic_geno)) / ncol(generic_geno)
+
+# 2. Assigning parents
+Parents <- rownames(generic_geno)
+
+# 3. Creating the mating plan
+Cross_plan <- planCross(TargetPop = Parents,
+                        MateDesign = "half")
+
+# 4. Estimates the total genetic value for the progenies of each cross
+total_gv <- getTGV(MatePlan = Cross_plan,
+                    Markers = generic_geno,
+                    addEff = generic_MrkEffects[, 1],
+                    domEff = generic_MrkEffects[, 3],
+                    K = relMat)
+
+
+head(total_gv, 10)
+```
+
+The second part is using criterion for each cross (total genetic value in this example) together with a relationship matrix (based on markers in this example) and create a optimum cross selection-based mating plan. The idea is to restrict the levels of inbreeding, by means of the covariance in the individual-cross level, and maximize the criterion used (total genetic value in this example). There is needed to set the target number of crosses in the mating plan (*n.cross*), with the maximum and minimum number of crosses that each parent can be part of (*max.cross* and *min.cross*), together with the level of covariance between cross via relationship matrix for the restriction (*culling.pairwise.k*).
+
+The output will be the mating plan based on the parameters before mentioned. 
+
+```{r}
+
+# 1. Crosses selected
+maxGainPlan <- selectCrosses(data = total_gv,
+                             K = relMat,
+                             n.cross = 25,
+                             max.cross = 10,
+                             min.cross = 1,
+                             culling.pairwise.k = 1)
+
+
+# Crosses parameters
+maxGainPlan[[1]]
+
+# Mating Plan
+maxGainPlan[[2]]
+```
+
+
+```{r, fig.width=5, fig.height=4}
+# Plot
+maxGainPlan[[3]]
+```
+ 
+<div id="pt5" />
+
+## Optimization: Using the Mean Parental Average
+
+Here, we will create a mating plan through an optimization based on the mean parental average for one additive trait using pedigree information.
+
+We need the cross plan, with all individuals candidates to parents. We may use the function `planCross()` for doing so. The parents are all individuals genotyped (*TargetPop*). We may choose which mate design we want (*MateDesign*). Then, we need to organized the dataset for the predictions. Basically, the input to calculate the mean parental average is a two column data frame, where in the first row we have the individuals identification (same names that we find in the cross plan),  and the criterion. By criterion you can specified the estimated breeding value (ebv) or even the best linear unbiased prediction (BLUP) for each individuals.
+This allow us to use this function for poliploids individuals, for example. In this case, we can make the predictions and input the values to calculate the expected mean parental average for each cross.
+
+The upcoming step is to use the function `getMPA()` to predict the mean parental average for each cross in the cross plan, using the BLUP information from each individual. The relationship matrix based on pedigree (in this case) is used to restrict for inbreeding. You can use the relationship matrix based on markers as well, instead of the pedigree-based matrix. We will use the package **AGHmatrix** for that (Amadeu et al. 2022).
+
+
+```{r, eval=TRUE}
+require(SimpleMating)
+# 1. Loading the information
+data(generic_pedigree)
+data(generic_IndBLUP)
+data(generic_geno)
+
+# 2. Using AGHMatrix to build the G matrix
+AMat <- AGHmatrix::Amatrix(data = generic_pedigree)
+
+# 3. Assigning parents
+Parents <- rownames(generic_geno)
+
+# 4. Creating the mating plan
+CrossPlan <- planCross(TargetPop = Parents,
+                       MateDesign = "half")
+
+# 5. Criterion
+Crit <- data.frame(Id = rownames(generic_geno),
+                   Criterion = generic_IndBLUP[, 2])
+
+
+# 6.Single trait mean parental average
+ST_mpa <- getMPA(MatePlan = CrossPlan,
+                 Criterion = Crit,
+                 K = AMat)
+
+head(ST_mpa, 20)
+```
+
+The second part is using criterion for each cross (mean parental average in this example) together with a relationship matrix (based on pedigree information in this example) and create a optimum cross selection-based mating plan. The idea is to restrict the levels of inbreeding, by means of the covariance in the individual-cross level, and maximize the criterion used (mean parental average in this example). There is needed to set the target number of crosses in the mating plan (*n.cross*), with the maximum and minimum number of crosses that each parent can be part of (*max.cross* and *min.cross*), together with the level of covariance between cross via relationship matrix for the restriction (*culling.pairwise.k*).
+
+The output will be the mating plan based on the parameters before mentioned. 
+
+
+
+```{r, eval=TRUE}
+# 1. Crosses selected
+maxGainPlan <- selectCrosses(data = ST_mpa,
+                             K = AMat,
+                             n.cross = 25,
+                             max.cross = 10,
+                             min.cross = 1,
+                             culling.pairwise.k = 0.4)
+
+# Crosses parameters
+maxGainPlan[[1]]
+
+# Mating Plan
+maxGainPlan[[2]]
+```
+
+
+```{r, fig.width=5, fig.height=4}
+# Plot
+maxGainPlan[[3]]
+```
+ 
+ 
+ 
+ 
+## Bibliography
+
+Akdemir & Sánchez (2016). Efficient breeding by genomic mating. Frontiers in Genetics. <https://doi.org/10.3389/fgene.2016.00210>\
+Allier et al. (2019). Usefulness criterion and post-selection parental contributions in multi-parental crosses: Application to polygenic trait introgression. G3: Genes, Genomes, Genetics. <https://doi.org/10.1534/g3.119.400129>\
+Bonk et al. (2016). Mendelian sampling covariability of marker effects and genetic values. Genetics Selection Evolution. <https://gsejournal.biomedcentral.com/articles/10.1186/s12711-016-0214-0>\
+Lehermeier (2017). Genetic gain increases by applying the usefulness criterion with improved variance prediction in selection of crosses. Genetics. <https://doi.org/10.1534/genetics.117.300403>\
+Schnell & Utz (1976). F1 Leistung und Elternwahl in der Zuchtung von Selbstbefruchtern. Ber Arbeitstag Arbeitsgem Saatzuchtleiter.\
+Toro & Varona (2010). A note on mate allocation for dominance handling in genomic selection. Genetics Selection Evolution. <https://doi.org/10.1186/1297-9686-42-33>\
+Varona et al. (2018). Non-additive effects in genomic selection. Frontiers in Genetics. <https://doi.org/10.3389/fgene.2018.00078>\
+Wolfe et al. (2021). Genomic mating in outbred species: Predicting cross usefulness with additive and total genetic covariance matrices. Genetics. <https://doi.org/10.1093/genetics/iyab122>
