@@ -53,8 +53,15 @@ For this module, a data frame with four columns is required. It encompasses Pare
 
 A detailed example of application of **SimpleMating** is given in this vignette.
 
+***
 
+Any question about the analyses, please, contact me!
 
+Marco
+
+Dr. Marco Antonio Peixoto
+Email: deamorimpeixotom@ufl.edu
+Page: https://marcopxt.github.io/
 
 
 <br>
