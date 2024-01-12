@@ -32,7 +32,7 @@ To cite this R package:
 
 ```{r}
 
-Peixoto MA, Amadeu RR, Bhering LL, Ferrão LFV, Munoz PR, Resende MFR. **SimpleMating**:  R-package  
+Peixoto MA, Amadeu RR, Bhering LL, Ferrão LFV, Munoz PR, Resende MFR. SimpleMating:  R-package  
 for prediction and optimization of breeding crosses using genomic selection.
 
 ```
