@@ -58,13 +58,13 @@ A detailed example of application of **SimpleMating** is given in this vignette.
 
 ***
 
-Any question about the analyses, please, contact me!
+Any question about the analyses, please, contact me!  
 
-Marco
+Marco  
 
-Dr. Marco Antonio Peixoto
-Email: deamorimpeixotom@ufl.edu
-Page: https://marcopxt.github.io/
+Dr. Marco Antonio Peixoto  
+Email: deamorimpeixotom@ufl.edu  
+Page: https://marcopxt.github.io/  
 
 
 <br>
