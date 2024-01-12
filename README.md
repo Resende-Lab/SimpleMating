@@ -3,7 +3,7 @@
 
 ## Synopsis
 
-SimpleMating provides an easy way to implement cross prediction based on marker data and optimization of Mating crosses based on relationship matrix (A or G).
+SimpleMating provides an easy way to implement cross prediction based on marker data or BLUP data and optimization of Mating crosses based on relationship matrix (A or G).
 
 
 ## Installation
@@ -15,18 +15,17 @@ Run in R:
 ```{r}
 
 library(devtools)
-install_github('Resende-Lab/SimpleMating') # current version:  0.1.0 (September 22th, 2023)
+install_github('Resende-Lab/SimpleMating') # current version:  0.1.9001 (January 12th, 2024)
 
 ```
 
 
 ## Dataset available
 
-Two datasets are available to implement the analyses as a toy example.
+Two groups of datasets are available to implement the analyses as toy examples. We created a vignette with examples on how to use **SimpleMating**. The two groups of datasets are:
 
-**lines**: two traits were simulated from a homozygous population. We have a genetic map, markers, breeding values, and a relationship matrix (realized) for all candidates to be parents.  
-**generic**: two traits simulated and controlled by additive and dominant effects.  We have a genetic map, markers, breeding values, and a relationship matrix (realized) for all candidates to be parents. 
-
+**lines_**: two traits were simulated from a homozygous population (only homozygous loci can be found). We have a genetic map, markers (coded 0,1,2), BLUP values, and markers additive effects for all candidates to be parents.  
+**generic_**: two traits controlled by additive and dominant effects were simulated.  We have a genetic map, markers (coded 0,1,2), haplotypes (coded 0,1), BLUP values, markers effects (additive and dominance effects), and pedigree information for all candidates to be parents. 
 
 ## Citation
 To cite this R package:
@@ -44,26 +43,8 @@ https://marcopxt.github.io/
 <br>  
 
 ## Module 1: Usefulness Estimation in `SimpleMating` 
-Currently, the package computes the usefulness criterion using the following implementations:
+Currently, the package computes the usefulness criterion using the following implementations
 
-### 1. Additive trait
-
-|         Population                         | Single trait                 | Multi trait     |
-|----------------------------------|------------------------------|------------------|
-| **Doubled haploids lines**       | Lehermeier et al. (2017)     | Bonk et al. (2016), Lehermeier et al. (2017) |
-| **Recombinant inbred lines**     | Lehermeier et al. (2017)     | Bonk et al. (2016), Lehermeier et al. (2017) |
-
-
-### 2. Additive and dominance trait
-
-|      Method       |    Single trait                               |                        Multi trait                                 |
-|-------------------|-----------------------------------------------|--------------------------------------------------------------------|
-| **Bonk**          | Bonk et al. (2016)                            |                       Bonk et al. (2016)                           |
-| **Wolfe**         | Lehermeier et al. (2017), Wolfe et al. (2021) | Lehermeier et al. (2017), Wolfe et al. (2021),  Bonk et al. (2016) |
-| **NonPhased**     | Lehermeier et al. (2017)                      |                       Bonk et al. (2016)                           |
-
-
-### 3. Target criterion
 
 The first module of the package is the generation of a criterion that represents the performance of the crosses in-between each individual who is a candidate to be a parent in the population. Several authors have put some effort together to unravel such contributions. The **usefulness** concept has been shown to work pretty well in the definition of such an aspect, as proposed by Schnell and Utz (1976). Here, the implementation required the marker's effects, the markers' position in the genome, and a matrix of markers' dosage for each one of the candidates. 
 In the absence of markers, the mean parental average can be calculated and used as input in the second part of the implementation (see getMPA function below). Also, in case the user wants to use markers to capture the non-additive effects of the F1 progeny, the function getTGV() can be implemented. 
