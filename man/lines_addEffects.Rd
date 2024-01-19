@@ -7,8 +7,8 @@
 \format{
 A data frame with 1230 rows and 2 variables.
 \describe{
-\item{\code{Trait1}}{Additive effects for trait one}
-\item{\code{Trait2}}{Additive effects for trait two}
+\item{\code{add_trait1}}{Additive effects for trait one}
+\item{\code{add_trait2}}{Additive effects for trait two}
 }
 }
 \usage{

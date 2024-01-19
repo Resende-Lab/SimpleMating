@@ -9,6 +9,7 @@ getUsefA_mt(
   Markers,
   addEff,
   Map.In,
+  linkDes = NULL,
   propSel = 0.05,
   Type = "DH",
   Generation = 1,
@@ -24,6 +25,8 @@ coded as 0,1,2.}
 \item{addEff}{matrix with additive marker effects.}
 
 \item{Map.In}{data frame with the genetic map information, i.e., Chromosome containing the locus, genetic map position, and unique identifier for locus.}
+
+\item{linkDes}{Linkage disequilibrium matrix with the size of the total number of SNPs. This is optional, and it should be used only if the information on the genetic map is not available.}
 
 \item{propSel}{Value representing the proportion of the selected individuals. Default is 0.05.}
 
@@ -51,10 +54,10 @@ data(lines_GenMap) # Genetic Map
 
 data(lines_addEffects) # Additive effects
 
-data(lines_geno) # Markers
+data(lines_Geno) # Markers
 
 # 2. Parents
-Parents <- rownames(lines_geno)
+Parents <- rownames(lines_Geno)
 
 # 3. Creating the mating plan
 plan <- planCross(TargetPop = Parents,
@@ -62,7 +65,7 @@ plan <- planCross(TargetPop = Parents,
 
 # 4.  Usefulness for both traits (DH case)
 usef_add <- getUsefA_mt(MatePlan = plan,
-                        Markers = lines_geno,
+                        Markers = lines_Geno,
                         addEff = lines_addEffects,
                         Map.In = lines_GenMap,
                         propSel = 0.05,

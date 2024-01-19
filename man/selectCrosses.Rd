@@ -41,15 +41,15 @@ crosses with relatedness values higher than this threshold will be discarded. Th
 \examples{
 \dontrun{
 # 1. Loading the data
-data(lines_geno)
+data(lines_Geno)
 data(lines_addEffects)
 data(lines_GenMap)
 
 # 2. Crossing plan
-CrossPlan <- planCross(TargetPop = rownames(lines_geno))
+CrossPlan <- planCross(TargetPop = rownames(lines_Geno))
 
 # 3 Creating relationship matrix
-ScaleMarkers <- scale(lines_geno, scale = FALSE)
+ScaleMarkers <- scale(lines_Geno, scale = FALSE)
 
 relMat <- (ScaleMarkers \%*\% t(ScaleMarkers)) / ncol(ScaleMarkers)
 
@@ -57,7 +57,7 @@ relMat <- (ScaleMarkers \%*\% t(ScaleMarkers)) / ncol(ScaleMarkers)
 
 # 4.1 Calculating the usefulness of trait number 1
 usef_add <- getUsefA(MatePlan = CrossPlan,
-                     Markers = lines_geno,
+                     Markers = lines_Geno,
                      addEff = lines_addEffects[, 1],
                      Map.In = lines_GenMap,
                      propSel = 0.05,

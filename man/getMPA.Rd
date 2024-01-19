@@ -28,7 +28,7 @@ be BLUPs for the individuals presented in the MatePlan. For more than one trait,
 \examples{
 \dontrun{
 # 1.Loading the data
-data(lines_geno)
+data(lines_Geno)
 data(lines_IndBLUP)
 
 # 2.Criterion
@@ -41,7 +41,7 @@ ScaleMarkers <- scale(lines_geno, scale = FALSE)
 relMat <- (ScaleMarkers \%*\% t(ScaleMarkers)) / ncol(ScaleMarkers)
 
 # 4.Mating Plan
-CrossPlan <- planCross(TargetPop = Crit[1:12, 1])
+CrossPlan <- planCross(TargetPop = lines_IndBLUP[, 1])
 
 # 5.Single trait mean parental average
 ST_mpa <- getMPA(MatePlan = CrossPlan,

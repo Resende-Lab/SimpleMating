@@ -10,6 +10,7 @@ getUsefAD(
   addEff,
   domEff,
   Map.In,
+  linkDes = NULL,
   propSel = 0.05,
   Method = "Phased"
 )
@@ -24,6 +25,8 @@ getUsefAD(
 \item{domEff}{column vector with dominance markers effects for the trait.}
 
 \item{Map.In}{data frame with the mapping information, i.e., Chromosome containing the locus, genetic map position, and unique identifier for locus.}
+
+\item{linkDes}{Linkage disequilibrium matrix with the size of the total number of SNPs. This is optional, and it should be used only if the information on the genetic map is not available.}
 
 \item{propSel}{Value representing the proportion of the selected individuals. Default is 0.05.}
 
@@ -45,12 +48,12 @@ data(generic_GenMap) # Genetic Map
 
 data(generic_MrkEffects) # Additive effects
 
-data(generic_geno) # Markers
+data(generic_Geno) # Markers
 
 data(generic_Phasedgeno) # Phased haplotypes
 
 # 2. Parents
-Parents <- rownames(generic_geno)
+Parents <- rownames(generic_Geno)
 
 # 3.Creating the mating plan
 plan <- planCross(TargetPop = Parents,
@@ -70,7 +73,7 @@ head(usefPhased, 10)
 
 # 5.Calculating the usefulness using 'NonPhased' method
 usefNonPhased <- getUsefAD(MatePlan = plan,
-                           Markers = generic_geno,
+                           Markers = generic_Geno,
                            addEff = generic_MrkEffects[, 1],
                            domEff = generic_MrkEffects[, 3],
                            Map.In = generic_GenMap,
