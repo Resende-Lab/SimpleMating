@@ -26,6 +26,7 @@
 #' coded as 0,1,2.
 #' @param addEff column vector with additive marker effects.
 #' @param Map.In data frame with the genetic map information, i.e., Chromosome containing the locus, genetic map position, and unique identifier for locus.
+#' @param linkDes Linkage disequilibrium matrix with the size of the total number of SNPs. This is optional, and it should be used only if the information on the genetic map is not available.
 #' @param propSel Value representing the proportion of the selected individuals. Default is 0.05.
 #' @param Type which kind of system of mating: "DH": doubled-haploids lines or
 #'  "RIL": Recombinant inbred lines.
@@ -44,10 +45,10 @@
 #'
 #' data(lines_addEffects) # Additive effects
 #'
-#' data(lines_geno) # Markers
+#' data(lines_Geno) # Markers
 #'
-#' # 2. Using just a subset for time purposes
-#' Parents <- rownames(lines_geno)[1:15]
+#' # 2. Parents
+#' Parents <- rownames(lines_Geno)
 #'
 #' # 3. Creating the mating plan
 #' plan <- planCross(TargetPop = Parents,
@@ -56,7 +57,7 @@
 #'
 #' # 4. Calculating the usefulness of trait number 1
 #' usef_add <- getUsefA(MatePlan = plan,
-#'                      Markers = lines_geno,
+#'                      Markers = lines_Geno,
 #'                      addEff = lines_addEffects[, 1],
 #'                      Map.In = lines_GenMap,
 #'                      propSel = 0.05,
@@ -76,7 +77,7 @@
 #'
 #' @export
 
-getUsefA <- function(MatePlan, Markers, addEff, Map.In, propSel = 0.05, Type = 'DH', Generation = 1) {
+getUsefA <- function(MatePlan, Markers, addEff, Map.In, linkDes = NULL, propSel = 0.05, Type = 'DH', Generation = 1) {
   if (!("data.frame" %in% class(MatePlan))) {
     stop("Argument 'MatePlan' is not a data frame.\n")
   }
@@ -97,11 +98,18 @@ getUsefA <- function(MatePlan, Markers, addEff, Map.In, propSel = 0.05, Type = '
     Mean_Cross <- (est.bredv[rownames(est.bredv) %in% tmp[1]] + est.bredv[rownames(est.bredv) %in% tmp[2]]) / 2
     return(round(Mean_Cross, digits = 5))
   })
+
+  if(is.null(linkDes) & is.null(Map.In)){
+    stop("You should give at least one of them, linkage desiquilibrium matrix or the map information. \n")
+  }
+
+  if(is.null(linkDes)){
   Markers_names <- colnames(Markers) <- rownames(EffA) <- Map.In[, 3]
   Map.Chr <- split(Map.In, Map.In[, 1, drop = FALSE])
   Map.Pos <- split(Markers_names, Map.In[, 1, drop = FALSE])
   Map.Eff <- split(EffA, Map.In[, 1, drop = FALSE])
   rMat <- lapply(Map.Chr, theta)
+
   if (Type == "DH") {
     if (Generation == 1) {
       MCov <- lapply(X = rMat, FUN = function(ctheta) 1 - (2 * ctheta))
@@ -173,6 +181,98 @@ getUsefA <- function(MatePlan, Markers, addEff, Map.In, propSel = 0.05, Type = '
   MatePlan$Usefulness <- apply(MatePlan, 1, function(x) calcuf(x))
   MatePlan <- MatePlan[order(MatePlan$Usefulness, decreasing = TRUE), ]
   rownames(MatePlan) <- NULL
+
+  }else{
+
+    Markers_names <- rownames(EffA) <- colnames(Markers)
+    Map.Pos <- split(Markers_names, Map.In[, 1, drop = FALSE])
+    Map.Eff <- split(EffA, Map.In[, 1, drop = FALSE])
+    block_sizes <- table(Map.In[,1])
+    rMat = list()
+
+    for(i in 1:(length(block_sizes))){
+      iMat <- sum(block_sizes[1:i-1]) + 1
+      jMat <- sum(block_sizes[1:i])
+      rMat[[i]] = linkDes[iMat:jMat, iMat:jMat]
+    }
+
+
+    if (Type == "DH") {
+      if (Generation == 1) {
+        MCov <- lapply(X = rMat, FUN = function(ctheta) 1 - (2 * ctheta))
+      } else if (Generation >= 10) {
+        MCov <- lapply(X = rMat, FUN = function(ctheta) (1 - (2 * ctheta)) / (1 + (2 * ctheta)))
+      } else {
+        RHS_MCov <- lapply(X = rMat, FUN = function(ctheta) {
+          popInfo <- 0.5 * (1 - (2 * ctheta))
+          Reduce(f = `+`, x = lapply(X = seq(Generation), FUN = function(k) popInfo^k))
+        })
+        LHS_MCov <- lapply(X = rMat, FUN = function(ctheta) (0.5 * (1 - (2 * ctheta)))^Generation)
+        MCov <- Map("+", RHS_MCov, LHS_MCov)
+      }
+    } else if (Type == "RIL") {
+      if (Generation >= 10) {
+        MCov <- lapply(X = rMat, FUN = function(ctheta) (1 - (2 * ctheta)) / (1 + (2 * ctheta)))
+      } else {
+        MCov <- lapply(X = rMat, FUN = function(ctheta) {
+          popInfo <- 0.5 * (1 - (2 * ctheta))
+          Reduce(f = `+`, x = lapply(X = seq(Generation), FUN = function(k) popInfo^k))
+        })
+      }
+    }
+
+    Markers <- Markers - 1
+    calc.info = function(Markers) {
+      fourD <- crossprod(Markers[1, , drop = FALSE] - Markers[2, , drop = FALSE]) / 4
+      return(fourD)
+    }
+
+
+   crospredPar = function(Ncross) {
+      cross_variance <- vector("list", nrow(Ncross))
+      for (i in seq_along(cross_variance)) {
+        Matepair <- as.character(Ncross[i, ])
+        Total_SNP <- Markers[Matepair, , drop = FALSE]
+        SNPseg <- which(!colMeans(Total_SNP) %in% c(1, -1))
+        SNPseg.Chr <- lapply(Map.Pos, intersect, Markers_names[SNPseg])
+        SNPseg.Chr_pos <- mapply(Map.Pos, SNPseg.Chr, FUN = function(.a, .b) which(.a %in% .b))
+        parGen <- lapply(SNPseg.Chr, function(tmp) Markers[Matepair, tmp, drop = FALSE])
+        D <- lapply(parGen, calc.info)
+        SNPseg.MCov <- mapply(SNPseg.Chr_pos, MCov, FUN = function(.a, .b) .b[.a, .a])
+        VarCov <- Map("*", D, SNPseg.MCov)
+        SNPseg.EffA <- mapply(SNPseg.Chr_pos, Map.Eff, FUN = function(.a, .b) .b[.a])
+        Pair.Var <- sum(mapply(VarCov, SNPseg.EffA,
+                               FUN = function(.a, .b) crossprod(.b, .a %*% .b)
+        ))
+        cross_variance[[i]] <- data.frame(t(Matepair),
+                                          Variance = abs(Pair.Var),
+                                          stringsAsFactors = FALSE,
+                                          row.names = NULL
+        )
+      }
+
+      do.call("rbind", cross_variance)
+    }
+    cros2cores <- list(`1` = MatePlan[, c(1:2)])
+    tmp_var <- lapply(cros2cores, crospredPar)
+    MateVar <- do.call("rbind", tmp_var)
+    MateVar$Cross.ID <- paste0(MateVar[, 1], "_", MateVar[, 2])
+    MatePlan <- merge(MatePlan, MateVar[, -c(1:2)], by = "Cross.ID")
+    MatePlan$sd <- sqrt(MatePlan$Variance)
+    selin <- dnorm(qnorm(1 - propSel)) / propSel
+    calcuf <- function(x) {
+      mean <- as.numeric(x[4])
+      std <- selin * sqrt(as.numeric(x[5]))
+      uc <- round(mean + std, 5)
+      return(uc)
+    }
+    MatePlan$Usefulness <- apply(MatePlan, 1, function(x) calcuf(x))
+    MatePlan <- MatePlan[order(MatePlan$Usefulness, decreasing = TRUE), ]
+    rownames(MatePlan) <- NULL
+
+
+  }
+
   cat(paste0("Usefulness predicted for ", nrow(MatePlan), " crosses. \n"))
   return(MatePlan)
 }
@@ -185,12 +285,9 @@ getUsefA <- function(MatePlan, Markers, addEff, Map.In, propSel = 0.05, Type = '
 #'
 #' @noRd
 
+
 theta <- function(map) {
-  Chr_cM <- do.call(rbind, lapply(1:nrow(map), function(x) rep(map[, 1][x], nrow(map))))
-  Chr_cMt <- t(Chr_cM)
-  d <- as.matrix(dist(map[, 2], upper = TRUE, diag = TRUE, method = "manhattan"))
-  tmp_c <- 0.5 * (1 - exp(-2 * (d / 100)))
-  tmp_c[Chr_cM != Chr_cMt] <- 0.5
-  recomb_Mat <- tmp_c
-  return(recomb_Mat)
+  distMat <- as.matrix(dist(map[, 2], upper = TRUE, diag = TRUE, method = "manhattan"))
+  return(0.5 * (1 - exp(-2 * (distMat/100))))
 }
+

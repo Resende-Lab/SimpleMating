@@ -35,7 +35,7 @@
 #' @examples
 #' \dontrun{
 #' # 1.Loading the data
-#' data(lines_geno)
+#' data(lines_Geno)
 #' data(lines_IndBLUP)
 #'
 #' # 2.Criterion
@@ -48,7 +48,7 @@
 #' relMat <- (ScaleMarkers %*% t(ScaleMarkers)) / ncol(ScaleMarkers)
 #'
 #' # 4.Mating Plan
-#' CrossPlan <- planCross(TargetPop = Crit[1:12, 1])
+#' CrossPlan <- planCross(TargetPop = lines_IndBLUP[, 1])
 #'
 #' # 5.Single trait mean parental average
 #' ST_mpa <- getMPA(MatePlan = CrossPlan,
@@ -107,7 +107,7 @@ getMPA <- function(MatePlan, Criterion, K = NULL, Weights = NULL, Scale = TRUE) 
   if (any(which(duplicated(cbind(output$Parent1, output$Parent2))))) {
     output <- output[-which(duplicated(cbind(output$Parent1, output$Parent2))), ]
   }
-  output = output[,-1]
+
   rownames(output) = NULL
   cat(paste0(nrow(output), " possible crosses were predicted\n"))
   return(output)

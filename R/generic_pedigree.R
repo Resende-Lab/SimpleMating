@@ -1,4 +1,4 @@
-#' @title generic_pedigree
+#' @title generic_Pedigree
 #' @description A pedigree information for 100 individuals. The three columns represents the individuals, mother, and father identification, respectively.
 #' @format A data frame with 120 rows and 3 variables.
 #' \describe{
@@ -9,6 +9,6 @@
 #'
 #' @docType data
 #'
-#' @usage data(generic_pedigree)
+#' @usage data(generic_Pedigree)
 #'
-"generic_pedigree"
+"generic_Pedigree"

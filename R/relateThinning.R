@@ -36,14 +36,14 @@
 #' \dontrun{
 #' # 1.Loading the data
 #' data(generic_IndBLUP) # BLUPs/Criteria
-#' data(generic_geno) # Markers
+#' data(generic_Geno) # Markers
 #'
 #' # 2.Criterion
 #' Crit <- data.frame(Id = generic_IndBLUP[, 1],
 #'                    Criterion = generic_IndBLUP[, 2])
 #'
 #' # 3. Creating relationship matrix
-#' ScaleMarkers <- scale(generic_geno, scale = FALSE)
+#' ScaleMarkers <- scale(generic_Geno, scale = FALSE)
 #'
 #' relMat <- (ScaleMarkers %*% t(ScaleMarkers)) / ncol(ScaleMarkers)
 #'

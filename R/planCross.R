@@ -64,7 +64,7 @@
 
 planCross <- function(TargetPop, MateDesign = "half", TargetPop2 = NULL, Indiv2keep = NULL) {
   if (!MateDesign %in% c("full_p", "full", "half", "half_p", "maxAvoid", "circularPlan")) {
-    stop(deparse("Please, choose a valid mate design plan. The options are: full_p, full, half_p, half, maxAvoid, and circularPlan"))
+    stop(deparse("Please, choose a valid mate design plan. The options are: full_p, full, half_p, and half"))
   }
 
   if (!is.null(TargetPop2)) {

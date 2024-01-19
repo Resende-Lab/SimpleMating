@@ -38,23 +38,23 @@
 #' \dontrun{
 #' # 1. Loading the data
 #' data(generic_MrkEffects) # Additive effects
-#' data(generic_geno) # Markers
+#' data(generic_Geno) # Markers
 #'
 #' # 2. Parents
-#' Parents <- rownames(generic_geno)
+#' Parents <- rownames(generic_Geno)
 #'
 #' # 3. Creating the mating plan
 #' CrossPlan <- planCross(TargetPop = Parents,
 #'                        MateDesign = "half")
 #'
 #' # 4. Creating relationship matrix
-#' ScaleMarkers <- scale(generic_geno, scale = FALSE)
+#' ScaleMarkers <- scale(generic_Geno, scale = FALSE)
 #'
 #' relMat <- (ScaleMarkers %*% t(ScaleMarkers)) / ncol(ScaleMarkers)
 #'
 #' # 4. Single trait
 #' ST_tgv <- getTGV(MatePlan = CrossPlan,
-#'                  Markers = generic_geno,
+#'                  Markers = generic_Geno,
 #'                  addEff = generic_MrkEffects[, 1],
 #'                  domEff = generic_MrkEffects[, 3],
 #'                  K = relMat)
@@ -63,7 +63,7 @@
 #'
 #' # 5. Multi trait
 #' MT_tgv <- getTGV(MatePlan = CrossPlan,
-#'                  Markers = generic_geno,
+#'                  Markers = generic_Geno,
 #'                  addEff = generic_MrkEffects[, 1:2],
 #'                  domEff = generic_MrkEffects[, 3:4],
 #'                  K = relMat,
