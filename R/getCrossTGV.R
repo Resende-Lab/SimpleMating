@@ -19,7 +19,7 @@
 #' @description
 #' The total genetic value for a set of crosses is estimated following the formulae proposed by Falconer and Mackay (1996). It uses the markers and the markers effects
 #' (additive and dominance effects). For more than one trait, the total genetic value is estimated by an index, a linear combination among the traits. Weights should be informed for each trait in this later case. The relationship matrix
-#' (K) here presented as an argument is for creating the output in the form of the input for the optimization function (selectCrosses).
+#' (K) here presented as an argument for creating the output as the input for the optimization function (selectCrosses).
 #'
 #' @param MatePlan data frame with two columns indicating the crosses.
 #' @param Markers matrix with markers information for all candidate parents,
@@ -27,8 +27,9 @@
 #' @param addEff column vector (for one trait) or a matrix (for more than one trait) with additive marker effects.
 #' @param domEff column vector (for one trait) or a matrix (for more than one trait) with dominance markers effects.
 #' @param K relationship matrix between all candidates to parents.
+#' @param ploidy data ploidy (generally an even number). Default=2.
 #' @param Weights vector with the weights for each trait. Only used when more than one trait is given.
-#' @param Scale Boolean. If TRUE, the traits values will be scaled. Default is TRUE. Only used when more than one trait is given.
+#' @param Scale Boolean. If TRUE, the trait values will be scaled. The default is TRUE. It is only used when more than one trait is given.
 #'
 #' @return A data frame with all possible crosses from the MatePlan (Parent1 and Parent2), their total genetic value (Y), and covariance from the relationship matrix (K).
 #'
@@ -78,7 +79,7 @@
 #'
 #' @export
 
-getTGV <- function(MatePlan, Markers, addEff, domEff, K, Weights = NULL, Scale = TRUE) {
+getTGV <- function(MatePlan, Markers, addEff, domEff, K,  ploidy = 2, Weights = NULL, Scale = TRUE) {
   if (!("data.frame" %in% class(MatePlan))) {
     stop("Argument 'MatePlan' is not a data frame.\n")
   }
@@ -107,8 +108,8 @@ getTGV <- function(MatePlan, Markers, addEff, domEff, K, Weights = NULL, Scale =
 
       for (j in 1:nrow(MatePlan)) {
         tmp <- MatePlan[j, ]
-        p1 <- Markers[tmp[1, 1], ] / 2
-        p2 <- Markers[tmp[1, 2], ] / 2
+        p1 <- Markers[tmp[1, 1], ] / ploidy
+        p2 <- Markers[tmp[1, 2], ] / ploidy
         pik <- p1
         qik <- 1 - p1
         yk <- p1 - p2
@@ -130,8 +131,8 @@ getTGV <- function(MatePlan, Markers, addEff, domEff, K, Weights = NULL, Scale =
     MuT <- matrix(NA, nrow = nrow(MatePlan))
     for (j in 1:nrow(MatePlan)) {
       tmp <- MatePlan[j, ]
-      p1 <- Markers[tmp[1, 1], ] / 2
-      p2 <- Markers[tmp[1, 2], ] / 2
+      p1 <- Markers[tmp[1, 1], ] / ploidy
+      p2 <- Markers[tmp[1, 2], ] / ploidy
       pik <- p1
       qik <- 1 - p1
       yk <- p1 - p2
