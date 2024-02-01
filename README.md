@@ -40,19 +40,21 @@ for prediction and optimization of breeding crosses using genomic selection.
 
 ***  
 
-The **SimpleMating** R package relies on two modules. The first one is to create a criterion that represents the performance of each pair of parents in a given crossing plan. The second module of **SimpleMating** creates a mating plan based on the criterion and constrains the individuals' relationship based on a predetermined cut-off. We describe more about the module below.
+The **SimpleMating** R package relies on two modules. The first one is to create a criterion that represents the performance of each pair of parents in a given crossing plan. The second module of **SimpleMating** creates a mating plan based on the criterion and constrains the individuals' relationship based on a predetermined cut-off. 
 
 ## Module 1: Criteria Estimation in `SimpleMating` 
 
-The first module of the package is the generation of a criterion that represents the performance of the crosses in-between each individual who is a candidate to be a parent in the population. The functions here implemented allow the user to predict *mean parental average* (targeting only additive traits), *total genetic value* (targetting both, additive and dominance traits), and *usefulness* (additive and/or dominance controlled traits). 
-The *usefulness* concept has been shown to work pretty well in the definition of such an aspect, as proposed by Schnell and Utz (1976). Here, the implementation required the markers' effects, the markers' position in the genome, and the dosage matrix for each one of the candidates to be parents.  
-In the absence of markers, the *mean parental average* can be calculated and used as input in the second part of the implementation (see getMPA() function). In addition, the user may use the function getTGV() to get the total genetic value of the progeny. 
+The first module of the package is the generation of a criterion that represents the performance of the crosses in-between each individual who is a candidate to be a parent in the population. The functions here implemented allow the user to predict *mean parental average* (targeting only additive traits), *total genetic value* (targetting traits controlled by genes with additive and dominance inheritance), and *usefulness* (additive and/or dominance controlled traits). 
+The *usefulness* concept has been shown to work pretty well in the definition of such an aspect, as proposed by Schnell and Utz (1976). Here, the implementation required the markers' effects, the markers' position in the genome (or a linkage disequilibrium matrix), and the dosage matrix for each one of the candidates to be parents.  
+In the absence of markers, the *mean parental average* can be calculated and used as input in the second part of the implementation (see getMPA() function) and use the pedigree information to build a relationship matrix. In addition, the user may use the function getTGV() to get the total genetic value of the progeny. And the user can use the functions getUsefA(), getUsefAD(), getUsefA(), and getUsefAD() to estimate usefulness.
+
 All options before stated (mean parental average, total genetic value, and usefulness) are the input for the second module of the package.
 
 
 ## Module 2: Optimization and Mating Allocation in `SimpleMating` 
 
-After the estimation of the criterion for each pair in the crossing plan, the second module of **SimpleMating** creates a mating plan based on mate allocation. The algorithm here developed maximizes the given criterion (mean parental average, total genetic value, or usefulness), and adds a cut-off in the inbreeding between individuals. This cut-off is based on the level of covariance between a pair of individuals, which can be derived from a relationship matrix based on markers (G) or pedigree (A). After the cut-off based on inbreeding, the mate allocation is done by restricting the number of crosses that each parent is part of (maximum and minimum number), and the total number of crosses.
+The step after getting the performance of each cross is to use the second module of **SimpleMating** to create a mating plan based on mate allocation. The algorithm here developed maximizes the given criterion (mean parental average, total genetic value, or usefulness), and adds a cut-off in the inbreeding between individuals. This cut-off is based on the level of covariance between a pair of individuals, which can be derived from a relationship matrix based on markers (G) or pedigree (A). After the cut-off based on inbreeding, the mate allocation is done by restricting the number of crosses that each parent is part of (maximum and minimum number), and the total number of crosses.
+
 For this module, a data frame with four columns is required. It encompasses Parent 1, Parent 2, a target Criterion (Y), and a covariance between individuals (K). 
 
 A detailed example of the application of **SimpleMating** is given in this vignette.
