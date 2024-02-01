@@ -57,7 +57,7 @@ The step after getting the performance of each cross is to use the second module
 
 For this module, a data frame with four columns is required. It encompasses Parent 1, Parent 2, a target Criterion (Y), and a covariance between individuals (K). 
 
-A detailed example of the application of **SimpleMating** is given in this [vignette](https://github.com/Resende-Lab/SimpleMating/blob/main/vignettes/Vignette.Rmd).
+A detailed example of the application of **SimpleMating** is given in this [[vignette]](https://htmlpreview.github.io/?https://github.com/Resende-Lab/SimpleMating/blob/main/doc/Vignette.html)
 
 ***
 
