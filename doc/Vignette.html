@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Marco Antonio Peixoto" />
+
+<meta name="date" content="2024-02-01" />
+
+<title>SimpleMating: A R package to breeding crosses optimization</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">SimpleMating: A R package to breeding
+crosses optimization</h1>
+<h4 class="author">Marco Antonio Peixoto</h4>
+<h4 class="date">2024-02-01</h4>
+
+
+
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p><strong>SimpleMating</strong> is a two module package for cross
+optimization. First, it estimates the performance for a set of crosses,
+such as mean parental average, cross total genetic value, and/or
+usefulness (using additive and/or non-additive effects), allowing for
+multi-trait scenarios. Furthermore, it uses a mate allocation algorithm
+to create a mating plan aiming to maximize a target criterion (mean
+parental average, total genetic value, or usefulness) and constrains the
+next generation inbreeding levels.</p>
+<p>In this tutorial we will explain the implementation of both modules
+while connecting it with examples using the data from the package.</p>
+</div>
+<div id="input-files" class="section level2">
+<h2>Input files</h2>
+<p>Four files are needed but not all required, to run an analyses in
+<strong>SimpleMating</strong>:</p>
+<ol style="list-style-type: lower-roman">
+<li>Matrix with markers from the parental population;<br />
+</li>
+<li>Markers effects for the target trait (or traits);<br />
+</li>
+<li>Genetic map for recombination frequency estimation or linkage
+disequilibrium matrix;<br />
+</li>
+<li>relationship matrix (pedigree- or marker-based).</li>
+</ol>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># 1. Install and require the package</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="co"># install.packages(SimpleMating)</span></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">require</span>(SimpleMating)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co">#&gt; Loading required package: SimpleMating</span></span></code></pre></div>
+<div id="marker-matrix" class="section level4">
+<h4>1) Marker matrix</h4>
+<p>The marker matrix has the information of genotypes (100 genotypes) in
+the lines and the information of SNPs in the columns, coded as 0,1,2
+meaning the number of copies of the alternate allele that is presented
+for each loci.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Marker matrix</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">data</span>(lines_Geno)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>lines_Geno[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt;    Chr1_SNP1 Chr1_SNP2 Chr1_SNP3 Chr1_SNP4 Chr1_SNP5</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; G1         0         0         2         0         2</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; G2         0         0         2         0         0</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; G3         0         0         2         0         2</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; G4         0         0         2         0         0</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt; G5         0         0         2         0         0</span></span></code></pre></div>
+</div>
+<div id="marker-effects" class="section level4">
+<h4>2) Marker effects</h4>
+<p>This is a data frame with the information of the effects for each
+marker from the matrix before mentioned for the trait under evaluation.
+In this case, each row represents one marker and each column one trait
+(two traits and 1230 markers).</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Marker Effects</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">data</span>(lines_addEffects)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="fu">head</span>(lines_addEffects)</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt;      add_trait1    add_trait2</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; 1  0.0207632801  1.034444e-03</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; 2 -0.0018488022 -7.234415e-03</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; 3 -0.0073807532  2.244785e-03</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt; 4 -0.0066209813  2.713244e-03</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; 5  0.0004828055 -3.478676e-05</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; 6 -0.0204069302  1.191772e-02</span></span></code></pre></div>
+</div>
+<div id="genetic-map" class="section level4">
+<h4>3) Genetic map</h4>
+<p>The genetic map is a data frame with the information about position,
+in the genome, of the markers. There are three columns in the file,
+being the first the chromosome, the second represents the actual
+position of the marker (in centimorgan), and the third is the marker
+name. <strong>SimpleMating</strong> also allow the use of linkage
+disequilibrium matrix for recombination instead of the genetic map. We
+discuss this below and give more details in the main paper.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Genetic Map</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">data</span>(lines_GenMap)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="fu">head</span>(lines_GenMap)</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt;   chr         pos  mkr</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt; 1   1  0.07865088  1_2</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; 2   1  3.64901989 1_11</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; 3   1  6.60301305 1_20</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; 4   1  7.04754570 1_22</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; 5   1  9.34700329 1_27</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; 6   1 11.35608253 1_33</span></span></code></pre></div>
+</div>
+<div id="relationship-matrix" class="section level4">
+<h4>4) Relationship matrix</h4>
+<p>For the optimization itself, to restrict inbreeding levels, we need a
+relationship matrix. It could be a numerator relationship matrix based
+on pedigree data or a realized relationship matrix based on markers.
+Make sure that your relationship matrix contains the names of the
+individuals genotypes as columns and rows’ names.</p>
+</div>
+</div>
+<div id="examples" class="section level2">
+<h2>Examples</h2>
+<p>We going to cover seven examples of implementation, as follows:</p>
+<ol style="list-style-type: decimal">
+<li>Optimization based on usefulness for one additive trait using
+molecular markers. <a href="#pt1">shortcut</a><br />
+</li>
+<li>Optimization based on usefulness for two additive traits using
+molecular markers. <a href="#pt2">shortcut</a><br />
+</li>
+<li>Optimization based on usefulness for one additive/dominance trait
+using molecular markers. <a href="#pt3">shortcut</a><br />
+</li>
+<li>Optimization based on total genetic value for one additive trait
+using molecular markers. <a href="#pt4">shortcut</a><br />
+</li>
+<li>Optimization based on mean parental average for one additive trait
+using pedigree information. <a href="#pt5">shortcut</a></li>
+<li>Optimization: Using the linkage disequilibrium to predicts the cross
+variance. <a href="#pt6">shortcut</a></li>
+<li>Thinning by relatedness: How to increase prediction speed. <a href="#pt7">shortcut</a></li>
+</ol>
+<div id="pt1"></div>
+
+</div>
+<div id="optimization-usefulness-on-additive-trait" class="section level2">
+<h2>Optimization: Usefulness on additive trait</h2>
+<p>Here, we will create a mating plan based on usefulness for one
+additive trait.</p>
+<p>First we create a crossing plan. The user may inform their own or use
+the function <code>planCross()</code> to create the crossing plan. The
+parents are all individuals genotyped and the information of their names
+should go in the argument <em>TargetPop</em>. We may choose which mate
+design we want (<em>MateDesign</em>). The upcoming step is to use the
+function <code>getUsefA()</code> to predict the usefulness for each
+cross in the crossing plan, using the markers, markers’ effects, and the
+genetic map. For this function, we may set the proportion of selection
+individuals (<em>proSel</em>), the population type (<em>Type</em>), and
+the generation (<em>Generation</em>).</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">require</span>(SimpleMating)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co"># 1. Assigning the parents</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>Parents <span class="ot">&lt;-</span> <span class="fu">rownames</span>(lines_Geno)</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co"># 2. Creating the crossing plan</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>Cross_plan <span class="ot">&lt;-</span> <span class="fu">planCross</span>(<span class="at">TargetPop =</span> Parents,</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>                        <span class="at">MateDesign =</span> <span class="st">&quot;half&quot;</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt; Number of crosses generated: 4950</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co"># 3. Creating relationship matrix based on markers</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>relMat <span class="ot">&lt;-</span> (lines_Geno <span class="sc">%*%</span> <span class="fu">t</span>(lines_Geno)) <span class="sc">/</span> <span class="fu">ncol</span>(lines_Geno)</span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co"># 4.  Usefulness of trait number 1 (DH)</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>usef_add <span class="ot">&lt;-</span> <span class="fu">getUsefA</span>(<span class="at">MatePlan =</span> Cross_plan,</span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>                     <span class="at">Markers =</span> lines_Geno,</span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>                     <span class="at">addEff =</span> lines_addEffects[, <span class="dv">1</span>],</span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>                     <span class="at">Map.In =</span> lines_GenMap,</span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>                     <span class="at">K =</span> relMat,</span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a>                     <span class="at">propSel =</span> <span class="fl">0.05</span>,</span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a>                     <span class="at">Type =</span> <span class="st">&quot;DH&quot;</span>,</span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>                     <span class="at">Generation =</span> <span class="dv">1</span>)</span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a><span class="co">#&gt; Usefulness predicted for 4950 crosses.</span></span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a></span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a><span class="fu">head</span>(usef_add[[<span class="dv">1</span>]], <span class="dv">10</span>)</span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a><span class="co">#&gt;    Cross.ID Parent1 Parent2    Mean  Variance        sd Usefulness</span></span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a><span class="co">#&gt; 1     G1_G2      G1      G2 4.51880 0.1304844 0.3612263    5.26391</span></span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a><span class="co">#&gt; 2     G2_G4      G2      G4 4.18298 0.2254939 0.4748620    5.16248</span></span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a><span class="co">#&gt; 3     G2_G3      G2      G3 4.01124 0.2984568 0.5463120    5.13812</span></span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a><span class="co">#&gt; 4     G1_G3      G1      G3 4.10644 0.2258000 0.4751842    5.08661</span></span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a><span class="co">#&gt; 5     G1_G4      G1      G4 4.27818 0.1391330 0.3730053    5.04758</span></span>
+<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a><span class="co">#&gt; 6     G3_G4      G3      G4 3.77061 0.3254046 0.5704425    4.94727</span></span>
+<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a><span class="co">#&gt; 7     G2_G5      G2      G5 3.38943 0.3398141 0.5829358    4.59186</span></span>
+<span id="cb5-34"><a href="#cb5-34" tabindex="-1"></a><span class="co">#&gt; 8     G1_G5      G1      G5 3.48462 0.2583192 0.5082511    4.53300</span></span>
+<span id="cb5-35"><a href="#cb5-35" tabindex="-1"></a><span class="co">#&gt; 9    G1_G30      G1     G30 3.40499 0.2720584 0.5215921    4.48088</span></span>
+<span id="cb5-36"><a href="#cb5-36" tabindex="-1"></a><span class="co">#&gt; 10   G1_G24      G1     G24 3.09747 0.4497345 0.6706225    4.48077</span></span>
+<span id="cb5-37"><a href="#cb5-37" tabindex="-1"></a></span>
+<span id="cb5-38"><a href="#cb5-38" tabindex="-1"></a><span class="fu">head</span>(usef_add[[<span class="dv">2</span>]], <span class="dv">10</span>)</span>
+<span id="cb5-39"><a href="#cb5-39" tabindex="-1"></a><span class="co">#&gt;    Parent1 Parent2       Y         K</span></span>
+<span id="cb5-40"><a href="#cb5-40" tabindex="-1"></a><span class="co">#&gt; 1       G1      G2 5.26391 1.2292683</span></span>
+<span id="cb5-41"><a href="#cb5-41" tabindex="-1"></a><span class="co">#&gt; 2       G2      G4 5.16248 1.2162602</span></span>
+<span id="cb5-42"><a href="#cb5-42" tabindex="-1"></a><span class="co">#&gt; 3       G2      G3 5.13812 0.9886179</span></span>
+<span id="cb5-43"><a href="#cb5-43" tabindex="-1"></a><span class="co">#&gt; 4       G1      G3 5.08661 1.0569106</span></span>
+<span id="cb5-44"><a href="#cb5-44" tabindex="-1"></a><span class="co">#&gt; 5       G1      G4 5.04758 1.2227642</span></span>
+<span id="cb5-45"><a href="#cb5-45" tabindex="-1"></a><span class="co">#&gt; 6       G3      G4 4.94727 0.9821138</span></span>
+<span id="cb5-46"><a href="#cb5-46" tabindex="-1"></a><span class="co">#&gt; 7       G2      G5 4.59186 1.0373984</span></span>
+<span id="cb5-47"><a href="#cb5-47" tabindex="-1"></a><span class="co">#&gt; 8       G1      G5 4.53300 1.0373984</span></span>
+<span id="cb5-48"><a href="#cb5-48" tabindex="-1"></a><span class="co">#&gt; 9       G1     G30 4.48088 1.0796748</span></span>
+<span id="cb5-49"><a href="#cb5-49" tabindex="-1"></a><span class="co">#&gt; 10      G1     G24 4.48077 1.0243902</span></span></code></pre></div>
+<p>The second part is using criterion for each cross (usefulness in this
+example) together with a relationship matrix (based on markers in this
+example) and create a optimum cross selection-based mating plan. The
+idea is to restrict the levels of inbreeding, by means of the covariance
+in the individual-cross level, and maximize the criterion used
+(usefulness in this example). There is needed to set the target number
+of crosses in the mating plan (<em>n.cross</em>), with the maximum and
+minimum number of crosses that each parent can be part of
+(<em>max.cross</em> and <em>min.cross</em>), together with the level of
+covariance between cross via relationship matrix for the restriction
+(<em>culling.pairwise.k</em>).</p>
+<p>The output will be the mating plan based on the parameters before
+mentioned.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># 1. Creating the mating plan</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>maxGainPlan <span class="ot">&lt;-</span> <span class="fu">selectCrosses</span>(<span class="at">data =</span> usef_add[[<span class="dv">2</span>]],</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>                             <span class="at">n.cross =</span> <span class="dv">10</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>                             <span class="at">max.cross =</span> <span class="dv">2</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>                             <span class="at">min.cross =</span> <span class="dv">1</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>                             <span class="at">culling.pairwise.k =</span> <span class="dv">1</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co"># Crosses parameters</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>maxGainPlan[[<span class="dv">1</span>]]</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt;   culling.pairwise.k target.Y  target.K</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt; 1                  1  4.16272 0.9772358</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co"># Mating Plan</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>maxGainPlan[[<span class="dv">2</span>]]</span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt;    Parent1 Parent2       Y         K</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt; 1       G2      G3 5.13812 0.9886179</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt; 2       G3      G4 4.94727 0.9821138</span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt; 3       G1     G13 4.37065 0.9788618</span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt; 4       G3      G5 4.35837 0.9918699</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt; 5       G2     G13 4.31537 0.9560976</span></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt; 6       G4     G24 4.24277 0.9463415</span></span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="co">#&gt; 7       G1     G10 4.20538 0.9658537</span></span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="co">#&gt; 8       G4     G12 4.00427 0.9886179</span></span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="co">#&gt; 9      G24     G30 3.10355 0.9951220</span></span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="co">#&gt; 10      G5     G56 2.94145 0.9788618</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># Plot</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>maxGainPlan[[<span class="dv">3</span>]]</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div id="pt2"></div>
+
+</div>
+<div id="optimization-usefulness-on-multi-traits-scenario" class="section level2">
+<h2>Optimization: Usefulness on Multi traits scenario</h2>
+<p>Here, we will create a mating plan based on usefulness for two
+additive traits.</p>
+<p>We need the crossing plan, with all individuals candidates to be
+parents. We may use the function <code>planCross()</code> for doing so.
+The parents are all individuals genotyped (<em>TargetPop</em>). We may
+choose which mate design we want (<em>MateDesign</em>). The upcoming
+step is to use the function <code>getUsefA_mt()</code> to predict the
+usefulness for each cross in the cross plan, using the markers, markers’
+effects, and the genetic map. In addition, we need to set weights for
+each trait (<em>Weights</em>), in a way to build a trait-based index for
+the estimation of usefulness. For this function, we may set the
+proportion of selection individuals (<em>proSel</em>), the population
+type (<em>Type</em>), and the generation (<em>Generation</em>).</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">require</span>(SimpleMating)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co"># 1. Assigning the parents</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>Parents <span class="ot">&lt;-</span> <span class="fu">rownames</span>(lines_Geno)</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co"># 2. Creating the crossing plan</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>Cross_plan <span class="ot">&lt;-</span> <span class="fu">planCross</span>(<span class="at">TargetPop =</span> Parents,</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>                        <span class="at">MateDesign =</span> <span class="st">&quot;half&quot;</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt; Number of crosses generated: 4950</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co"># 3. Creating relationship matrix based on markers</span></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>relMat <span class="ot">&lt;-</span> (lines_Geno <span class="sc">%*%</span> <span class="fu">t</span>(lines_Geno)) <span class="sc">/</span> <span class="fu">ncol</span>(lines_Geno)</span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co"># 4.  Usefulness for two traits</span></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a>Multitrait_usef <span class="ot">&lt;-</span> <span class="fu">getUsefA_mt</span>(<span class="at">MatePlan =</span> Cross_plan,</span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a>                               <span class="at">Markers =</span> lines_Geno,</span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a>                               <span class="at">addEff =</span> lines_addEffects,</span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a>                               <span class="at">Map.In =</span> lines_GenMap,</span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a>                               <span class="at">K =</span> relMat,</span>
+<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a>                               <span class="at">propSel =</span> <span class="fl">0.05</span>,</span>
+<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a>                               <span class="at">Type =</span> <span class="st">&quot;RIL&quot;</span>,</span>
+<span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a>                               <span class="at">Generation =</span> <span class="dv">1</span>,</span>
+<span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a>                               <span class="at">Weights =</span> <span class="fu">c</span>(<span class="fl">0.4</span>, <span class="fl">0.6</span>))</span>
+<span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a><span class="co">#&gt; Usefulness predicted for 4950 crosses.</span></span>
+<span id="cb8-26"><a href="#cb8-26" tabindex="-1"></a></span>
+<span id="cb8-27"><a href="#cb8-27" tabindex="-1"></a></span>
+<span id="cb8-28"><a href="#cb8-28" tabindex="-1"></a><span class="fu">head</span>(Multitrait_usef[[<span class="dv">1</span>]], <span class="dv">10</span>)</span>
+<span id="cb8-29"><a href="#cb8-29" tabindex="-1"></a><span class="co">#&gt;    Cross.ID Parent1 Parent2    Mean   Variance        sd Usefulness</span></span>
+<span id="cb8-30"><a href="#cb8-30" tabindex="-1"></a><span class="co">#&gt; 1     G1_G2      G1      G2 2.28678 0.01126616 0.1061422    2.50572</span></span>
+<span id="cb8-31"><a href="#cb8-31" tabindex="-1"></a><span class="co">#&gt; 2     G2_G4      G2      G4 2.24444 0.01504070 0.1226405    2.49741</span></span>
+<span id="cb8-32"><a href="#cb8-32" tabindex="-1"></a><span class="co">#&gt; 3     G1_G4      G1      G4 2.24372 0.01100678 0.1049132    2.46013</span></span>
+<span id="cb8-33"><a href="#cb8-33" tabindex="-1"></a><span class="co">#&gt; 4     G2_G3      G2      G3 1.85493 0.03397417 0.1843208    2.23513</span></span>
+<span id="cb8-34"><a href="#cb8-34" tabindex="-1"></a><span class="co">#&gt; 5     G3_G4      G3      G4 1.81186 0.03789793 0.1946739    2.21342</span></span>
+<span id="cb8-35"><a href="#cb8-35" tabindex="-1"></a><span class="co">#&gt; 6     G1_G3      G1      G3 1.85421 0.02578186 0.1605673    2.18541</span></span>
+<span id="cb8-36"><a href="#cb8-36" tabindex="-1"></a><span class="co">#&gt; 7     G2_G5      G2      G5 1.77789 0.02448657 0.1564819    2.10067</span></span>
+<span id="cb8-37"><a href="#cb8-37" tabindex="-1"></a><span class="co">#&gt; 8     G1_G5      G1      G5 1.77717 0.02014957 0.1419492    2.06997</span></span>
+<span id="cb8-38"><a href="#cb8-38" tabindex="-1"></a><span class="co">#&gt; 9    G2_G12      G2     G12 1.71979 0.02859541 0.1691018    2.06860</span></span>
+<span id="cb8-39"><a href="#cb8-39" tabindex="-1"></a><span class="co">#&gt; 10   G2_G30      G2     G30 1.68297 0.03234579 0.1798494    2.05395</span></span>
+<span id="cb8-40"><a href="#cb8-40" tabindex="-1"></a></span>
+<span id="cb8-41"><a href="#cb8-41" tabindex="-1"></a><span class="fu">head</span>(Multitrait_usef[[<span class="dv">2</span>]], <span class="dv">10</span>)</span>
+<span id="cb8-42"><a href="#cb8-42" tabindex="-1"></a><span class="co">#&gt;    Parent1 Parent2       Y         K</span></span>
+<span id="cb8-43"><a href="#cb8-43" tabindex="-1"></a><span class="co">#&gt; 1       G1      G2 2.50572 1.2292683</span></span>
+<span id="cb8-44"><a href="#cb8-44" tabindex="-1"></a><span class="co">#&gt; 2       G2      G4 2.49741 1.2162602</span></span>
+<span id="cb8-45"><a href="#cb8-45" tabindex="-1"></a><span class="co">#&gt; 3       G1      G4 2.46013 1.2227642</span></span>
+<span id="cb8-46"><a href="#cb8-46" tabindex="-1"></a><span class="co">#&gt; 4       G2      G3 2.23513 0.9886179</span></span>
+<span id="cb8-47"><a href="#cb8-47" tabindex="-1"></a><span class="co">#&gt; 5       G3      G4 2.21342 0.9821138</span></span>
+<span id="cb8-48"><a href="#cb8-48" tabindex="-1"></a><span class="co">#&gt; 6       G1      G3 2.18541 1.0569106</span></span>
+<span id="cb8-49"><a href="#cb8-49" tabindex="-1"></a><span class="co">#&gt; 7       G2      G5 2.10067 1.0373984</span></span>
+<span id="cb8-50"><a href="#cb8-50" tabindex="-1"></a><span class="co">#&gt; 8       G1      G5 2.06997 1.0373984</span></span>
+<span id="cb8-51"><a href="#cb8-51" tabindex="-1"></a><span class="co">#&gt; 9       G2     G12 2.06860 1.0081301</span></span>
+<span id="cb8-52"><a href="#cb8-52" tabindex="-1"></a><span class="co">#&gt; 10      G2     G30 2.05395 1.0471545</span></span></code></pre></div>
+<p>The second part is using criterion for each cross (usefulness in this
+example) together with a relationship matrix (based on markers in this
+example) and create a optimum cross selection-based mating plan. The
+idea is to restrict the levels of inbreeding, by means of the covariance
+in the individual-cross level, and maximize the criterion used
+(usefulness in this example). There is needed to set the target number
+of crosses in the mating plan (<em>n.cross</em>), with the maximum and
+minimum number of crosses that each parent can be part of
+(<em>max.cross</em> and <em>min.cross</em>), together with the level of
+covariance between cross via relationship matrix for the restriction
+(<em>culling.pairwise.k</em>).</p>
+<p>The output will be the mating plan based on the parameters before
+mentioned.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># 1. Cross selection</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>maxGainPlan <span class="ot">&lt;-</span> <span class="fu">selectCrosses</span>(<span class="at">data =</span> Multitrait_usef[[<span class="dv">2</span>]],</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>                             <span class="at">n.cross =</span> <span class="dv">10</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>                             <span class="at">max.cross =</span> <span class="dv">3</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>                             <span class="at">min.cross =</span> <span class="dv">1</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>                             <span class="at">culling.pairwise.k =</span> <span class="dv">1</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co"># Crosses parameters</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>maxGainPlan[[<span class="dv">1</span>]]</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt;   culling.pairwise.k target.Y  target.K</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt; 1                  1 1.940074 0.9762602</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co"># Mating Plan</span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="fu">head</span>(maxGainPlan[[<span class="dv">2</span>]], <span class="dv">10</span>)</span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co">#&gt;    Parent1 Parent2       Y         K</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt; 1       G2      G3 2.23513 0.9886179</span></span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt; 2       G3      G4 2.21342 0.9821138</span></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co">#&gt; 3       G4     G12 2.04633 0.9886179</span></span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="co">#&gt; 4       G4      G6 1.99178 0.9691057</span></span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a><span class="co">#&gt; 5       G2     G13 1.90305 0.9560976</span></span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a><span class="co">#&gt; 6       G1     G13 1.88016 0.9788618</span></span>
+<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a><span class="co">#&gt; 7       G4     G58 1.87963 0.9723577</span></span>
+<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a><span class="co">#&gt; 8       G2     G37 1.81394 0.9365854</span></span>
+<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a><span class="co">#&gt; 9       G3      G5 1.71879 0.9918699</span></span>
+<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a><span class="co">#&gt; 10      G1     G27 1.71851 0.9983740</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># Plot</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>maxGainPlan[[<span class="dv">3</span>]]</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div id="pt3"></div>
+
+</div>
+<div id="optimization-usefulness-and-additivenon-additive-effects" class="section level2">
+<h2>Optimization: Usefulness and additive/non-additive effects</h2>
+<p>Here, we will create a mating plan based on usefulness for a trait
+with additive and dominance effects.</p>
+<p>We need the crossing plan, with all individuals candidates to be
+parents. We may use the function <code>planCross()</code> for doing so.
+The parents are all individuals genotyped (<em>TargetPop</em>). We may
+choose which mate design we want (<em>MateDesign</em>). The upcoming
+step is to use the function <code>getUsefAD()</code> to predict the
+usefulness for each cross in the cross plan, using the markers, markers’
+effects (additive marker effects and dominance marker effects), and the
+genetic map. For this function, we may set the proportion of selection
+individuals (<em>proSel</em>), the population type (<em>Type</em>), and
+the generation (<em>Generation</em>).</p>
+<p>There are two options for prediction of usefulness implemented in
+<strong>SimpleMating</strong>. One of them are based on phased
+haplotypes (basically a marker set where we know from each chromosome
+the copy of the allele came from) (<em>Method = Phased</em>). The method
+is a proposition that we implemented to estimate the usefulness without
+the need for phased haplotypes (<em>Method = NonPhased</em>).</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">require</span>(SimpleMating)</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co"># 1. Loading the data</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="fu">data</span>(generic_GenMap)</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="fu">data</span>(generic_Geno)</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="fu">data</span>(generic_MrkEffects)</span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="fu">data</span>(generic_Phasedgeno)</span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="co"># 2. Assigning the parents</span></span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>Parents <span class="ot">&lt;-</span> <span class="fu">rownames</span>(generic_Geno)</span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="co"># 3. Creating the crossing plan</span></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a>Cross_plan <span class="ot">&lt;-</span> <span class="fu">planCross</span>(<span class="at">TargetPop =</span> Parents,</span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a>                        <span class="at">MateDesign =</span> <span class="st">&quot;half&quot;</span>)</span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a><span class="co">#&gt; Number of crosses generated: 4950</span></span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a></span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a><span class="co"># 4. Relationship matrix</span></span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a>relMat <span class="ot">&lt;-</span> (generic_Geno <span class="sc">%*%</span> <span class="fu">t</span>(generic_Geno)) <span class="sc">/</span> <span class="fu">ncol</span>(generic_Geno)</span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a></span>
+<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a></span>
+<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a><span class="co"># 5.  Usefulness of trait number 1 - Phased</span></span>
+<span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a>usef_Phased <span class="ot">&lt;-</span> <span class="fu">getUsefAD</span>(<span class="at">MatePlan =</span> Cross_plan,</span>
+<span id="cb11-23"><a href="#cb11-23" tabindex="-1"></a>                       <span class="at">Markers =</span> generic_Phasedgeno, <span class="co"># Phased haplotypes</span></span>
+<span id="cb11-24"><a href="#cb11-24" tabindex="-1"></a>                       <span class="at">addEff =</span> generic_MrkEffects[, <span class="dv">1</span>],</span>
+<span id="cb11-25"><a href="#cb11-25" tabindex="-1"></a>                       <span class="at">domEff =</span> generic_MrkEffects[, <span class="dv">3</span>],</span>
+<span id="cb11-26"><a href="#cb11-26" tabindex="-1"></a>                       <span class="at">Map.In =</span> generic_GenMap,</span>
+<span id="cb11-27"><a href="#cb11-27" tabindex="-1"></a>                       <span class="at">K =</span> relMat,</span>
+<span id="cb11-28"><a href="#cb11-28" tabindex="-1"></a>                       <span class="at">propSel =</span> <span class="fl">0.05</span>,</span>
+<span id="cb11-29"><a href="#cb11-29" tabindex="-1"></a>                       <span class="at">Method =</span> <span class="st">&quot;Phased&quot;</span>)</span>
+<span id="cb11-30"><a href="#cb11-30" tabindex="-1"></a><span class="co">#&gt; Usefulness predicted for 4950 crosses.</span></span>
+<span id="cb11-31"><a href="#cb11-31" tabindex="-1"></a></span>
+<span id="cb11-32"><a href="#cb11-32" tabindex="-1"></a><span class="fu">head</span>(usef_Phased[[<span class="dv">1</span>]], <span class="dv">10</span>)</span>
+<span id="cb11-33"><a href="#cb11-33" tabindex="-1"></a><span class="co">#&gt;       Cross.ID Parent1 Parent2 Total.gv      Var_A       sdA      Var_D</span></span>
+<span id="cb11-34"><a href="#cb11-34" tabindex="-1"></a><span class="co">#&gt; 1  29988_30069   29988   30069  7.60248 0.02206726 0.1485505 0.05781974</span></span>
+<span id="cb11-35"><a href="#cb11-35" tabindex="-1"></a><span class="co">#&gt; 2  30069_30098   30069   30098  7.36695 0.02198121 0.1482606 0.06356747</span></span>
+<span id="cb11-36"><a href="#cb11-36" tabindex="-1"></a><span class="co">#&gt; 3  30069_30010   30069   30010  7.47667 0.01511091 0.1229264 0.03998785</span></span>
+<span id="cb11-37"><a href="#cb11-37" tabindex="-1"></a><span class="co">#&gt; 4  30069_29766   30069   29766  7.20845 0.02948413 0.1717094 0.04573390</span></span>
+<span id="cb11-38"><a href="#cb11-38" tabindex="-1"></a><span class="co">#&gt; 5  30069_29577   30069   29577  7.21645 0.01426810 0.1194492 0.03196729</span></span>
+<span id="cb11-39"><a href="#cb11-39" tabindex="-1"></a><span class="co">#&gt; 6  30069_29779   30069   29779  6.92268 0.02231110 0.1493690 0.04930136</span></span>
+<span id="cb11-40"><a href="#cb11-40" tabindex="-1"></a><span class="co">#&gt; 7  30069_30042   30069   30042  6.50328 0.01838281 0.1355832 0.06310293</span></span>
+<span id="cb11-41"><a href="#cb11-41" tabindex="-1"></a><span class="co">#&gt; 8  30069_29732   30069   29732  6.60909 0.01238753 0.1112993 0.03091797</span></span>
+<span id="cb11-42"><a href="#cb11-42" tabindex="-1"></a><span class="co">#&gt; 9  30069_29765   30069   29765  6.53291 0.02205777 0.1485186 0.03718066</span></span>
+<span id="cb11-43"><a href="#cb11-43" tabindex="-1"></a><span class="co">#&gt; 10 30069_29593   30069   29593  6.55606 0.01377457 0.1173651 0.03838363</span></span>
+<span id="cb11-44"><a href="#cb11-44" tabindex="-1"></a><span class="co">#&gt;          sdD Usefulness</span></span>
+<span id="cb11-45"><a href="#cb11-45" tabindex="-1"></a><span class="co">#&gt; 1  0.2404574    8.18549</span></span>
+<span id="cb11-46"><a href="#cb11-46" tabindex="-1"></a><span class="co">#&gt; 2  0.2521259    7.97027</span></span>
+<span id="cb11-47"><a href="#cb11-47" tabindex="-1"></a><span class="co">#&gt; 3  0.1999696    7.96085</span></span>
+<span id="cb11-48"><a href="#cb11-48" tabindex="-1"></a><span class="co">#&gt; 4  0.2138548    7.77417</span></span>
+<span id="cb11-49"><a href="#cb11-49" tabindex="-1"></a><span class="co">#&gt; 5  0.1787940    7.65998</span></span>
+<span id="cb11-50"><a href="#cb11-50" tabindex="-1"></a><span class="co">#&gt; 6  0.2220391    7.47467</span></span>
+<span id="cb11-51"><a href="#cb11-51" tabindex="-1"></a><span class="co">#&gt; 7  0.2512030    7.09210</span></span>
+<span id="cb11-52"><a href="#cb11-52" tabindex="-1"></a><span class="co">#&gt; 8  0.1758351    7.03834</span></span>
+<span id="cb11-53"><a href="#cb11-53" tabindex="-1"></a><span class="co">#&gt; 9  0.1928229    7.03495</span></span>
+<span id="cb11-54"><a href="#cb11-54" tabindex="-1"></a><span class="co">#&gt; 10 0.1959174    7.02715</span></span>
+<span id="cb11-55"><a href="#cb11-55" tabindex="-1"></a></span>
+<span id="cb11-56"><a href="#cb11-56" tabindex="-1"></a><span class="co"># 6.  Usefulness of trait number 1 - Non phased</span></span>
+<span id="cb11-57"><a href="#cb11-57" tabindex="-1"></a>usefNonPhased <span class="ot">&lt;-</span> <span class="fu">getUsefAD</span>(<span class="at">MatePlan =</span> Cross_plan,</span>
+<span id="cb11-58"><a href="#cb11-58" tabindex="-1"></a>                           <span class="at">Markers =</span> generic_Geno, <span class="co"># non Phased markers</span></span>
+<span id="cb11-59"><a href="#cb11-59" tabindex="-1"></a>                           <span class="at">addEff =</span> generic_MrkEffects[, <span class="dv">1</span>],</span>
+<span id="cb11-60"><a href="#cb11-60" tabindex="-1"></a>                           <span class="at">domEff =</span> generic_MrkEffects[, <span class="dv">3</span>],</span>
+<span id="cb11-61"><a href="#cb11-61" tabindex="-1"></a>                           <span class="at">Map.In =</span> generic_GenMap,</span>
+<span id="cb11-62"><a href="#cb11-62" tabindex="-1"></a>                           <span class="at">K =</span> relMat,</span>
+<span id="cb11-63"><a href="#cb11-63" tabindex="-1"></a>                           <span class="at">propSel =</span> <span class="fl">0.05</span>,</span>
+<span id="cb11-64"><a href="#cb11-64" tabindex="-1"></a>                           <span class="at">Method =</span> <span class="st">&quot;NonPhased&quot;</span>)</span>
+<span id="cb11-65"><a href="#cb11-65" tabindex="-1"></a><span class="co">#&gt; Usefulness predicted for 4950 crosses.</span></span>
+<span id="cb11-66"><a href="#cb11-66" tabindex="-1"></a></span>
+<span id="cb11-67"><a href="#cb11-67" tabindex="-1"></a><span class="fu">head</span>(usefNonPhased[[<span class="dv">1</span>]], <span class="dv">10</span>)</span>
+<span id="cb11-68"><a href="#cb11-68" tabindex="-1"></a><span class="co">#&gt;       Cross.ID Parent1 Parent2 Total.gv      Var_A       sdA    Var_D      sdD</span></span>
+<span id="cb11-69"><a href="#cb11-69" tabindex="-1"></a><span class="co">#&gt; 1  29988_30069   29988   30069  7.60248 0.09841212 0.3137071 3.849888 1.962113</span></span>
+<span id="cb11-70"><a href="#cb11-70" tabindex="-1"></a><span class="co">#&gt; 2  30069_30098   30069   30098  7.36695 0.10418577 0.3227782 3.255957 1.804427</span></span>
+<span id="cb11-71"><a href="#cb11-71" tabindex="-1"></a><span class="co">#&gt; 3  30069_29766   30069   29766  7.20845 0.10372587 0.3220650 2.972838 1.724192</span></span>
+<span id="cb11-72"><a href="#cb11-72" tabindex="-1"></a><span class="co">#&gt; 4  30069_29577   30069   29577  7.21645 0.06916419 0.2629909 2.683442 1.638121</span></span>
+<span id="cb11-73"><a href="#cb11-73" tabindex="-1"></a><span class="co">#&gt; 5  30069_30010   30069   30010  7.47667 0.10894299 0.3300651 2.219524 1.489807</span></span>
+<span id="cb11-74"><a href="#cb11-74" tabindex="-1"></a><span class="co">#&gt; 6  30069_29760   30069   29760  6.48958 0.06908177 0.2628341 3.109599 1.763406</span></span>
+<span id="cb11-75"><a href="#cb11-75" tabindex="-1"></a><span class="co">#&gt; 7  30069_29779   30069   29779  6.92268 0.08722246 0.2953345 2.276488 1.508803</span></span>
+<span id="cb11-76"><a href="#cb11-76" tabindex="-1"></a><span class="co">#&gt; 8  30069_29765   30069   29765  6.53291 0.10405690 0.3225785 2.858590 1.690737</span></span>
+<span id="cb11-77"><a href="#cb11-77" tabindex="-1"></a><span class="co">#&gt; 9  30069_29406   30069   29406  6.28254 0.08670396 0.2944554 2.879325 1.696858</span></span>
+<span id="cb11-78"><a href="#cb11-78" tabindex="-1"></a><span class="co">#&gt; 10 30069_29593   30069   29593  6.55606 0.09917756 0.3149247 2.342416 1.530495</span></span>
+<span id="cb11-79"><a href="#cb11-79" tabindex="-1"></a><span class="co">#&gt;    Usefulness</span></span>
+<span id="cb11-80"><a href="#cb11-80" tabindex="-1"></a><span class="co">#&gt; 1    11.70116</span></span>
+<span id="cb11-81"><a href="#cb11-81" tabindex="-1"></a><span class="co">#&gt; 2    11.14805</span></span>
+<span id="cb11-82"><a href="#cb11-82" tabindex="-1"></a><span class="co">#&gt; 3    10.82648</span></span>
+<span id="cb11-83"><a href="#cb11-83" tabindex="-1"></a><span class="co">#&gt; 4    10.63869</span></span>
+<span id="cb11-84"><a href="#cb11-84" tabindex="-1"></a><span class="co">#&gt; 5    10.62423</span></span>
+<span id="cb11-85"><a href="#cb11-85" tabindex="-1"></a><span class="co">#&gt; 6    10.16716</span></span>
+<span id="cb11-86"><a href="#cb11-86" tabindex="-1"></a><span class="co">#&gt; 7    10.09397</span></span>
+<span id="cb11-87"><a href="#cb11-87" tabindex="-1"></a><span class="co">#&gt; 8    10.08332</span></span>
+<span id="cb11-88"><a href="#cb11-88" tabindex="-1"></a><span class="co">#&gt; 9     9.83498</span></span>
+<span id="cb11-89"><a href="#cb11-89" tabindex="-1"></a><span class="co">#&gt; 10    9.77917</span></span></code></pre></div>
+<p>The second part is using criterion for each cross (usefulness in this
+example) together with a relationship matrix (based on markers in this
+example) and create a optimum cross selection-based mating plan. The
+idea is to restrict the levels of inbreeding, by means of the covariance
+in the individual-cross level, and maximize the criterion used
+(usefulness in this example). There is needed to set the target number
+of crosses in the mating plan (<em>n.cross</em>), with the maximum and
+minimum number of crosses that each parent can be part of
+(<em>max.cross</em> and <em>min.cross</em>), together with the level of
+covariance between cross via relationship matrix for the restriction
+(<em>culling.pairwise.k</em>).</p>
+<p>The output will be the mating plan based on the parameters before
+mentioned. Same step-by-step approach can be implemented for several
+traits (using the function <code>getUsefAD_mt()</code>)</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># 1. Cross selection</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>maxGainPlan <span class="ot">&lt;-</span> <span class="fu">selectCrosses</span>(<span class="at">data =</span> usef_Phased[[<span class="dv">2</span>]],</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>                             <span class="at">n.cross =</span> <span class="dv">25</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>                             <span class="at">max.cross =</span> <span class="dv">5</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>                             <span class="at">min.cross =</span> <span class="dv">1</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>                             <span class="at">culling.pairwise.k =</span> <span class="dv">1</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co"># Crosses parameters</span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a>maxGainPlan[[<span class="dv">1</span>]]</span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="co">#&gt;   culling.pairwise.k target.Y  target.K</span></span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="co">#&gt; 1                  1  5.78758 0.9813889</span></span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a><span class="co"># Mating Plan</span></span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a>maxGainPlan[[<span class="dv">2</span>]]</span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a><span class="co">#&gt;    Parent1 Parent2       Y         K</span></span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a><span class="co">#&gt; 1    29988   30069 8.18549 0.9819444</span></span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a><span class="co">#&gt; 2    30069   30098 7.97027 0.9645833</span></span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a><span class="co">#&gt; 3    30069   30010 7.96085 0.9750000</span></span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a><span class="co">#&gt; 4    30069   29766 7.77417 0.9979167</span></span>
+<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a><span class="co">#&gt; 5    30069   29779 7.47467 0.9923611</span></span>
+<span id="cb12-21"><a href="#cb12-21" tabindex="-1"></a><span class="co">#&gt; 6    30069   29732 7.03834 0.9736111</span></span>
+<span id="cb12-22"><a href="#cb12-22" tabindex="-1"></a><span class="co">#&gt; 7    29779   29193 5.72334 0.9777778</span></span>
+<span id="cb12-23"><a href="#cb12-23" tabindex="-1"></a><span class="co">#&gt; 8    29406   29577 5.61338 0.9951389</span></span>
+<span id="cb12-24"><a href="#cb12-24" tabindex="-1"></a><span class="co">#&gt; 9    30098   29577 5.57755 0.9833333</span></span>
+<span id="cb12-25"><a href="#cb12-25" tabindex="-1"></a><span class="co">#&gt; 10   29779   29141 5.48698 0.9736111</span></span>
+<span id="cb12-26"><a href="#cb12-26" tabindex="-1"></a><span class="co">#&gt; 11   29141   29574 5.38015 0.9694444</span></span>
+<span id="cb12-27"><a href="#cb12-27" tabindex="-1"></a><span class="co">#&gt; 12   29426   29577 5.29153 0.9611111</span></span>
+<span id="cb12-28"><a href="#cb12-28" tabindex="-1"></a><span class="co">#&gt; 13   29577   30010 5.25388 0.9708333</span></span>
+<span id="cb12-29"><a href="#cb12-29" tabindex="-1"></a><span class="co">#&gt; 14   29766   29193 5.18111 0.9944444</span></span>
+<span id="cb12-30"><a href="#cb12-30" tabindex="-1"></a><span class="co">#&gt; 15   29766   29805 5.15846 0.9916667</span></span>
+<span id="cb12-31"><a href="#cb12-31" tabindex="-1"></a><span class="co">#&gt; 16   29766   30010 5.13237 0.9680556</span></span>
+<span id="cb12-32"><a href="#cb12-32" tabindex="-1"></a><span class="co">#&gt; 17   29406   30098 5.06658 0.9951389</span></span>
+<span id="cb12-33"><a href="#cb12-33" tabindex="-1"></a><span class="co">#&gt; 18   30098   29141 5.03607 0.9888889</span></span>
+<span id="cb12-34"><a href="#cb12-34" tabindex="-1"></a><span class="co">#&gt; 19   29779   30042 5.03320 0.9951389</span></span>
+<span id="cb12-35"><a href="#cb12-35" tabindex="-1"></a><span class="co">#&gt; 20   29577   29629 4.93852 0.9875000</span></span>
+<span id="cb12-36"><a href="#cb12-36" tabindex="-1"></a><span class="co">#&gt; 21   29121   29577 4.92981 0.9854167</span></span>
+<span id="cb12-37"><a href="#cb12-37" tabindex="-1"></a><span class="co">#&gt; 22   29975   30010 4.88606 0.9937500</span></span>
+<span id="cb12-38"><a href="#cb12-38" tabindex="-1"></a><span class="co">#&gt; 23   29577   29643 4.88240 0.9715278</span></span>
+<span id="cb12-39"><a href="#cb12-39" tabindex="-1"></a><span class="co">#&gt; 24   29791   29577 4.85873 0.9680556</span></span>
+<span id="cb12-40"><a href="#cb12-40" tabindex="-1"></a><span class="co">#&gt; 25   29141   30010 4.85559 0.9784722</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># Plot</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>maxGainPlan[[<span class="dv">3</span>]]</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div id="pt4"></div>
+
+
+</div>
+<div id="optimization-using-total-genetic-value" class="section level2">
+<h2>Optimization: Using total genetic value</h2>
+<p>Here, we will create a mating plan through an optimization based on
+total genetic value for one trait controlled by additive and dominance
+effects, using molecular markers.</p>
+<p>We need the crossing plan, with all individuals candidates to
+parents. We may use the function <code>planCross()</code> for doing so.
+The parents are all individuals genotyped (<em>TargetPop</em>). We may
+choose which mate design we want (<em>MateDesign</em>). The upcoming
+step is to use the function <code>getTGV()</code> to predict the total
+genetic value for each cross in the cross plan, using the markers,
+markers’ effects, and the relationship matrix for generating the input
+for the new optimization function itself.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">require</span>(SimpleMating)</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="co"># 1. Loading the data</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="fu">data</span>(generic_GenMap)</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="fu">data</span>(generic_Geno)</span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="fu">data</span>(generic_MrkEffects)</span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="co"># 2. Creating relationship matrix based on markers</span></span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a>relMat <span class="ot">&lt;-</span> (generic_Geno <span class="sc">%*%</span> <span class="fu">t</span>(generic_Geno)) <span class="sc">/</span> <span class="fu">ncol</span>(generic_Geno)</span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a></span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a><span class="co"># 3. Assigning parents</span></span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a>Parents <span class="ot">&lt;-</span> <span class="fu">rownames</span>(generic_Geno)</span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a></span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a><span class="co"># 4. Creating the crossing plan</span></span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a>Cross_plan <span class="ot">&lt;-</span> <span class="fu">planCross</span>(<span class="at">TargetPop =</span> Parents,</span>
+<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a>                        <span class="at">MateDesign =</span> <span class="st">&quot;half&quot;</span>)</span>
+<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a><span class="co">#&gt; Number of crosses generated: 4950</span></span>
+<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a></span>
+<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a><span class="co"># 5. Estimates the total genetic value for the progenies of each cross</span></span>
+<span id="cb14-20"><a href="#cb14-20" tabindex="-1"></a>total_gv <span class="ot">&lt;-</span> <span class="fu">getTGV</span>(<span class="at">MatePlan =</span> Cross_plan,</span>
+<span id="cb14-21"><a href="#cb14-21" tabindex="-1"></a>                   <span class="at">Markers =</span> generic_Geno,</span>
+<span id="cb14-22"><a href="#cb14-22" tabindex="-1"></a>                   <span class="at">addEff =</span> generic_MrkEffects[, <span class="dv">1</span>],</span>
+<span id="cb14-23"><a href="#cb14-23" tabindex="-1"></a>                   <span class="at">domEff =</span> generic_MrkEffects[, <span class="dv">3</span>],</span>
+<span id="cb14-24"><a href="#cb14-24" tabindex="-1"></a>                   <span class="at">K =</span> relMat,</span>
+<span id="cb14-25"><a href="#cb14-25" tabindex="-1"></a>                   <span class="at">ploidy =</span> <span class="dv">2</span>)</span>
+<span id="cb14-26"><a href="#cb14-26" tabindex="-1"></a><span class="co">#&gt; TGVs predicted for 4950 crosses.</span></span>
+<span id="cb14-27"><a href="#cb14-27" tabindex="-1"></a></span>
+<span id="cb14-28"><a href="#cb14-28" tabindex="-1"></a></span>
+<span id="cb14-29"><a href="#cb14-29" tabindex="-1"></a><span class="fu">head</span>(total_gv, <span class="dv">10</span>)</span>
+<span id="cb14-30"><a href="#cb14-30" tabindex="-1"></a><span class="co">#&gt;    Parent1 Parent2       Y         K</span></span>
+<span id="cb14-31"><a href="#cb14-31" tabindex="-1"></a><span class="co">#&gt; 1    29121   29138 0.94021 1.1222222</span></span>
+<span id="cb14-32"><a href="#cb14-32" tabindex="-1"></a><span class="co">#&gt; 2    29121   29141 3.82345 0.9694444</span></span>
+<span id="cb14-33"><a href="#cb14-33" tabindex="-1"></a><span class="co">#&gt; 3    29121   29173 3.27528 0.9618056</span></span>
+<span id="cb14-34"><a href="#cb14-34" tabindex="-1"></a><span class="co">#&gt; 4    29121   29174 2.46291 0.9472222</span></span>
+<span id="cb14-35"><a href="#cb14-35" tabindex="-1"></a><span class="co">#&gt; 5    29121   29179 3.63474 0.9548611</span></span>
+<span id="cb14-36"><a href="#cb14-36" tabindex="-1"></a><span class="co">#&gt; 6    29121   29193 3.33305 1.0020833</span></span>
+<span id="cb14-37"><a href="#cb14-37" tabindex="-1"></a><span class="co">#&gt; 7    29121   29205 1.54588 1.0201389</span></span>
+<span id="cb14-38"><a href="#cb14-38" tabindex="-1"></a><span class="co">#&gt; 8    29121   29213 2.04343 1.0395833</span></span>
+<span id="cb14-39"><a href="#cb14-39" tabindex="-1"></a><span class="co">#&gt; 9    29121   29233 2.06714 1.0194444</span></span>
+<span id="cb14-40"><a href="#cb14-40" tabindex="-1"></a><span class="co">#&gt; 10   29121   29245 2.34731 0.9881944</span></span></code></pre></div>
+<p>The second part is using criterion for each cross (total genetic
+value in this example) together with a relationship matrix (based on
+markers in this example) and create a optimum cross selection-based
+mating plan. The idea is to restrict the levels of inbreeding, by means
+of the covariance in the individual-cross level, and maximize the
+criterion used (total genetic value in this example). There is needed to
+set the target number of crosses in the mating plan (<em>n.cross</em>),
+with the maximum and minimum number of crosses that each parent can be
+part of (<em>max.cross</em> and <em>min.cross</em>), together with the
+level of covariance between cross via relationship matrix for the
+restriction (<em>culling.pairwise.k</em>).</p>
+<p>The output will be the mating plan based on the parameters before
+mentioned.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="co"># 1. Crosses selected</span></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>maxGainPlan <span class="ot">&lt;-</span> <span class="fu">selectCrosses</span>(<span class="at">data =</span> total_gv,</span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>                             <span class="at">n.cross =</span> <span class="dv">25</span>,</span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>                             <span class="at">max.cross =</span> <span class="dv">10</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>                             <span class="at">min.cross =</span> <span class="dv">1</span>,</span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>                             <span class="at">culling.pairwise.k =</span> <span class="fl">1.1</span>)</span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a><span class="co"># Crosses parameters</span></span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a>maxGainPlan[[<span class="dv">1</span>]]</span>
+<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a><span class="co">#&gt;   culling.pairwise.k target.Y target.K</span></span>
+<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a><span class="co">#&gt; 1                1.1 5.992452  0.99975</span></span>
+<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a><span class="co"># Mating Plan</span></span>
+<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a>maxGainPlan[[<span class="dv">2</span>]]</span>
+<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a><span class="co">#&gt;    Parent1 Parent2       Y         K</span></span>
+<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a><span class="co">#&gt; 1    29988   30069 7.60248 0.9819444</span></span>
+<span id="cb15-19"><a href="#cb15-19" tabindex="-1"></a><span class="co">#&gt; 2    30069   30010 7.47667 0.9750000</span></span>
+<span id="cb15-20"><a href="#cb15-20" tabindex="-1"></a><span class="co">#&gt; 3    30069   30098 7.36695 0.9645833</span></span>
+<span id="cb15-21"><a href="#cb15-21" tabindex="-1"></a><span class="co">#&gt; 4    30069   29577 7.21645 1.0034722</span></span>
+<span id="cb15-22"><a href="#cb15-22" tabindex="-1"></a><span class="co">#&gt; 5    30069   29766 7.20845 0.9979167</span></span>
+<span id="cb15-23"><a href="#cb15-23" tabindex="-1"></a><span class="co">#&gt; 6    30069   29779 6.92268 0.9923611</span></span>
+<span id="cb15-24"><a href="#cb15-24" tabindex="-1"></a><span class="co">#&gt; 7    30069   29732 6.60909 0.9736111</span></span>
+<span id="cb15-25"><a href="#cb15-25" tabindex="-1"></a><span class="co">#&gt; 8    30069   29593 6.55606 1.0222222</span></span>
+<span id="cb15-26"><a href="#cb15-26" tabindex="-1"></a><span class="co">#&gt; 9    30069   29765 6.53291 0.9569444</span></span>
+<span id="cb15-27"><a href="#cb15-27" tabindex="-1"></a><span class="co">#&gt; 10   30069   29776 6.50338 1.0041667</span></span>
+<span id="cb15-28"><a href="#cb15-28" tabindex="-1"></a><span class="co">#&gt; 11   30069   30042 6.50328 1.0208333</span></span>
+<span id="cb15-29"><a href="#cb15-29" tabindex="-1"></a><span class="co">#&gt; 12   29988   29593 5.79058 1.0680556</span></span>
+<span id="cb15-30"><a href="#cb15-30" tabindex="-1"></a><span class="co">#&gt; 13   29577   29141 5.45943 1.0013889</span></span>
+<span id="cb15-31"><a href="#cb15-31" tabindex="-1"></a><span class="co">#&gt; 14   29766   29577 5.45905 1.0722222</span></span>
+<span id="cb15-32"><a href="#cb15-32" tabindex="-1"></a><span class="co">#&gt; 15   29406   29577 5.39024 0.9951389</span></span>
+<span id="cb15-33"><a href="#cb15-33" tabindex="-1"></a><span class="co">#&gt; 16   29988   29577 5.31732 1.0236111</span></span>
+<span id="cb15-34"><a href="#cb15-34" tabindex="-1"></a><span class="co">#&gt; 17   29779   29193 5.26292 0.9777778</span></span>
+<span id="cb15-35"><a href="#cb15-35" tabindex="-1"></a><span class="co">#&gt; 18   30098   29577 5.24666 0.9833333</span></span>
+<span id="cb15-36"><a href="#cb15-36" tabindex="-1"></a><span class="co">#&gt; 19   29988   30098 5.16477 1.0756944</span></span>
+<span id="cb15-37"><a href="#cb15-37" tabindex="-1"></a><span class="co">#&gt; 20   29426   29577 5.15370 0.9611111</span></span>
+<span id="cb15-38"><a href="#cb15-38" tabindex="-1"></a><span class="co">#&gt; 21   29988   29805 5.09140 1.0027778</span></span>
+<span id="cb15-39"><a href="#cb15-39" tabindex="-1"></a><span class="co">#&gt; 22   29577   30010 5.04938 0.9708333</span></span>
+<span id="cb15-40"><a href="#cb15-40" tabindex="-1"></a><span class="co">#&gt; 23   29577   29975 4.99133 1.0256944</span></span>
+<span id="cb15-41"><a href="#cb15-41" tabindex="-1"></a><span class="co">#&gt; 24   29141   29574 4.97513 0.9694444</span></span>
+<span id="cb15-42"><a href="#cb15-42" tabindex="-1"></a><span class="co">#&gt; 25   29779   29141 4.96099 0.9736111</span></span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co"># Plot</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>maxGainPlan[[<span class="dv">3</span>]]</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div id="pt5"></div>
+
+</div>
+<div id="optimization-using-the-mean-parental-average" class="section level2">
+<h2>Optimization: Using the Mean Parental Average</h2>
+<p>Here, we will create a mating plan through an optimization based on
+the mean parental average for one additive trait using pedigree
+information.</p>
+<p>We need the crossing plan, with all individuals candidates to
+parents. We may use the function <code>planCross()</code> for doing so.
+The parents are all individuals genotyped (<em>TargetPop</em>). We may
+choose which mate design we want (<em>MateDesign</em>). Then, we need to
+organized the dataset for the predictions. Basically, the input to
+calculate the mean parental average is a two column data frame, where in
+the first row we have the individuals identification (same names that we
+find in the cross plan), and the criterion. By criterion you can
+specified the estimated breeding value (ebv) or even the best linear
+unbiased prediction (BLUP) for each individuals. This allow us to use
+this function for poliploids individuals, for example. In this case, we
+can make the predictions and input the values to calculate the expected
+mean parental average for each cross.</p>
+<p>The upcoming step is to use the function <code>getMPA()</code> to
+predict the mean parental average for each cross in the cross plan,
+using the BLUP information from each individual. The relationship matrix
+based on pedigree (in this case) is used to restrict for inbreeding. You
+can use the relationship matrix based on markers as well, instead of the
+pedigree-based matrix. We will use the package
+<strong>AGHmatrix</strong> for that (Amadeu et al. 2022).</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="fu">require</span>(SimpleMating)</span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a><span class="co"># 1. Loading the information</span></span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="fu">data</span>(generic_Pedigree)</span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a><span class="fu">data</span>(generic_IndBLUP)</span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a><span class="fu">data</span>(generic_Geno)</span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a><span class="co"># 2. Using AGHMatrix to build the G matrix</span></span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a>AMat <span class="ot">&lt;-</span> AGHmatrix<span class="sc">::</span><span class="fu">Amatrix</span>(<span class="at">data =</span> generic_Pedigree)</span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a><span class="co">#&gt; Verifying conflicting data... </span></span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a><span class="co">#&gt; Organizing data... </span></span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a><span class="co">#&gt; Your data was chronologically organized with success. </span></span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1"></a><span class="co">#&gt; Constructing matrix A using ploidy = 2 </span></span>
+<span id="cb17-14"><a href="#cb17-14" tabindex="-1"></a><span class="co">#&gt; Completed! Time = 0.0003333333  minutes</span></span>
+<span id="cb17-15"><a href="#cb17-15" tabindex="-1"></a></span>
+<span id="cb17-16"><a href="#cb17-16" tabindex="-1"></a><span class="co"># 3. Assigning parents</span></span>
+<span id="cb17-17"><a href="#cb17-17" tabindex="-1"></a>Parents <span class="ot">&lt;-</span> <span class="fu">rownames</span>(generic_Geno)</span>
+<span id="cb17-18"><a href="#cb17-18" tabindex="-1"></a></span>
+<span id="cb17-19"><a href="#cb17-19" tabindex="-1"></a><span class="co"># 4. Creating the mating plan</span></span>
+<span id="cb17-20"><a href="#cb17-20" tabindex="-1"></a>CrossPlan <span class="ot">&lt;-</span> <span class="fu">planCross</span>(<span class="at">TargetPop =</span> Parents,</span>
+<span id="cb17-21"><a href="#cb17-21" tabindex="-1"></a>                       <span class="at">MateDesign =</span> <span class="st">&quot;half&quot;</span>)</span>
+<span id="cb17-22"><a href="#cb17-22" tabindex="-1"></a><span class="co">#&gt; Number of crosses generated: 4950</span></span>
+<span id="cb17-23"><a href="#cb17-23" tabindex="-1"></a></span>
+<span id="cb17-24"><a href="#cb17-24" tabindex="-1"></a><span class="co"># 5. Criterion</span></span>
+<span id="cb17-25"><a href="#cb17-25" tabindex="-1"></a>Crit <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Id =</span> generic_IndBLUP[,<span class="dv">1</span>],</span>
+<span id="cb17-26"><a href="#cb17-26" tabindex="-1"></a>                   <span class="at">Criterion =</span> generic_IndBLUP[, <span class="dv">2</span>])</span>
+<span id="cb17-27"><a href="#cb17-27" tabindex="-1"></a></span>
+<span id="cb17-28"><a href="#cb17-28" tabindex="-1"></a></span>
+<span id="cb17-29"><a href="#cb17-29" tabindex="-1"></a><span class="co"># 6.Single trait mean parental average</span></span>
+<span id="cb17-30"><a href="#cb17-30" tabindex="-1"></a>ST_mpa <span class="ot">&lt;-</span> <span class="fu">getMPA</span>(<span class="at">MatePlan =</span> CrossPlan,</span>
+<span id="cb17-31"><a href="#cb17-31" tabindex="-1"></a>                 <span class="at">Criterion =</span> Crit,</span>
+<span id="cb17-32"><a href="#cb17-32" tabindex="-1"></a>                 <span class="at">K =</span> AMat)</span>
+<span id="cb17-33"><a href="#cb17-33" tabindex="-1"></a><span class="co">#&gt; 4950 possible crosses were predicted</span></span>
+<span id="cb17-34"><a href="#cb17-34" tabindex="-1"></a></span>
+<span id="cb17-35"><a href="#cb17-35" tabindex="-1"></a><span class="fu">head</span>(ST_mpa, <span class="dv">20</span>)</span>
+<span id="cb17-36"><a href="#cb17-36" tabindex="-1"></a><span class="co">#&gt;    Parent1 Parent2        Y K</span></span>
+<span id="cb17-37"><a href="#cb17-37" tabindex="-1"></a><span class="co">#&gt; 1    29988   30069 175.1673 0</span></span>
+<span id="cb17-38"><a href="#cb17-38" tabindex="-1"></a><span class="co">#&gt; 2    30069   29406 173.9280 0</span></span>
+<span id="cb17-39"><a href="#cb17-39" tabindex="-1"></a><span class="co">#&gt; 3    30069   29551 169.9036 0</span></span>
+<span id="cb17-40"><a href="#cb17-40" tabindex="-1"></a><span class="co">#&gt; 4    30069   30098 169.8895 0</span></span>
+<span id="cb17-41"><a href="#cb17-41" tabindex="-1"></a><span class="co">#&gt; 5    30069   29768 169.8379 0</span></span>
+<span id="cb17-42"><a href="#cb17-42" tabindex="-1"></a><span class="co">#&gt; 6    30069   29766 169.4261 0</span></span>
+<span id="cb17-43"><a href="#cb17-43" tabindex="-1"></a><span class="co">#&gt; 7    30069   29426 169.2966 0</span></span>
+<span id="cb17-44"><a href="#cb17-44" tabindex="-1"></a><span class="co">#&gt; 8    29988   29406 169.0046 0</span></span>
+<span id="cb17-45"><a href="#cb17-45" tabindex="-1"></a><span class="co">#&gt; 9    30069   29497 168.9645 0</span></span>
+<span id="cb17-46"><a href="#cb17-46" tabindex="-1"></a><span class="co">#&gt; 10   30069   29898 168.8804 0</span></span>
+<span id="cb17-47"><a href="#cb17-47" tabindex="-1"></a><span class="co">#&gt; 11   30069   29577 168.2743 0</span></span>
+<span id="cb17-48"><a href="#cb17-48" tabindex="-1"></a><span class="co">#&gt; 12   30069   29760 168.2431 0</span></span>
+<span id="cb17-49"><a href="#cb17-49" tabindex="-1"></a><span class="co">#&gt; 13   30069   29791 168.1582 0</span></span>
+<span id="cb17-50"><a href="#cb17-50" tabindex="-1"></a><span class="co">#&gt; 14   30069   29372 167.7388 0</span></span>
+<span id="cb17-51"><a href="#cb17-51" tabindex="-1"></a><span class="co">#&gt; 15   30069   29975 167.4502 0</span></span>
+<span id="cb17-52"><a href="#cb17-52" tabindex="-1"></a><span class="co">#&gt; 16   30069   29529 167.2337 0</span></span>
+<span id="cb17-53"><a href="#cb17-53" tabindex="-1"></a><span class="co">#&gt; 17   30069   29601 167.1417 0</span></span>
+<span id="cb17-54"><a href="#cb17-54" tabindex="-1"></a><span class="co">#&gt; 18   30069   29141 167.0200 0</span></span>
+<span id="cb17-55"><a href="#cb17-55" tabindex="-1"></a><span class="co">#&gt; 19   30069   29121 166.8110 0</span></span>
+<span id="cb17-56"><a href="#cb17-56" tabindex="-1"></a><span class="co">#&gt; 20   30069   29792 166.7701 0</span></span></code></pre></div>
+<p>The second part is using criterion for each cross (mean parental
+average in this example) together with a relationship matrix (based on
+pedigree information in this example) and create a optimum cross
+selection-based mating plan. The idea is to restrict the levels of
+inbreeding, by means of the covariance in the individual-cross level,
+and maximize the criterion used (mean parental average in this example).
+There is needed to set the target number of crosses in the mating plan
+(<em>n.cross</em>), with the maximum and minimum number of crosses that
+each parent can be part of (<em>max.cross</em> and <em>min.cross</em>),
+together with the level of covariance between cross via relationship
+matrix for the restriction (<em>culling.pairwise.k</em>).</p>
+<p>The output will be the mating plan based on the parameters before
+mentioned.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="co"># 1. Crosses selected</span></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>maxGainPlan <span class="ot">&lt;-</span> <span class="fu">selectCrosses</span>(<span class="at">data =</span> ST_mpa,</span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>                             <span class="at">n.cross =</span> <span class="dv">25</span>,</span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>                             <span class="at">max.cross =</span> <span class="dv">10</span>,</span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a>                             <span class="at">min.cross =</span> <span class="dv">1</span>,</span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a>                             <span class="at">culling.pairwise.k =</span> <span class="fl">0.21</span>)</span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a></span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a><span class="co"># Crosses parameters</span></span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a>maxGainPlan[[<span class="dv">1</span>]]</span>
+<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a><span class="co">#&gt;   culling.pairwise.k target.Y target.K</span></span>
+<span id="cb18-11"><a href="#cb18-11" tabindex="-1"></a><span class="co">#&gt; 1               0.21 166.9377        0</span></span>
+<span id="cb18-12"><a href="#cb18-12" tabindex="-1"></a></span>
+<span id="cb18-13"><a href="#cb18-13" tabindex="-1"></a><span class="co"># Mating Plan</span></span>
+<span id="cb18-14"><a href="#cb18-14" tabindex="-1"></a>maxGainPlan[[<span class="dv">2</span>]]</span>
+<span id="cb18-15"><a href="#cb18-15" tabindex="-1"></a><span class="co">#&gt;    Parent1 Parent2        Y K</span></span>
+<span id="cb18-16"><a href="#cb18-16" tabindex="-1"></a><span class="co">#&gt; 1    29988   30069 175.1673 0</span></span>
+<span id="cb18-17"><a href="#cb18-17" tabindex="-1"></a><span class="co">#&gt; 2    30069   29406 173.9280 0</span></span>
+<span id="cb18-18"><a href="#cb18-18" tabindex="-1"></a><span class="co">#&gt; 3    30069   29551 169.9036 0</span></span>
+<span id="cb18-19"><a href="#cb18-19" tabindex="-1"></a><span class="co">#&gt; 4    30069   30098 169.8895 0</span></span>
+<span id="cb18-20"><a href="#cb18-20" tabindex="-1"></a><span class="co">#&gt; 5    30069   29768 169.8379 0</span></span>
+<span id="cb18-21"><a href="#cb18-21" tabindex="-1"></a><span class="co">#&gt; 6    30069   29766 169.4261 0</span></span>
+<span id="cb18-22"><a href="#cb18-22" tabindex="-1"></a><span class="co">#&gt; 7    30069   29426 169.2966 0</span></span>
+<span id="cb18-23"><a href="#cb18-23" tabindex="-1"></a><span class="co">#&gt; 8    29988   29406 169.0046 0</span></span>
+<span id="cb18-24"><a href="#cb18-24" tabindex="-1"></a><span class="co">#&gt; 9    30069   29497 168.9645 0</span></span>
+<span id="cb18-25"><a href="#cb18-25" tabindex="-1"></a><span class="co">#&gt; 10   30069   29898 168.8804 0</span></span>
+<span id="cb18-26"><a href="#cb18-26" tabindex="-1"></a><span class="co">#&gt; 11   30069   29577 168.2743 0</span></span>
+<span id="cb18-27"><a href="#cb18-27" tabindex="-1"></a><span class="co">#&gt; 12   30069   29760 168.2431 0</span></span>
+<span id="cb18-28"><a href="#cb18-28" tabindex="-1"></a><span class="co">#&gt; 13   29988   29551 164.9802 0</span></span>
+<span id="cb18-29"><a href="#cb18-29" tabindex="-1"></a><span class="co">#&gt; 14   29988   30098 164.9661 0</span></span>
+<span id="cb18-30"><a href="#cb18-30" tabindex="-1"></a><span class="co">#&gt; 15   29988   29768 164.9145 0</span></span>
+<span id="cb18-31"><a href="#cb18-31" tabindex="-1"></a><span class="co">#&gt; 16   29988   29766 164.5027 0</span></span>
+<span id="cb18-32"><a href="#cb18-32" tabindex="-1"></a><span class="co">#&gt; 17   29988   29426 164.3733 0</span></span>
+<span id="cb18-33"><a href="#cb18-33" tabindex="-1"></a><span class="co">#&gt; 18   29988   29497 164.0412 0</span></span>
+<span id="cb18-34"><a href="#cb18-34" tabindex="-1"></a><span class="co">#&gt; 19   29988   29898 163.9571 0</span></span>
+<span id="cb18-35"><a href="#cb18-35" tabindex="-1"></a><span class="co">#&gt; 20   29406   29551 163.7409 0</span></span>
+<span id="cb18-36"><a href="#cb18-36" tabindex="-1"></a><span class="co">#&gt; 21   29406   30098 163.7268 0</span></span>
+<span id="cb18-37"><a href="#cb18-37" tabindex="-1"></a><span class="co">#&gt; 22   29406   29768 163.6752 0</span></span>
+<span id="cb18-38"><a href="#cb18-38" tabindex="-1"></a><span class="co">#&gt; 23   29988   29577 163.3510 0</span></span>
+<span id="cb18-39"><a href="#cb18-39" tabindex="-1"></a><span class="co">#&gt; 24   29406   29766 163.2634 0</span></span>
+<span id="cb18-40"><a href="#cb18-40" tabindex="-1"></a><span class="co">#&gt; 25   29406   29426 163.1340 0</span></span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="co"># Plot</span></span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>maxGainPlan[[<span class="dv">3</span>]]</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div id="pt6"></div>
+
+</div>
+<div id="optimization-using-the-linkage-disequilibrium-to-predicts-the-crosses-variance" class="section level2">
+<h2>Optimization: Using the linkage disequilibrium to predicts the
+crosses variance</h2>
+<p>From the original proposition, a genetic map (the input in the
+Haldane function to estimates the recombination rates in the population)
+is required (Lehermeier et al. 2017) for the estimation of cross’
+variance. In addition, it is not straightforward to have a genetic map
+that represents the target population under study. In this way, we
+replace the information of the matrix with the recombination frequencies
+between pair of SNPs by the linkage disequilibrium (LD) matrix. It is
+known that the the LD varies from 0-1 in a population, being values
+close to an integer the recombination is low and when it is close to
+zero, the recombination frequency is high. Linkage disequilibrium can be
+estimated from a markers matrix (with or without phasing information).
+It was implemented in the function that estimates the usefulness
+(<code>getUsefA</code>, <code>getUsefAD</code>,
+<code>getUsefA_mt</code>, and <code>getUsefAD_mt</code>) the estimation
+of the cross variance and, ultimately, the cross usefulness by using the
+LD matrix. By doing so, the user may give the LD matrix in the argument
+<code>linkDes</code> and give the chromosome and the SNP id in the
+argument <code>Map.In</code>.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="fu">require</span>(SimpleMating)</span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a><span class="co"># 1. Load data</span></span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a><span class="fu">data</span>(lines_Geno)</span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a><span class="co"># 2. Assuming a naive LD measure</span></span>
+<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a>linkageDes <span class="ot">&lt;-</span> (<span class="fu">t</span>(lines_Geno) <span class="sc">%*%</span> lines_Geno)<span class="sc">/</span>(<span class="fu">ncol</span>(lines_Geno))</span>
+<span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a><span class="co"># 3. Creating relationship matrix based on markers</span></span>
+<span id="cb20-10"><a href="#cb20-10" tabindex="-1"></a>relMat <span class="ot">&lt;-</span> (lines_Geno <span class="sc">%*%</span> <span class="fu">t</span>(lines_Geno)) <span class="sc">/</span> <span class="fu">ncol</span>(lines_Geno)</span>
+<span id="cb20-11"><a href="#cb20-11" tabindex="-1"></a></span>
+<span id="cb20-12"><a href="#cb20-12" tabindex="-1"></a><span class="co"># 4. Assigning the parents</span></span>
+<span id="cb20-13"><a href="#cb20-13" tabindex="-1"></a>Parents <span class="ot">&lt;-</span> <span class="fu">rownames</span>(lines_Geno)</span>
+<span id="cb20-14"><a href="#cb20-14" tabindex="-1"></a></span>
+<span id="cb20-15"><a href="#cb20-15" tabindex="-1"></a><span class="co"># 5. Creating the crossing plan</span></span>
+<span id="cb20-16"><a href="#cb20-16" tabindex="-1"></a>Cross_plan <span class="ot">&lt;-</span> <span class="fu">planCross</span>(<span class="at">TargetPop =</span> Parents,</span>
+<span id="cb20-17"><a href="#cb20-17" tabindex="-1"></a>                        <span class="at">MateDesign =</span> <span class="st">&quot;half&quot;</span>)</span>
+<span id="cb20-18"><a href="#cb20-18" tabindex="-1"></a><span class="co">#&gt; Number of crosses generated: 4950</span></span>
+<span id="cb20-19"><a href="#cb20-19" tabindex="-1"></a></span>
+<span id="cb20-20"><a href="#cb20-20" tabindex="-1"></a><span class="co"># 6. Information on the SNPs</span></span>
+<span id="cb20-21"><a href="#cb20-21" tabindex="-1"></a>mapInfo <span class="ot">=</span> lines_GenMap[,<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">3</span>)]</span>
+<span id="cb20-22"><a href="#cb20-22" tabindex="-1"></a></span>
+<span id="cb20-23"><a href="#cb20-23" tabindex="-1"></a><span class="co"># 7.  Usefulness of trait number 1 (DH)</span></span>
+<span id="cb20-24"><a href="#cb20-24" tabindex="-1"></a>usef_add <span class="ot">&lt;-</span> <span class="fu">getUsefA</span>(<span class="at">MatePlan =</span> Cross_plan,</span>
+<span id="cb20-25"><a href="#cb20-25" tabindex="-1"></a>                     <span class="at">Markers =</span> lines_Geno,</span>
+<span id="cb20-26"><a href="#cb20-26" tabindex="-1"></a>                     <span class="at">addEff =</span> lines_addEffects[, <span class="dv">1</span>],</span>
+<span id="cb20-27"><a href="#cb20-27" tabindex="-1"></a>                     <span class="at">Map.In =</span> mapInfo,</span>
+<span id="cb20-28"><a href="#cb20-28" tabindex="-1"></a>                     <span class="at">linkDes =</span> linkageDes,</span>
+<span id="cb20-29"><a href="#cb20-29" tabindex="-1"></a>                     <span class="at">K =</span> relMat,</span>
+<span id="cb20-30"><a href="#cb20-30" tabindex="-1"></a>                     <span class="at">propSel =</span> <span class="fl">0.05</span>,</span>
+<span id="cb20-31"><a href="#cb20-31" tabindex="-1"></a>                     <span class="at">Type =</span> <span class="st">&quot;DH&quot;</span>,</span>
+<span id="cb20-32"><a href="#cb20-32" tabindex="-1"></a>                     <span class="at">Generation =</span> <span class="dv">1</span>)</span>
+<span id="cb20-33"><a href="#cb20-33" tabindex="-1"></a><span class="co">#&gt; Usefulness predicted for 4950 crosses.</span></span>
+<span id="cb20-34"><a href="#cb20-34" tabindex="-1"></a></span>
+<span id="cb20-35"><a href="#cb20-35" tabindex="-1"></a><span class="fu">head</span>(usef_add[[<span class="dv">1</span>]], <span class="dv">10</span>)</span>
+<span id="cb20-36"><a href="#cb20-36" tabindex="-1"></a><span class="co">#&gt;    Cross.ID Parent1 Parent2    Mean  Variance        sd Usefulness</span></span>
+<span id="cb20-37"><a href="#cb20-37" tabindex="-1"></a><span class="co">#&gt; 1     G1_G2      G1      G2 4.51880 0.1088652 0.3299473    5.19939</span></span>
+<span id="cb20-38"><a href="#cb20-38" tabindex="-1"></a><span class="co">#&gt; 2     G2_G3      G2      G3 4.01124 0.3138716 0.5602424    5.16686</span></span>
+<span id="cb20-39"><a href="#cb20-39" tabindex="-1"></a><span class="co">#&gt; 3     G1_G3      G1      G3 4.10644 0.2188901 0.4678569    5.07149</span></span>
+<span id="cb20-40"><a href="#cb20-40" tabindex="-1"></a><span class="co">#&gt; 4     G2_G4      G2      G4 4.18298 0.1606344 0.4007922    5.00970</span></span>
+<span id="cb20-41"><a href="#cb20-41" tabindex="-1"></a><span class="co">#&gt; 5     G1_G4      G1      G4 4.27818 0.1246093 0.3530005    5.00632</span></span>
+<span id="cb20-42"><a href="#cb20-42" tabindex="-1"></a><span class="co">#&gt; 6     G3_G4      G3      G4 3.77061 0.3394908 0.5826584    4.97247</span></span>
+<span id="cb20-43"><a href="#cb20-43" tabindex="-1"></a><span class="co">#&gt; 7     G2_G5      G2      G5 3.38943 0.3850392 0.6205153    4.66937</span></span>
+<span id="cb20-44"><a href="#cb20-44" tabindex="-1"></a><span class="co">#&gt; 8     G1_G9      G1      G9 3.04164 0.6058405 0.7783575    4.64717</span></span>
+<span id="cb20-45"><a href="#cb20-45" tabindex="-1"></a><span class="co">#&gt; 9     G1_G5      G1      G5 3.48462 0.3083308 0.5552754    4.62999</span></span>
+<span id="cb20-46"><a href="#cb20-46" tabindex="-1"></a><span class="co">#&gt; 10   G1_G24      G1     G24 3.09747 0.5425123 0.7365544    4.61677</span></span></code></pre></div>
+<div id="pt7"></div>
+
+</div>
+<div id="thinning-by-relatedness-how-to-speed-up-prediction" class="section level2">
+<h2>Thinning by relatedness: How to speed up prediction</h2>
+<p>The <em>relateThinning()</em> is an optional step and it will
+increase the efficiency of the prediction by cutting individuals by
+relatedness and, consequently, decreases time for the prediction of
+usefulness and cross optimization. It selects the top individuals within
+a family by the relatedness <code>threshold</code>. For example, if
+<code>max.per.cluster=4</code> and <code>threshold = 0.1</code> the
+algorithm will identify all groups of individuals that shared more than
+0.1 in the relationship matrix and select the top 4 individuals with
+highest criterion to be used as possible parents in the mating plan.
+Besides those arguments, we need to give to the function the
+relationship matrix (<code>K</code>) between the parents. It could be
+the relationship matrix based on markers information (G) or based on
+pedigree information (A). In addition, a <code>criterion</code> should
+be added, such as the estimated breeding value, total breeding value, or
+the BLUP of the candidates (not the cross as before).</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="fu">require</span>(SimpleMating)</span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a><span class="co"># 1. Loading the data</span></span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a><span class="fu">data</span>(generic_Geno)</span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a><span class="fu">data</span>(generic_IndBLUP)</span>
+<span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a></span>
+<span id="cb21-7"><a href="#cb21-7" tabindex="-1"></a><span class="co"># 2. Creating relationship matrix based on markers</span></span>
+<span id="cb21-8"><a href="#cb21-8" tabindex="-1"></a>ScaledMarkers <span class="ot">=</span> <span class="fu">scale</span>(generic_Geno, <span class="at">scale =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb21-9"><a href="#cb21-9" tabindex="-1"></a>relMat <span class="ot">&lt;-</span> (ScaledMarkers <span class="sc">%*%</span> <span class="fu">t</span>(ScaledMarkers)) <span class="sc">/</span> <span class="fu">ncol</span>(ScaledMarkers)</span>
+<span id="cb21-10"><a href="#cb21-10" tabindex="-1"></a></span>
+<span id="cb21-11"><a href="#cb21-11" tabindex="-1"></a><span class="co"># 3. Criterion for the trait</span></span>
+<span id="cb21-12"><a href="#cb21-12" tabindex="-1"></a>Crit <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Id =</span> <span class="fu">rownames</span>(generic_IndBLUP),</span>
+<span id="cb21-13"><a href="#cb21-13" tabindex="-1"></a>                   <span class="at">Criterion =</span> generic_IndBLUP[, <span class="dv">2</span>]) <span class="co"># trait number one</span></span>
+<span id="cb21-14"><a href="#cb21-14" tabindex="-1"></a>                    </span>
+<span id="cb21-15"><a href="#cb21-15" tabindex="-1"></a><span class="co"># 4. Trimming by relatedness</span></span>
+<span id="cb21-16"><a href="#cb21-16" tabindex="-1"></a>keep <span class="ot">&lt;-</span> <span class="fu">relateThinning</span>(<span class="at">K =</span> relMat,</span>
+<span id="cb21-17"><a href="#cb21-17" tabindex="-1"></a>                      <span class="at">Criterion =</span> Crit,</span>
+<span id="cb21-18"><a href="#cb21-18" tabindex="-1"></a>                      <span class="at">threshold=</span><span class="fl">0.1</span>,</span>
+<span id="cb21-19"><a href="#cb21-19" tabindex="-1"></a>                      <span class="at">max.per.cluster=</span><span class="dv">4</span>)</span>
+<span id="cb21-20"><a href="#cb21-20" tabindex="-1"></a><span class="co">#&gt; 93 genotypes kept out of 100</span></span>
+<span id="cb21-21"><a href="#cb21-21" tabindex="-1"></a></span>
+<span id="cb21-22"><a href="#cb21-22" tabindex="-1"></a></span>
+<span id="cb21-23"><a href="#cb21-23" tabindex="-1"></a><span class="co"># 5. Crossing plan using the argument Indiv2keep</span></span>
+<span id="cb21-24"><a href="#cb21-24" tabindex="-1"></a>plan <span class="ot">&lt;-</span> <span class="fu">planCross</span>(<span class="at">TargetPop =</span> <span class="fu">colnames</span>(relMat),</span>
+<span id="cb21-25"><a href="#cb21-25" tabindex="-1"></a>                 <span class="at">MateDesign =</span> <span class="st">&#39;half&#39;</span>,</span>
+<span id="cb21-26"><a href="#cb21-26" tabindex="-1"></a>                 <span class="at">Indiv2keep =</span> keep)</span>
+<span id="cb21-27"><a href="#cb21-27" tabindex="-1"></a><span class="co">#&gt; Number of crosses generated: 4278</span></span></code></pre></div>
+<p>As a result, we kept 93 individuals out of 100 individuals. In such
+case, we will predict usefulness or mean parental average/total genetic
+value for 4278 crosses instead of 4950 crosses (number of crosses
+resulted from the matching of 100 individuals). When we have a large
+number of parents, such as 2000 individuals as candidates to parents,
+the function can be used to decrease the time for prediction and
+optimization.</p>
+</div>
+<div id="bibliography" class="section level2">
+<h2>Bibliography</h2>
+<p>Akdemir &amp; Sánchez (2016). Efficient breeding by genomic mating.
+Frontiers in Genetics. <a href="https://doi.org/10.3389/fgene.2016.00210" class="uri">https://doi.org/10.3389/fgene.2016.00210</a><br />
+Allier et al. (2019). Usefulness criterion and post-selection parental
+contributions in multi-parental crosses: Application to polygenic trait
+introgression. G3: Genes, Genomes, Genetics. <a href="https://doi.org/10.1534/g3.119.400129" class="uri">https://doi.org/10.1534/g3.119.400129</a><br />
+Bonk et al. (2016). Mendelian sampling covariability of marker effects
+and genetic values. Genetics Selection Evolution. <a href="https://gsejournal.biomedcentral.com/articles/10.1186/s12711-016-0214-0" class="uri">https://gsejournal.biomedcentral.com/articles/10.1186/s12711-016-0214-0</a><br />
+Lehermeier (2017). Genetic gain increases by applying the usefulness
+criterion with improved variance prediction in selection of crosses.
+Genetics. <a href="https://doi.org/10.1534/genetics.117.300403" class="uri">https://doi.org/10.1534/genetics.117.300403</a><br />
+Schnell &amp; Utz (1976). F1 Leistung und Elternwahl in der Zuchtung von
+Selbstbefruchtern. Ber Arbeitstag Arbeitsgem Saatzuchtleiter.<br />
+Toro &amp; Varona (2010). A note on mate allocation for dominance
+handling in genomic selection. Genetics Selection Evolution. <a href="https://doi.org/10.1186/1297-9686-42-33" class="uri">https://doi.org/10.1186/1297-9686-42-33</a><br />
+Varona et al. (2018). Non-additive effects in genomic selection.
+Frontiers in Genetics. <a href="https://doi.org/10.3389/fgene.2018.00078" class="uri">https://doi.org/10.3389/fgene.2018.00078</a><br />
+Wolfe et al. (2021). Genomic mating in outbred species: Predicting cross
+usefulness with additive and total genetic covariance matrices.
+Genetics. <a href="https://doi.org/10.1093/genetics/iyab122" class="uri">https://doi.org/10.1093/genetics/iyab122</a></p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
