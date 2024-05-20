@@ -126,7 +126,7 @@ selectCrosses <- function(data, n.cross = 200, max.cross = 4, min.cross = 2,
   cross.keep <- data[1, ]
   data <- data[2:max.cross.to.search, ]
   for (i in 1:(max.cross.to.search - 1)) {
-    parent.list <- as.vector(cbind(cross.keep$Parent1, cross.keep$P2))
+    parent.list <- as.vector(cbind(cross.keep$Parent1, cross.keep$Parent2))
     parent.stop.add <- names(which(table(parent.list) ==
       max.cross))
     if (length(parent.stop.add) > 0) {
