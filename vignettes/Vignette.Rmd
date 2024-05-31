@@ -81,7 +81,7 @@ We going to cover seven examples of implementation, as follows:
 1)  Optimization based on usefulness for one additive trait using molecular markers. [shortcut](#pt1)\
 2)  Optimization based on usefulness for two additive traits using molecular markers. [shortcut](#pt2)\
 3)  Optimization based on usefulness for one additive/dominance trait using molecular markers. [shortcut](#pt3)\
-4)  Optimization based on total genetic value for one additive trait using molecular markers. [shortcut](#pt4)\
+4)  Optimization based on total genetic value for one additive/dominance trait using molecular markers. [shortcut](#pt4)\
 5)  Optimization based on mean parental average for one additive trait using pedigree information. [shortcut](#pt5)
 6)  Optimization: Using the linkage disequilibrium to predicts the cross variance. [shortcut](#pt6)
 7)  Thinning by relatedness: How to increase prediction speed. [shortcut](#pt7)
