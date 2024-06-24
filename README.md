@@ -63,9 +63,7 @@ A detailed example of the application of **SimpleMating** is given in this [[vig
 
 Any questions about the analyses, please, contact me!  
 
-Marco  
-
-Dr. Marco Antonio Peixoto  
+Marco Antonio Peixoto  
 Email: deamorimpeixotom@ufl.edu  
 Page: https://marcopxt.github.io/  
 
