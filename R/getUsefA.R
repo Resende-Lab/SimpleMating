@@ -230,7 +230,7 @@ getUsefA <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, propS
       }
     }
 
-    MCov <- setNames(MCov, seq_along(MCov))
+    MCov <- setNames(MCov, names(block_sizes))
     MCov = MCov[order(as.character(names(MCov)))]
     Markers <- Markers - 1
     calc.info = function(Markers) {
@@ -253,7 +253,7 @@ getUsefA <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, propS
         VarCov <- Map("*", D, SNPseg.MCov)
         SNPseg.EffA <- mapply(SNPseg.Chr_pos, Map.Eff, FUN = function(.a, .b) .b[.a])
         Pair.Var <- sum(mapply(VarCov, SNPseg.EffA,
-                               FUN = function(.a, .b) crossprod(.b, .a %*% .b)
+                               FUN = function(.a, .b) crossprod(.b, as.matrix(.a) %*% .b)
         ))
         cross_variance[[i]] <- data.frame(t(Matepair),
                                           Variance = abs(Pair.Var),
