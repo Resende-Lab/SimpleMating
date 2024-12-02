@@ -1,9 +1,14 @@
 # SimpleMating: R package for crosses optimization based on relationship matrix <img align="right" width="300" height="250" src="https://github.com/marcopxt/Miscellaneous/blob/main/ppt.png"> 
 
 
+## Paper
+
+Title: SimpleMating: R-package for prediction and optimization of breeding crosses using genomic selection
+DOI: https://doi.org/10.1002/tpg2.20533
+
 ## Synopsis
 
-SimpleMating provides an easy way to implement cross prediction based on marker data or BLUP data and optimization of Mating crosses based on relationship matrix (A or G).
+SimpleMating provides an easy way to implement cross-prediction based on markers/pedigree and BLUP data and optimize Mating crosses based on a relationship matrix (A or G).
 
 
 ## Installation
@@ -15,7 +20,7 @@ Run it in R:
 ```{r}
 
 library(devtools)
-install_github('Resende-Lab/SimpleMating') # current version:  0.1.9001 (January 12th, 2024)
+install_github('Resende-Lab/SimpleMating') # current version:  0.1.9001 (december 2nd, 2024)
 
 ```
 
@@ -44,9 +49,9 @@ The **SimpleMating** R package relies on two modules. The first one is to create
 
 ## Module 1: Criteria Estimation in `SimpleMating` 
 
-The first module of the package is the generation of a criterion that represents the performance of the crosses in-between each individual who is a candidate to be a parent in the population. The functions here implemented allow the user to predict *mean parental average* (targeting only additive traits), *total genetic value* (targetting traits controlled by genes with additive and dominance inheritance), and *usefulness* (additive and/or dominance controlled traits). 
+The first module of the package is the generation of a criterion that represents the performance of the crosses in-between each individual who is a candidate to be a parent in the population. The functions here implemented allow the user to predict *mid parental value* (targeting only additive traits), *total genetic value* (targetting traits controlled by genes with additive and dominance inheritance), and *usefulness* (additive and/or dominance controlled traits). 
 The *usefulness* concept has been shown to work pretty well in the definition of such an aspect, as proposed by Schnell and Utz (1976). Here, the implementation required the markers' effects, the markers' position in the genome (or a linkage disequilibrium matrix), and the dosage matrix for each one of the candidates to be parents.  
-In the absence of markers, the *mean parental average* can be calculated and used as input in the second part of the implementation (see getMPA() function) and use the pedigree information to build a relationship matrix. In addition, the user may use the function getTGV() to get the total genetic value of the progeny. And the user can use the functions getUsefA(), getUsefAD(), getUsefA(), and getUsefAD() to estimate usefulness.
+In the absence of markers, the *mean parental average* can be calculated and used as input in the second part of the implementation (see getMPV() function) and use the pedigree information to build a relationship matrix. In addition, the user may use the function getTGV() to get the total genetic value of the progeny. And the user can use the functions getUsefA(), getUsefAD(), getUsefA(), and getUsefAD() to estimate usefulness.
 
 All options before stated (mean parental average, total genetic value, and usefulness) are the input for the second module of the package.
 
