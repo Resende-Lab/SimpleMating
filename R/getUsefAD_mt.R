@@ -23,7 +23,7 @@
 #' Weights should be given.
 #'
 #' @param MatePlan data frame with the two columns indicating the crosses.
-#' @param Markers matrix with markers information for all candidate parents, coded as 0,1,2. If Method is equal 'Phased', phased haplotypes should be given and the markers is coded as 0 and 1.
+#' @param Markers matrix with markers information for all candidate parents, coded as 0,1,2. If Method is equal 'Phased', phased haplotypes should be given and the markers is coded as 0 and 1. Missing values should be coded as NA.
 #' @param addEff matrix with additive marker effects for each trait (mxn, where 'm' is the number of individuals and 'n' represents the number of traits).
 #' @param domEff matrix with dominance markers effects for each trait (mxn, where 'm' is the number of individuals and 'n' represents the number of traits).
 #' @param K relationship matrix.
@@ -31,7 +31,7 @@
 #' @param linkDes Linkage disequilibrium matrix with the size of the total number of SNPs. This is optional, and it should be used only if the information on the genetic map is not available.
 #' @param propSel Value representing the proportion of the selected individuals.
 #' @param Weights Row vector containing the weights for each trait
-#' @param Method Which method should be used to calculates the progeny variances.
+#' @param Method Which method should be used to calculates the progeny variances. The implemented methods are Phased and NonPhased.
 #'
 #' @return A data frame with means, variances, and usefulness for each pair of
 #' crosses presented in the MatePlan.
@@ -114,6 +114,11 @@ getUsefAD_mt <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=N
   if (!is.matrix(Markers)) {
     stop("Markers is not a matrix.\n")
   }
+
+  if (!is.numeric(propSel) || propSel <= 0 || propSel >= 1) {
+    stop("Argument 'propSel' must be a numeric value within the range (0, 1).\n")
+  }
+
   gnames <- unique(c(MatePlan[, 1]), (MatePlan[, 2]))
   MatePlan$Cross.ID <- paste0(MatePlan[, 1], "_", MatePlan[, 2])
   colnames(MatePlan) <- c("Parent1", "Parent2", "Cross.ID")
@@ -255,7 +260,7 @@ getUsefAD_mt <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=N
       }
 
       MCov <- lapply(rMat, FUN = function(cFreq) 1 - (2 * cFreq))
-      MCov <- setNames(MCov, seq_along(MCov))
+      MCov <- setNames(MCov, names(block_sizes))
       MCov = MCov[order(as.character(names(MCov)))]
 
       calc.Dijw <- function(Par_Phased, MCV) {
@@ -469,7 +474,7 @@ getUsefAD_mt <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=N
       }
 
       MCov <- lapply(X = rMat, FUN = function(cFreq) 1 - (2 * cFreq))
-      MCov <- setNames(MCov, seq_along(MCov))
+      MCov <- setNames(MCov, names(block_sizes))
       MCov <- MCov[order(as.character(names(MCov)))]
 
       Markers <- Markers - 1

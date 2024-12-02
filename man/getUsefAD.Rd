@@ -19,7 +19,7 @@ getUsefAD(
 \arguments{
 \item{MatePlan}{data frame with the two columns indicating the crosses.}
 
-\item{Markers}{matrix with markers information for all candidate parents, coded as 0,1,2. If Method is equal 'Phased', phased haplotypes should be given and the markers is coded as 0 and 1.}
+\item{Markers}{matrix with markers information for all candidate parents, coded as 0,1,2. If Method is equal 'Phased', phased haplotypes should be given and the markers is coded as 0 and 1. Missing values should be coded as NA.}
 
 \item{addEff}{column vector with additive marker effects for the trait.}
 

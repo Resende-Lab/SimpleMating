@@ -2,7 +2,7 @@
 
 export(contrib2Cross)
 export(getIndex)
-export(getMPA)
+export(getMPV)
 export(getTGV)
 export(getUsefA)
 export(getUsefAD)

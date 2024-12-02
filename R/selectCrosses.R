@@ -17,7 +17,7 @@
 #'
 #' @description
 #' The is the core function for optimization. The input (argument data) is a data frame with four columns: Parent1, Parent2, Y, and K. The Parent1 and Parent2 represent the cross itself.
-#' The column Y is a criterion to be maximized. It could be any estimates between the pair of parents, like mean parental average, total genetic value, and usefulness. The last column (K) is the covariance
+#' The column Y is a criterion to be maximized. It could be any estimates between the pair of parents, like mid-parental value, cross total genetic value, and usefulness. The last column (K) is the covariance
 #' between the pair of individuals that is presented in the cross (i.e., Parent1 and Parent2). This estimation is used to do a cut off in the mating plan, based on the value given in culling.pairwise.k. All
 #' crosses with relatedness values higher than this threshold will be discarded. This is done in order to improve the value of the given criterion (Y) under a constrain in relatedness.
 #'
@@ -76,19 +76,19 @@
 #' # Graph
 #' maxGainPlan[[3]]
 #'
-#' # 5. Based on mean parental average
+#' # 5. Based on mid-parental value
 #'
 #' # 5.1 Criterion
 #' Crit <- data.frame(Id = lines_IndBLUP[, 1],
 #'                    Criterion = lines_IndBLUP[, 2])
 #'
 #' # 5.2 Single trait mean parental average
-#' ST_mpa <- getMPA(MatePlan = CrossPlan,
+#' ST_mpV <- getMPV(MatePlan = CrossPlan,
 #'                  Criterion = Crit,
 #'                  K = relMat)
 #'
 #' # 5.3 Crosses selected
-#' maxGainPlan2 <- selectCrosses(data = ST_mpa,
+#' maxGainPlan2 <- selectCrosses(data = ST_mpV,
 #'                               n.cross = 25,
 #'                               max.cross = 3,
 #'                               min.cross = 1,
@@ -113,6 +113,9 @@
 
 selectCrosses <- function(data, n.cross = 200, max.cross = 4, min.cross = 2,
                           max.cross.to.search = 1e+05, culling.pairwise.k = NULL) {
+
+  suppressMessages(requireNamespace("ggplot2"))
+
   df <- data
   df$ID <- paste0(df$Parent1, "_", df$Parent2)
   if (is.null(culling.pairwise.k)) {
@@ -205,29 +208,24 @@ selectCrosses <- function(data, n.cross = 200, max.cross = 4, min.cross = 2,
   selCrosses$ID <- paste0(selCrosses$Parent1, "_", selCrosses$Parent2)
   df$Sel <- ifelse(df$ID %in% selCrosses$ID, "Mating plan", "Non-Selected")
   dfSel <- df[order(df$Sel, decreasing = TRUE), ]
-  relMax <- max(dfSel$K)
-  relMin <- min(dfSel$K)
-  CritMax <- max(dfSel$Y)
-  CritMin <- min(dfSel$Y)
-  plotation <- ggplot(dfSel, aes(dfSel$K, dfSel$Y)) +
-    geom_point(aes(colour = factor(dfSel$Sel)), size = 6) +
-    scale_color_manual(values = c("#FC4E07", "#00AFBB")) +
-    geom_vline(xintercept = culling.pairwise.k, linetype = "dashed", color = "blue", linewidth = 1.2) +
-    theme(
-      panel.grid.minor = element_blank(),
-      panel.grid.major = element_blank(),
-      legend.title = element_blank(),
-      legend.text = element_text(size = 16),
-      legend.position = "bottom",
-      axis.text.x = element_text(size = 20, colour = "black"),
-      axis.text.y.left = element_text(size = 20, colour = "black"),
-      axis.ticks = element_blank(),
-      axis.line = element_line(
-        colour = "black",
-        linewidth = 0.5, linetype = "solid"
-      ),
-      axis.title = element_text(size = 25, face = "bold")
-    ) +
+  relMax <- max(dfSel$K);  relMin <- min(dfSel$K);  CritMax <- max(dfSel$Y);  CritMin <- min(dfSel$Y)
+  plotation <- ggplot(dfSel, aes(K, Y)) +
+                      geom_point(aes(colour = factor(Sel)), size = 6) +
+                      scale_color_manual(values = c("#FC4E07", "#00AFBB")) +
+                      geom_vline(xintercept = culling.pairwise.k, linetype = "dashed", color = "blue", linewidth = 1.2) +
+                theme(
+                      panel.grid.minor = element_blank(),
+                      panel.grid.major = element_blank(),
+                      legend.title = element_blank(),
+                      legend.text = element_text(size = 16),
+                      legend.position = "bottom",
+                      axis.text.x = element_text(size = 20, colour = "black"),
+                      axis.text.y.left = element_text(size = 20, colour = "black"),
+                      axis.ticks = element_blank(),
+                      axis.line = element_line(
+                      colour = "black",
+                      linewidth = 0.5, linetype = "solid"),
+                      axis.title = element_text(size = 25, face = "bold")) +
     scale_x_continuous("Relatedness", limits = c(relMin - 0.05, relMax + 0.05)) +
     scale_y_continuous("Criterion", limits = c(CritMin - 1, CritMax + 1))
 

@@ -23,7 +23,7 @@
 #'
 #' @param MatePlan data frame with the two columns indicating the crosses to estimates usefulness.
 #' @param Markers matrix with markers information for all candidate parents,
-#' coded as 0,1,2.
+#' coded as 0,2. Missing values should be coded as NA.
 #' @param addEff column vector with additive marker effects.
 #' @param K relationship matrix between all genotypes.
 #' @param Map.In data frame with the genetic map information, i.e., Chromosome containing the locus, genetic map position, and unique identifier for locus.
@@ -85,6 +85,7 @@
 #' @export
 
 getUsefA <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, propSel = 0.05, Type = 'DH', Generation = 1) {
+
   if (!("data.frame" %in% class(MatePlan))) {
     stop("Argument 'MatePlan' is not a data frame.\n")
   }
@@ -93,9 +94,19 @@ getUsefA <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, propS
     stop("Some individuals from 'MatePlan are missing in 'Markers'.\n")
   }
 
+  if (!is.numeric(propSel) || propSel <= 0 || propSel >= 1) {
+    stop("Argument 'propSel' must be a numeric value within the range (0, 1).\n")
+  }
+
   if (!is.matrix(Markers)) {
     stop("Markers is not a matrix.\n")
   }
+
+  if (!all(Markers %in% c(0, 2, NA), na.rm = TRUE)) {
+    stop("Markers matrix must contain only values 0, 2, or NA (missing data).\n")
+  }
+
+
   MatePlan$idcross <- paste0(MatePlan[, 1], "_", MatePlan[, 2])
   colnames(MatePlan) <- c("Parent1", "Parent2", "Cross.ID")
   EffA <- as.matrix(addEff)
@@ -141,7 +152,7 @@ getUsefA <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, propS
     }
   }
 
-  MCov <- setNames(MCov, seq_along(MCov))
+  MCov <- setNames(MCov, names(rMat))
   MCov = MCov[order(as.character(names(MCov)))]
   Markers <- Markers - 1
   calc.info = function(Markers) {

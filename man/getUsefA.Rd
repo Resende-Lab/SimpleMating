@@ -20,7 +20,7 @@ getUsefA(
 \item{MatePlan}{data frame with the two columns indicating the crosses to estimates usefulness.}
 
 \item{Markers}{matrix with markers information for all candidate parents,
-coded as 0,1,2.}
+coded as 0,2. Missing values should be coded as NA.}
 
 \item{addEff}{column vector with additive marker effects.}
 

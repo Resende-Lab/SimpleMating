@@ -23,7 +23,7 @@
 #'
 #' @param MatePlan data frame with the two columns indicating the crosses to predict.
 #' @param Markers matrix with markers information for all candidate parents,
-#' coded as 0,1,2.
+#' coded as 0,2. Missing values should be coded as NA.
 #' @param addEff matrix with additive marker effects.
 #' @param K relationship matrix.
 #' @param Map.In data frame with the genetic map information, i.e., Chromosome containing the locus, genetic map position, and unique identifier for locus.
@@ -91,15 +91,26 @@
 
 
 getUsefA_mt <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, propSel = 0.05, Type = 'DH', Generation = 1, Weights = NULL) {
+
   if (!("data.frame" %in% class(MatePlan))) {
     stop("Argument 'MatePlan' is not a data frame.\n")
   }
+
   gnames <- unique(c(MatePlan[, 1]), (MatePlan[, 2]))
   if (!any(gnames %in% rownames(Markers))) {
     stop("Some individuals from 'MatePlan are missing in 'Markers'.\n")
   }
+
   if (!is.matrix(Markers)) {
     stop("Markers is not a matrix.\n")
+  }
+
+  if (!is.numeric(propSel) || propSel <= 0 || propSel >= 1) {
+    stop("Argument 'propSel' must be a numeric value within the range (0, 1).\n")
+  }
+
+  if (!all(Markers %in% c(0, 2, NA), na.rm = TRUE)) {
+    stop("Markers matrix must contain only values 0, 2, or NA (missing data).\n")
   }
 
   MatePlan$idcross <- paste0(MatePlan[, 1], "_", MatePlan[, 2])
@@ -141,6 +152,9 @@ getUsefA_mt <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, pr
       })
     }
   }
+
+  MCov <- setNames(MCov, names(rMat))
+  MCov = MCov[order(as.character(names(MCov)))]
   Markers <- Markers - 1
   calc.info <- function(Markers) {
     fourD <- crossprod(Markers[1, , drop = FALSE] - Markers[2, , drop = FALSE]) / 4
@@ -229,7 +243,7 @@ getUsefA_mt <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, pr
         })
       }
     }
-    MCov <- setNames(MCov, seq_along(MCov))
+    MCov <- setNames(MCov, names(block_sizes))
     MCov = MCov[order(as.character(names(MCov)))]
     Markers <- Markers - 1
     calc.info <- function(Markers) {

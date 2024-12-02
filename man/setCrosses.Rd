@@ -2,7 +2,7 @@
 % Please edit documentation in R/setCrosses.R
 \name{setCrosses}
 \alias{setCrosses}
-\title{Creates a mating plan that maximizes the mean parental average of a set of crosses}
+\title{Creates a mating plan that maximizes the mid-parental value of a set of crosses}
 \usage{
 setCrosses(
   Criterion,
@@ -40,7 +40,7 @@ setCrosses(
 A data frame with all possible crosses.
 }
 \description{
-For a set of individuals (parents), this function creates a mating plan with the mean parental average of the individuals. The best option here is to use BLUPs from each candidate to be parent.
+For a set of individuals (parents), this function creates a mating plan with the mid-parental value of the individuals. The best option here is to use BLUPs from each candidate to be parent.
 Multiple trait can also be used, and weights should be given. No constrains to inbreeding is used. If there is information regarding relationship among individuals, please, use the function selectCrosses.
 }
 \examples{

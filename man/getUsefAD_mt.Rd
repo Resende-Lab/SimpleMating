@@ -20,7 +20,7 @@ getUsefAD_mt(
 \arguments{
 \item{MatePlan}{data frame with the two columns indicating the crosses.}
 
-\item{Markers}{matrix with markers information for all candidate parents, coded as 0,1,2. If Method is equal 'Phased', phased haplotypes should be given and the markers is coded as 0 and 1.}
+\item{Markers}{matrix with markers information for all candidate parents, coded as 0,1,2. If Method is equal 'Phased', phased haplotypes should be given and the markers is coded as 0 and 1. Missing values should be coded as NA.}
 
 \item{addEff}{matrix with additive marker effects for each trait (mxn, where 'm' is the number of individuals and 'n' represents the number of traits).}
 
@@ -36,7 +36,7 @@ getUsefAD_mt(
 
 \item{Weights}{Row vector containing the weights for each trait}
 
-\item{Method}{Which method should be used to calculates the progeny variances.}
+\item{Method}{Which method should be used to calculates the progeny variances. The implemented methods are Phased and NonPhased.}
 }
 \value{
 A data frame with means, variances, and usefulness for each pair of

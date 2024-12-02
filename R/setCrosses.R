@@ -3,7 +3,7 @@
 # Package: SimpleMating
 #
 # File: setCrosses.R
-# Contains: setCrosses, mpaSetCrosses
+# Contains: setCrosses, mpvSetCrosses
 #
 # Written by Rodrigo Amadeu and Marco Peixoto
 #
@@ -14,10 +14,10 @@
 #
 ##########################################
 #'
-#' Creates a mating plan that maximizes the mean parental average of a set of crosses
+#' Creates a mating plan that maximizes the mid-parental value of a set of crosses
 #'
 #' @description
-#' For a set of individuals (parents), this function creates a mating plan with the mean parental average of the individuals. The best option here is to use BLUPs from each candidate to be parent.
+#' For a set of individuals (parents), this function creates a mating plan with the mid-parental value of the individuals. The best option here is to use BLUPs from each candidate to be parent.
 #' Multiple trait can also be used, and weights should be given. No constrains to inbreeding is used. If there is information regarding relationship among individuals, please, use the function selectCrosses.
 #'
 #'
@@ -90,6 +90,7 @@
 
 setCrosses <- function(Criterion, MateDesign = "half", n.cross = 200, max.cross = 4, min.cross = 2,
                        max.cross.to.search = 1e+05, Weights = NULL, Scale = TRUE) {
+
   if (!("data.frame" %in% class(Criterion))) {
     stop("Argument 'Criterion' is not a data frame.\n")
   }
@@ -112,7 +113,7 @@ setCrosses <- function(Criterion, MateDesign = "half", n.cross = 200, max.cross 
   MatePlan$Cross.ID <- paste0(MatePlan[, 1], "_", MatePlan[, 2])
 
   # bv criteria
-  bvCriterion <- mpaSetCrosses(Crit_tmp)
+  bvCriterion <- mpvSetCrosses(Crit_tmp)
 
   # Filtering
   Criteria <- merge(MatePlan, bvCriterion[, -c(1, 2)], by = "Cross.ID")
@@ -267,7 +268,7 @@ planMate <- function(gnames, MateDesign = "half") {
 }
 
 
-mpaSetCrosses <- function(data) {
+mpvSetCrosses <- function(data) {
   addeffect <- as.vector(data[, 2])
   X <- kronecker(t(addeffect), matrix(1, length(addeffect), 1))
   X <- (X + t(X)) / 2

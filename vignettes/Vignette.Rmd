@@ -299,7 +299,7 @@ maxGainPlan[[3]]
 <div id="pt4" />
 
 
-## Optimization: Using total genetic value
+## Optimization: Using cross total genetic value
 
 Here, we will create a mating plan through an optimization based on the total genetic value for one trait controlled by additive and dominance effects, using molecular markers. 
 
@@ -364,14 +364,14 @@ maxGainPlan[[3]]
  
 <div id="pt5" />
 
-## Optimization: Using the Mean Parental Average
+## Optimization: Using the Mid-Parental Value
 
-Here, we will create a mating plan through optimization based on the mean parental average for one additive trait using pedigree information.
+Here, we will create a mating plan through optimization based on the Mid-Parental Value for one additive trait using pedigree information.
 
-We need the crossing plan, with all individual candidates to parents. We may use the function `planCross()` for doing so. The parents are all individuals genotyped (*TargetPop*). We may choose which mate design we want (*MateDesign*). Then, we need to organize the dataset for the predictions. The input to calculate the mean parental average is a two-column data frame, where in the first row we have the individual's identification (same names that we find in the cross plan),  and the criterion. By criterion, you can specify the estimated breeding value (EBV) or even the best linear unbiased prediction (BLUP) of each individual.
-This allows us to use this function for polyploid individuals, for example. In this case, we can make the predictions and input the values to calculate the expected mean parental average for each cross.
+We need the crossing plan, with all individual candidates to parents. We may use the function `planCross()` for doing so. The parents are all individuals genotyped (*TargetPop*). We may choose which mate design we want (*MateDesign*). Then, we need to organize the dataset for the predictions. The input to calculate the Mid-Parental Value is a two-column data frame, where in the first row we have the individual's identification (same names that we find in the cross plan),  and the criterion. By criterion, you can specify the estimated breeding value (EBV) or even the best linear unbiased prediction (BLUP) of each individual.
+This allows us to use this function for polyploid individuals, for example. In this case, we can make the predictions and input the values to calculate the expected Mid-Parental Value for each cross.
 
-The upcoming step is to use the function `getMPA()` to predict the mean parental average for each cross in the cross plan, using the BLUP information from each individual. The relationship matrix based on pedigree (in this case) is used to restrict inbreeding. You can use the relationship matrix based on markers, instead of the pedigree-based matrix. We will use the package **AGHmatrix** for that (Amadeu et al. 2022).
+The upcoming step is to use the function `getMPA()` to predict the Mid-Parental Value for each cross in the cross plan, using the BLUP information from each individual. The relationship matrix based on pedigree (in this case) is used to restrict inbreeding. You can use the relationship matrix based on markers, instead of the pedigree-based matrix. We will use the package **AGHmatrix** for that (Amadeu et al. 2022).
 
 
 ```{r, eval=TRUE}
@@ -398,15 +398,15 @@ Crit <- data.frame(Id = generic_IndBLUP[,1],
 
 
 # 6.Single trait mean parental average
-ST_mpa <- getMPA(MatePlan = CrossPlan,
+ST_mpv <- getMPV(MatePlan = CrossPlan,
                  Criterion = Crit,
                  K = AMat)
 
-head(ST_mpa, 20)
+head(ST_mpv, 20)
 
 ```
 
-The second part uses a criterion for each cross (mean parental average in this example) with a relationship matrix (based on pedigree information in this example) and creates an optimum cross-selection-based mating plan. The idea is to restrict the levels of inbreeding, utilizing the covariance in the individual-cross level, and maximize the criterion used (mean parental average in this example). There is needed to set the target number of crosses in the mating plan (*n.cross*), with the maximum and minimum number of crosses that each parent can be part of (*max.cross* and *min.cross*), together with the level of covariance between cross via relationship matrix for the restriction (*culling.pairwise.k*).
+The second part uses a criterion for each cross (Mid-Parental Value in this example) with a relationship matrix (based on pedigree information in this example) and creates an optimum cross-selection-based mating plan. The idea is to restrict the levels of inbreeding, utilizing the covariance in the individual-cross level, and maximize the criterion used (Mid-Parental Value in this example). There is needed to set the target number of crosses in the mating plan (*n.cross*), with the maximum and minimum number of crosses that each parent can be part of (*max.cross* and *min.cross*), together with the level of covariance between cross via relationship matrix for the restriction (*culling.pairwise.k*).
 
 The output will be the mating plan based on the parameters before mentioned. 
 
@@ -414,7 +414,7 @@ The output will be the mating plan based on the parameters before mentioned.
 
 ```{r, eval=TRUE}
 # 1. Crosses selected
-maxGainPlan <- selectCrosses(data = ST_mpa,
+maxGainPlan <- selectCrosses(data = ST_mpv,
                              n.cross = 25,
                              max.cross = 10,
                              min.cross = 1,

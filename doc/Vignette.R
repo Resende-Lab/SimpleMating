@@ -34,7 +34,7 @@ Parents <- rownames(lines_Geno)
 Cross_plan <- planCross(TargetPop = Parents,
                         MateDesign = "half")
 
-# 3. Creating relationship matrix based on markers
+# 3. Creating a relationship matrix based on markers
 relMat <- (lines_Geno %*% t(lines_Geno)) / ncol(lines_Geno)
 
 # 4.  Usefulness of trait number 1 (DH)
@@ -81,7 +81,7 @@ Cross_plan <- planCross(TargetPop = Parents,
                         MateDesign = "half")
 
 
-# 3. Creating relationship matrix based on markers
+# 3. Creating a relationship matrix based on markers
 relMat <- (lines_Geno %*% t(lines_Geno)) / ncol(lines_Geno)
 
 # 4.  Usefulness for two traits
@@ -139,7 +139,7 @@ Cross_plan <- planCross(TargetPop = Parents,
 relMat <- (generic_Geno %*% t(generic_Geno)) / ncol(generic_Geno)
 
 
-# 5.  Usefulness of trait number 1 - Phased
+# 5.  The usefulness of trait number 1 - Phased
 usef_Phased <- getUsefAD(MatePlan = Cross_plan,
                        Markers = generic_Phasedgeno, # Phased haplotypes
                        addEff = generic_MrkEffects[, 1],
@@ -151,7 +151,7 @@ usef_Phased <- getUsefAD(MatePlan = Cross_plan,
 
 head(usef_Phased[[1]], 10)
 
-# 6.  Usefulness of trait number 1 - Non phased
+# 6.  The usefulness of trait number 1 - Non phased
 usefNonPhased <- getUsefAD(MatePlan = Cross_plan,
                            Markers = generic_Geno, # non Phased markers
                            addEff = generic_MrkEffects[, 1],
@@ -190,7 +190,7 @@ data(generic_GenMap)
 data(generic_Geno)
 data(generic_MrkEffects)
 
-# 2. Creating relationship matrix based on markers
+# 2. Creating a relationship matrix based on markers
 relMat <- (generic_Geno %*% t(generic_Geno)) / ncol(generic_Geno)
 
 # 3. Assigning parents
@@ -255,16 +255,16 @@ Crit <- data.frame(Id = generic_IndBLUP[,1],
 
 
 # 6.Single trait mean parental average
-ST_mpa <- getMPA(MatePlan = CrossPlan,
+ST_mpv <- getMPV(MatePlan = CrossPlan,
                  Criterion = Crit,
                  K = AMat)
 
-head(ST_mpa, 20)
+head(ST_mpv, 20)
 
 
 ## ----eval=TRUE----------------------------------------------------------------
 # 1. Crosses selected
-maxGainPlan <- selectCrosses(data = ST_mpa,
+maxGainPlan <- selectCrosses(data = ST_mpv,
                              n.cross = 25,
                              max.cross = 10,
                              min.cross = 1,

@@ -22,7 +22,7 @@
 #' built a recombination map for the population (we implemented the Haldane map function). Two methods are implemented, one that uses phased haplotypes and another that uses non phased diplotypes.
 #'
 #' @param MatePlan data frame with the two columns indicating the crosses.
-#' @param Markers matrix with markers information for all candidate parents, coded as 0,1,2. If Method is equal 'Phased', phased haplotypes should be given and the markers is coded as 0 and 1.
+#' @param Markers matrix with markers information for all candidate parents, coded as 0,1,2. If Method is equal 'Phased', phased haplotypes should be given and the markers is coded as 0 and 1. Missing values should be coded as NA.
 #' @param addEff column vector with additive marker effects for the trait.
 #' @param domEff column vector with dominance markers effects for the trait.
 #' @param K relationship matrix.
@@ -111,9 +111,14 @@ getUsefAD <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=NULL
     stop("Markers is not a matrix.\n")
   }
 
+  if (!is.numeric(propSel) || propSel <= 0 || propSel >= 1) {
+    stop("Argument 'propSel' must be a numeric value within the range (0, 1).\n")
+  }
+
   if(is.null(linkDes) & is.null(Map.In)){
     stop("You should give at least one of them, linkage desiquilibrium matrix or the map information. \n")
   }
+
 
   gnames <- unique(c(MatePlan[, 1]), (MatePlan[, 2]))
   MatePlan$Cross.ID <- paste0(MatePlan[, 1], "_", MatePlan[, 2])
@@ -129,6 +134,7 @@ getUsefAD <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=NULL
     if (!any(gnames %in% rownames(MarkersMean))) {
       stop("Some individuals from 'MatePlan' are missing in 'Markers'.\n")
     }
+
     MuT <- matrix(NA, nrow = nrow(MatePlan))
     for (j in 1:nrow(MatePlan)) {
       tmp <- MatePlan[j, ]
@@ -246,7 +252,7 @@ getUsefAD <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=NULL
 
 
       MCov <- lapply(rMat, FUN = function(cFreq) 1 - (2 * cFreq))
-      MCov <- setNames(MCov, seq_along(MCov))
+      MCov <- setNames(MCov, names(block_sizes))
       MCov = MCov[order(as.character(names(MCov)))]
 
       calDij <- function(Par_Phased, MCV) {
@@ -449,7 +455,7 @@ getUsefAD <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=NULL
 
 
     MCov <- lapply(rMat, FUN = function(cFreq) 1 - (2 * cFreq))
-    MCov <- setNames(MCov, seq_along(MCov))
+    MCov <- setNames(MCov, names(block_sizes))
     MCov = MCov[order(as.character(names(MCov)))]
 
     cros2cores <- list(`1` = MatePlan[, c(1:2)])

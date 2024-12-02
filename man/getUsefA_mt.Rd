@@ -21,7 +21,7 @@ getUsefA_mt(
 \item{MatePlan}{data frame with the two columns indicating the crosses to predict.}
 
 \item{Markers}{matrix with markers information for all candidate parents,
-coded as 0,1,2.}
+coded as 0,2. Missing values should be coded as NA.}
 
 \item{addEff}{matrix with additive marker effects.}
 

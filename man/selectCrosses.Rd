@@ -31,7 +31,7 @@ A data frame with all possible crosses.
 }
 \description{
 The is the core function for optimization. The input (argument data) is a data frame with four columns: Parent1, Parent2, Y, and K. The Parent1 and Parent2 represent the cross itself.
-The column Y is a criterion to be maximized. It could be any estimates between the pair of parents, like mean parental average, total genetic value, and usefulness. The last column (K) is the covariance
+The column Y is a criterion to be maximized. It could be any estimates between the pair of parents, like mid-parental value, cross total genetic value, and usefulness. The last column (K) is the covariance
 between the pair of individuals that is presented in the cross (i.e., Parent1 and Parent2). This estimation is used to do a cut off in the mating plan, based on the value given in culling.pairwise.k. All
 crosses with relatedness values higher than this threshold will be discarded. This is done in order to improve the value of the given criterion (Y) under a constrain in relatedness.
 }
@@ -77,19 +77,19 @@ maxGainPlan[[2]]
 # Graph
 maxGainPlan[[3]]
 
-# 5. Based on mean parental average
+# 5. Based on mid-parental value
 
 # 5.1 Criterion
 Crit <- data.frame(Id = lines_IndBLUP[, 1],
                    Criterion = lines_IndBLUP[, 2])
 
 # 5.2 Single trait mean parental average
-ST_mpa <- getMPA(MatePlan = CrossPlan,
+ST_mpV <- getMPV(MatePlan = CrossPlan,
                  Criterion = Crit,
                  K = relMat)
 
 # 5.3 Crosses selected
-maxGainPlan2 <- selectCrosses(data = ST_mpa,
+maxGainPlan2 <- selectCrosses(data = ST_mpV,
                               n.cross = 25,
                               max.cross = 3,
                               min.cross = 1,
