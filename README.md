@@ -3,7 +3,7 @@
 
 ## Paper
 
-Title: SimpleMating: R-package for prediction and optimization of breeding crosses using genomic selection
+Title: SimpleMating: R-package for prediction and optimization of breeding crosses using genomic selection  
 DOI: https://doi.org/10.1002/tpg2.20533
 
 ## Synopsis
