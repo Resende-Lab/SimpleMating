@@ -38,8 +38,7 @@ To cite this R package:
 
 ```{r}
 
-Peixoto MA, Amadeu RR, Bhering LL, Ferrão LFV, Munoz PR, Resende MFR. SimpleMating:  R-package  
-for prediction and optimization of breeding crosses using genomic selection.
+Peixoto, M. A., Amadeu, R.R., Bhering, L. L., Ferrão, L. F. V., Munoz, P. R., &Resende, M. F. R. (2024). SimpleMating: R-package for prediction and optimization of breeding crosses using genomic selection. The Plant Genome, e20533.https://doi.org/10.1002/tpg2.20533
 
 ```
 
