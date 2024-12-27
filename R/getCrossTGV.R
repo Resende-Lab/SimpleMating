@@ -81,7 +81,7 @@ getTGV <- function(MatePlan, Markers, addEff, domEff, K,  ploidy = 2, Weights = 
   if (!("data.frame" %in% class(MatePlan))) {
     stop("Argument 'MatePlan' is not a data frame.\n")
   }
-  gnames <- unique(c(MatePlan[, 1]), (MatePlan[, 2]))
+  gnames <- unique(c(MatePlan[, 1], MatePlan[, 2]))
   if (!any(gnames %in% rownames(Markers))) {
     stop("Some individuals from 'MatePlan' are missing in 'Markers'.\n")
   }
