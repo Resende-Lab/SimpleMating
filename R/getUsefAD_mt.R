@@ -119,7 +119,7 @@ getUsefAD_mt <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=N
     stop("Argument 'propSel' must be a numeric value within the range (0, 1).\n")
   }
 
-  gnames <- unique(c(MatePlan[, 1]), (MatePlan[, 2]))
+  gnames <- unique(c(MatePlan[, 1], MatePlan[, 2]))
   MatePlan$Cross.ID <- paste0(MatePlan[, 1], "_", MatePlan[, 2])
   colnames(MatePlan) <- c("Parent1", "Parent2", "Cross.ID")
 
