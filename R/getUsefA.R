@@ -89,7 +89,7 @@ getUsefA <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, propS
   if (!("data.frame" %in% class(MatePlan))) {
     stop("Argument 'MatePlan' is not a data frame.\n")
   }
-  gnames <- unique(c(MatePlan[, 1]), (MatePlan[, 2]))
+  gnames <- unique(c(MatePlan[, 1], MatePlan[, 2]))
   if (!any(gnames %in% rownames(Markers))) {
     stop("Some individuals from 'MatePlan are missing in 'Markers'.\n")
   }
