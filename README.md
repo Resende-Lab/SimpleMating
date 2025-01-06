@@ -10,6 +10,9 @@ DOI: https://doi.org/10.1002/tpg2.20533
 
 SimpleMating provides an easy way to implement cross-prediction based on markers/pedigree and BLUP data and optimize Mating crosses based on a relationship matrix (A or G).
 
+## Vignette
+A detailed example of the application of **SimpleMating** is given in this [[vignette]](https://htmlpreview.github.io/?https://github.com/Resende-Lab/SimpleMating/blob/main/doc/Vignette.html)
+
 
 ## Installation
 
@@ -61,13 +64,13 @@ All options before stated (mean parental average, total genetic value, and usefu
 
 The step after getting the performance of each cross is to use the second module of **SimpleMating** to create a mating plan based on mate allocation. The algorithm here developed maximizes the given criterion (mean parental average, total genetic value, or usefulness), and adds a cut-off in the inbreeding between individuals. This cut-off is based on the level of covariance between a pair of individuals, which can be derived from a relationship matrix based on markers (G) or pedigree (A). After the cut-off based on inbreeding, the mate allocation is done by restricting the number of crosses that each parent is part of (maximum and minimum number), and the total number of crosses.
 
-For this module, a data frame with four columns is required. It encompasses Parent 1, Parent 2, a target Criterion (Y), and a covariance between individuals (K). 
+A data frame with four columns is required for this module. It encompasses Parent 1, Parent 2, a target Criterion (Y), and a covariance between individuals (K). 
 
 A detailed example of the application of **SimpleMating** is given in this [[vignette]](https://htmlpreview.github.io/?https://github.com/Resende-Lab/SimpleMating/blob/main/doc/Vignette.html)
 
 ***
 
-Any questions about the analyses, please, contact me!  
+If you have any questions about the analyses, please, contact me!  
 
 Marco Antonio Peixoto  
 Email: deamorimpeixotom@ufl.edu  
