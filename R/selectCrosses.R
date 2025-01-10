@@ -28,6 +28,7 @@
 #' @param min.cross minimum number of crosses per individual in the plan (this is the target, some parents might be used just one time).
 #' @param max.cross.to.search maximum number of rows in the input to search for the solution.
 #' @param culling.pairwise.k don't allow crosses with more than this threshold of relatedness. Default is NULL, don't use it.
+#' @param TargetPool which pool (Parent1 or Parent2) should be considered in the optimization. Default is NULL (both should be used). This argument facilitates to optimize only one group of parents.
 #'
 #' @return A data frame with all possible crosses.
 #'
@@ -105,6 +106,8 @@
 #' maxGainPlan[[3]]
 #' }
 #'
+#' @references \emph{Peixoto, Amadeu, Bhering, Ferrao, Munoz, & Resende Jr. (2024). SimpleMating:  R-package for prediction and optimization of breeding crosses using genomic selection. The Plant Genome, e20533.https://doi.org/10.1002/tpg2.20533}
+#'
 #' @importFrom stats na.omit
 #' @import ggplot2
 #' @importFrom ggplot2 ggplot
@@ -112,12 +115,13 @@
 #' @export
 
 selectCrosses <- function(data, n.cross = 200, max.cross = 4, min.cross = 2,
-                          max.cross.to.search = 1e+05, culling.pairwise.k = NULL) {
+                          max.cross.to.search = 1e+05, culling.pairwise.k = NULL, TargetPool = NULL) {
 
   suppressMessages(requireNamespace("ggplot2"))
 
   df <- data
   df$ID <- paste0(df$Parent1, "_", df$Parent2)
+
   if (is.null(culling.pairwise.k)) {
     culling.pairwise.k <- max(data$K + 1)
   }
@@ -128,18 +132,34 @@ selectCrosses <- function(data, n.cross = 200, max.cross = 4, min.cross = 2,
   )
   cross.keep <- data[1, ]
   data <- data[2:max.cross.to.search, ]
+
+
+  if(!is.null(TargetPool)){
+
+    if (!TargetPool %in% c("Parent1", "Parent2")) {
+      stop(deparse("Please, choose a valid pool for the optimization. The options are: Parent1 and Parent2. R is case sensitive"))
+    }
+
   for (i in 1:(max.cross.to.search - 1)) {
-    parent.list <- as.vector(cbind(cross.keep$Parent1, cross.keep$Parent2))
+    parent.list <- as.vector(switch(TargetPool,
+                                    Parent1=cross.keep$Parent1,
+                                    Parent2=cross.keep$Parent2,
+
+    ))
+
     parent.stop.add <- names(which(table(parent.list) ==
       max.cross))
+
     if (length(parent.stop.add) > 0) {
-      parent.rm <- unique(c(which(!is.na(match(
-        data$Parent1,
+      parent.rm <- unique(which(!is.na(match(
+        switch(TargetPool,
+               Parent1=data$Parent1,
+               Parent2=data$Parent2,
+
+        ),
         parent.stop.add
-      ))), which(!is.na(match(
-        data$Parent2,
-        parent.stop.add
-      )))))
+      ))))
+
       if (length(parent.rm) > 0) {
         data <- data[-parent.rm, ]
       }
@@ -150,14 +170,17 @@ selectCrosses <- function(data, n.cross = 200, max.cross = 4, min.cross = 2,
     check.min.parents <- function(pedigree, min.cross = 2, n.cross = 200, n.try = 50, return.ped = FALSE) {
       for (j in 1:n.try) {
         ind0 <- nrow(pedigree)
-        P1.below.min <- names(which((table(pedigree$Parent1) < min.cross)))
-        if (length(P1.below.min) > 0) {
-          pedigree <- pedigree[-which(!is.na(match(pedigree$Parent1, P1.below.min))), ]
-        }
+        P1.below.min <- names(which((table(switch(TargetPool,
+                                                  Parent1=pedigree$Parent1,
+                                                  Parent2=pedigree$Parent2,
 
-        P2.below.min <- names(which((table(pedigree$Parent2) < min.cross)))
-        if (length(P2.below.min) > 0) {
-          pedigree <- pedigree[-which(!is.na(match(pedigree$Parent2, P2.below.min))), ]
+        )) < min.cross)))
+        if (length(P1.below.min) > 0) {
+          pedigree <- pedigree[-which(!is.na(match(switch(TargetPool,
+                                                          Parent1=pedigree$Parent1,
+                                                          Parent2=pedigree$Parent2,
+
+          ), P1.below.min))), ]
         }
 
         ind1 <- nrow(pedigree)
@@ -200,6 +223,73 @@ selectCrosses <- function(data, n.cross = 200, max.cross = 4, min.cross = 2,
     return(FALSE)
   }
 
+
+  }else{
+
+
+    for (i in 1:(max.cross.to.search - 1)) {
+      parent.list <- as.vector(cbind(cross.keep$Parent1, cross.keep$Parent2))
+      parent.stop.add <- names(which(table(parent.list) ==
+                                       max.cross))
+      if (length(parent.stop.add) > 0) {
+        parent.rm <- unique(c(which(!is.na(match(data$Parent1,
+                                                 parent.stop.add))), which(!is.na(match(data$Parent2,
+                                                                                        parent.stop.add)))))
+        if (length(parent.rm) > 0) {
+          data <- data[-parent.rm, ]
+        }
+      }
+      cross.keep <- rbind(cross.keep, data[1, ])
+      data <- data[-1, ]
+      check.min.parents <- function(pedigree, min.cross = 2,
+                                    n.cross = 200, n.try = 50, return.ped = FALSE) {
+        for (j in 1:n.try) {
+          ind0 <- nrow(pedigree)
+          P1.below.min <- names(which((table(pedigree$Parent1) <
+                                         min.cross)))
+          if (length(P1.below.min) > 0) {
+            pedigree <- pedigree[-which(!is.na(match(pedigree$Parent1,
+                                                     P1.below.min))), ]
+          }
+          P2.below.min <- names(which((table(pedigree$Parent2) <
+                                         min.cross)))
+          if (length(P2.below.min) > 0) {
+            pedigree <- pedigree[-which(!is.na(match(pedigree$Parent2,
+                                                     P2.below.min))), ]
+          }
+          ind1 <- nrow(pedigree)
+          if (nrow(pedigree) < n.cross) {
+            return(FALSE)
+          }
+          if (ind0 == ind1) {
+            if (return.ped) {
+              return(pedigree)
+            }
+            else {
+              return(TRUE)
+            }
+          }
+        }
+      }
+      if (check.min.parents(cross.keep, min.cross = min.cross,
+                            n.cross = n.cross, n.try = 100)) {
+        cross.keep <- check.min.parents(cross.keep, min.cross = min.cross,
+                                        n.cross = n.cross, n.try = 100, return.ped = TRUE)
+        break
+      }
+    }
+    if (i == (max.cross.to.search - 1)) {
+      stop(deparse("Reached maximum in the search, try to increase data size."))
+      return(FALSE)
+    }
+    cross.keep <- cross.keep[1:n.cross, ]
+    if (any(is.na(cross.keep$Y))) {
+      stop(deparse("Reached maximum in the search, try to tweak parameters, i.e., max.cross and/or culling.pairwise.k"))
+      return(FALSE)
+    }
+
+  }
+
   tmp <- cross.keep$K
   rownames(cross.keep) <- NULL
 
@@ -209,6 +299,8 @@ selectCrosses <- function(data, n.cross = 200, max.cross = 4, min.cross = 2,
   df$Sel <- ifelse(df$ID %in% selCrosses$ID, "Mating plan", "Non-Selected")
   dfSel <- df[order(df$Sel, decreasing = TRUE), ]
   relMax <- max(dfSel$K);  relMin <- min(dfSel$K);  CritMax <- max(dfSel$Y);  CritMin <- min(dfSel$Y)
+  K = dfSel$K; Y = dfSel$Y; Sel = dfSel$Sel
+
   plotation <- ggplot(dfSel, aes(K, Y)) +
                       geom_point(aes(colour = factor(Sel)), size = 6) +
                       scale_color_manual(values = c("#FC4E07", "#00AFBB")) +

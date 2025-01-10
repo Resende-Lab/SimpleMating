@@ -80,6 +80,8 @@ head(MT_tgv, 20)
 }
 \references{
 \emph{Falconer, DS & Mackay TFC (1996). Introduction to quantitative genetics. Pearson Education India.}
+
+\emph{Peixoto, Amadeu, Bhering, Ferrao, Munoz, & Resende Jr. (2024). SimpleMating:  R-package for prediction and optimization of breeding crosses using genomic selection. The Plant Genome, e20533.https://doi.org/10.1002/tpg2.20533}
 }
 \author{
 Marco Antonio Peixoto, \email{marco.peixotom@gmail.com}

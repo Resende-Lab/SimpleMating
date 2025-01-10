@@ -10,7 +10,8 @@ selectCrosses(
   max.cross = 4,
   min.cross = 2,
   max.cross.to.search = 1e+05,
-  culling.pairwise.k = NULL
+  culling.pairwise.k = NULL,
+  TargetPool = NULL
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ selectCrosses(
 \item{max.cross.to.search}{maximum number of rows in the input to search for the solution.}
 
 \item{culling.pairwise.k}{don't allow crosses with more than this threshold of relatedness. Default is NULL, don't use it.}
+
+\item{TargetPool}{which pool (Parent1 or Parent2) should be considered in the optimization. Default is NULL (both should be used). This argument facilitates to optimize only one group of parents.}
 }
 \value{
 A data frame with all possible crosses.
@@ -106,6 +109,9 @@ maxGainPlan[[2]]
 maxGainPlan[[3]]
 }
 
+}
+\references{
+\emph{Peixoto, Amadeu, Bhering, Ferrao, Munoz, & Resende Jr. (2024). SimpleMating:  R-package for prediction and optimization of breeding crosses using genomic selection. The Plant Genome, e20533.https://doi.org/10.1002/tpg2.20533}
 }
 \author{
 Rodrigo R Amadeu, \email{rramadeu@gmail.com} Marco Antonio Peixoto, \email{marco.peixotom@gmail.com}
