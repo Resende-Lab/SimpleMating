@@ -136,7 +136,7 @@ getTGV <- function(MatePlan, Markers, addEff, domEff, K,  ploidy = 2, Weights = 
       qik <- 1 - p1
       yk <- p1 - p2
       tgv <- EffA * (pik - qik - yk) + (EffD * (2 * pik * qik + yk * (pik - qik)))
-      Mean.tgv <- sum(tgv)
+      Mean.tgv <- sum(tgv) 
       MuT[j] <- round(Mean.tgv, digits = 5)
     }
     MatePlan$Y <- MuT
