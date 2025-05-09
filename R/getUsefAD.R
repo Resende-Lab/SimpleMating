@@ -148,6 +148,7 @@ getUsefAD <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=NULL
       MuT[j] <- round(Mean.tgv, digits = 5)
     }
     MatePlan$Total.gv <- MuT
+    Map.In[,1] <- letters[Map.In[,1]]
     Markers_name <- names(domEff) <- names(addEff) <- colnames(Markers) <- Map.In[, 3]
     Map.Chr <- split(Map.In, Map.In[, 1, drop = FALSE])
     Map.Pos <- split(Markers_name, Map.In[, 1, drop = FALSE])
@@ -236,6 +237,7 @@ getUsefAD <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=NULL
         MuT[j] <- round(Mean.tgv, digits = 5)
       }
       MatePlan$Total.gv <- MuT
+      Map.In[,1] <- letters[Map.In[,1]]
       Markers_name <- names(domEff) <- names(addEff) <-colnames(linkDes) <- rownames(linkDes) <- colnames(Markers) <- Map.In[,2]
       Map.Pos <- split(Markers_name, Map.In[, 1, drop = FALSE])
       Map.EffA <- split(addEff, Map.In[, 1, drop = FALSE])
@@ -337,6 +339,7 @@ getUsefAD <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=NULL
       MuT[j] <- round(Mean.tgv, digits = 5)
     }
     MatePlan$Total.gv <- MuT
+    Map.In[,1] <- letters[Map.In[,1]]
     Markers_name <- names(domEff) <- names(addEff) <- colnames(Markers) <- Map.In[, 3]
     Map.Chr <- split(Map.In, Map.In[, 1, drop = FALSE])
     Map.Pos <- split(Markers_name, Map.In[, 1, drop = FALSE])
@@ -439,6 +442,7 @@ getUsefAD <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=NULL
       MuT[j] <- round(Mean.tgv, digits = 5)
     }
     MatePlan$Total.gv <- MuT
+    Map.In[,1] <- letters[Map.In[,1]]
     Markers_name <- names(domEff) <- names(addEff) <- colnames(Markers) <- colnames(linkDes) <- rownames(linkDes) <- Map.In[,2]
     Map.Pos <- split(Markers_name, Map.In[, 1, drop = FALSE])
     Map.EffA <- split(addEff, Map.In[, 1, drop = FALSE])
