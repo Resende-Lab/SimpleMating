@@ -151,6 +151,7 @@ getUsefAD_mt <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=N
     }
     ind.tgv <- (Mean.tgv[, -1]) %*% Weights
     MatePlan$Mean <- ind.tgv
+    Map.In[,1] <- letters[Map.In[,1]]
     Markers_name <- rownames(domEff) <- rownames(addEff) <- colnames(Markers) <- Map.In[, 3]
     Map.Chr <- split(Map.In, Map.In[, 1, drop = FALSE])
     Map.Pos <- split(Markers_name, Map.In[, 1, drop = FALSE])
@@ -247,6 +248,7 @@ getUsefAD_mt <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=N
       }
       ind.tgv <- (Mean.tgv[, -1]) %*% Weights
       MatePlan$Mean <- ind.tgv
+      Map.In[,1] <- letters[Map.In[,1]]
       Markers_name <- rownames(domEff) <- rownames(addEff) <- colnames(Markers) <- rownames(linkDes) <- colnames(linkDes) <- Map.In[,2]
       Map.Pos <- split(Markers_name, Map.In[, 1, drop = FALSE])
       Map.EffA <- split(data.frame(addEff), Map.In[, 1, drop = FALSE])
@@ -352,6 +354,7 @@ getUsefAD_mt <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=N
     }
     ind.tgv <- (Mean.tgv[, -1]) %*% Weights
     MatePlan$Mean <- ind.tgv
+    Map.In[,1] <- letters[Map.In[,1]]
     Markers_name <- rownames(domEff) <- rownames(addEff) <- colnames(Markers) <- Map.In[, 3]
     Map.Chr <- split(Map.In, Map.In[, 1, drop = FALSE])
     Map.Pos <- split(Markers_name, Map.In[, 1, drop = FALSE])
@@ -461,6 +464,7 @@ getUsefAD_mt <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=N
       }
       ind.tgv <- (Mean.tgv[, -1]) %*% Weights
       MatePlan$Mean <- ind.tgv
+      Map.In[,1] <- letters[Map.In[,1]]
       Markers_name <- rownames(domEff) <- rownames(addEff) <- colnames(Markers) <-colnames(linkDes) <- rownames(linkDes) <- Map.In[, 2]
       Map.Pos <- split(Markers_name, Map.In[, 1, drop = FALSE])
       Map.EffA <- split(data.frame(addEff), Map.In[, 1, drop = FALSE])
