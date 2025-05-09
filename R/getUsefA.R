@@ -123,6 +123,7 @@ getUsefA <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, propS
   }
 
   if(is.null(linkDes)){
+  Map.In[,1] <- letters[Map.In[,1]]
   Markers_names <- colnames(Markers) <- rownames(EffA) <- Map.In[, 3]
   Map.Chr <- split(Map.In, Map.In[, 1, drop = FALSE])
   Map.Pos <- split(Markers_names, Map.In[, 1, drop = FALSE])
@@ -204,7 +205,8 @@ getUsefA <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, propS
   rownames(MatePlan) <- NULL
 
   }else{
-
+    
+    Map.In[,1] <- letters[Map.In[,1]]
     Markers_names <- rownames(EffA) <- colnames(Markers) <- rownames(linkDes) <- colnames(linkDes) <- Map.In[,2]
     Map.Pos <- split(Markers_names, Map.In[, 1, drop = FALSE])
     Map.Eff <- split(EffA, Map.In[, 1, drop = FALSE])
