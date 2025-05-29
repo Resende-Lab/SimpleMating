@@ -367,7 +367,11 @@ getUsefAD_mt <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=N
       meanM <- abs(colSums(markersIn))
       meanM[meanM == 1] <- 0.5
       meanM[meanM == 0] <- 1
-      mat <- diag(meanM)
+      if (length(meanM) == 1) {
+          mat <- matrix(meanM, nrow = 1, ncol = 1)  # 
+        } else {
+          mat <- diag(meanM)
+        }
       return(mat)
     }
     MarkersD <- Markers
@@ -376,7 +380,11 @@ getUsefAD_mt <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=N
       meanMD <- abs(colSums(markersDIn))
       meanMD[meanMD == 0] <- 1
       meanMD[meanMD == 2] <- 0
-      matD <- diag(meanMD)
+      if (length(meanMD) == 1) {
+          matD <- matrix(meanMD, nrow = 1, ncol = 1)  # 
+        } else {
+          matD <- diag(meanMD)
+        }
       return(matD)
     }
     cros2cores <- list(`1` = MatePlan[, c(1:2)])
@@ -486,7 +494,11 @@ getUsefAD_mt <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=N
         meanM <- abs(colSums(markersIn))
         meanM[meanM == 1] <- 0.5
         meanM[meanM == 0] <- 1
-        mat <- diag(meanM)
+        if (length(meanM) == 1) {
+          mat <- matrix(meanM, nrow = 1, ncol = 1)  # 
+        } else {
+          mat <- diag(meanM)
+        }
         return(mat)
       }
       MarkersD <- Markers
@@ -495,7 +507,11 @@ getUsefAD_mt <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=N
         meanMD <- abs(colSums(markersDIn))
         meanMD[meanMD == 0] <- 1
         meanMD[meanMD == 2] <- 0
-        matD <- diag(meanMD)
+        if (length(meanMD) == 1) {
+          matD <- matrix(meanMD, nrow = 1, ncol = 1)  # 
+        } else {
+          matD <- diag(meanMD)
+        }
         return(matD)
       }
 
