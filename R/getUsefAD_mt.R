@@ -472,7 +472,7 @@ getUsefAD_mt <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=N
       }
       ind.tgv <- (Mean.tgv[, -1]) %*% Weights
       MatePlan$Mean <- ind.tgv
-      Map.In[,1] <- letters[Map.In[,1]]
+      #Map.In[,1] <- letters[Map.In[,1]]
       Markers_name <- rownames(domEff) <- rownames(addEff) <- colnames(Markers) <-colnames(linkDes) <- rownames(linkDes) <- Map.In[, 2]
       Map.Pos <- split(Markers_name, Map.In[, 1, drop = FALSE])
       Map.EffA <- split(data.frame(addEff), Map.In[, 1, drop = FALSE])
@@ -487,7 +487,7 @@ getUsefAD_mt <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=N
 
       MCov <- lapply(X = rMat, FUN = function(cFreq) 1 - (2 * cFreq))
       MCov <- setNames(MCov, names(block_sizes))
-      MCov <- MCov[order(as.character(names(MCov)))]
+      MCov <- MCov[order(as.numeric(names(MCov)))]
 
       Markers <- Markers - 1
       HDiag <- function(markersIn) {
@@ -528,7 +528,14 @@ getUsefAD_mt <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=N
           parGen <- lapply(SNPseg.Chr, function(tmp) Markers[Matepair, tmp, drop = FALSE])
           Hij <- lapply(parGen, HDiag)
           SNPseg.MCov <- mapply(SNPseg.Chr_pos, MCov, FUN = function(.a, .b) .b[.a, .a], SIMPLIFY = FALSE)
-          VarCov <- mapply(SNPseg.MCov, Hij, FUN = function(.a, .b) (.a - diag(.a)) + .b, SIMPLIFY = FALSE)
+          VarCov <- mapply(SNPseg.MCov, Hij, FUN = function(.a, .b) {
+            if (is.matrix(.a)) {
+              (.a - diag(.a)) + .b
+            } else {
+              .b  
+            }
+          }, SIMPLIFY = FALSE)
+          
           SNPseg.EffA <- mapply(SNPseg.Chr_pos, Map.EffA, FUN = function(.a, .b) .b[.a, ], SIMPLIFY = FALSE)
           MatVarA <- mapply(VarCov, SNPseg.EffA,
                             FUN = function(.a, .b) crossprod(as.matrix(.b), .a %*% as.matrix(.b)), SIMPLIFY = FALSE
