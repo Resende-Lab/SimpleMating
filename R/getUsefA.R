@@ -19,9 +19,9 @@
 #' @description
 #' Predicts usefulness component for a set of crosses. It accounts for only one
 #' trait controlled by additive effects. The variances were implemented according to Lehermeier et al. (2017). It accommodates Doubled-haploids (DH) and Recombinant
-#' inbred lines (RILs) types. The genetic map is used to built a recombination map for the population (we implemented the Haldane map function internally).
+#' inbred lines (RILs) types. The genetic map is used to build a recombination map for the population (we implemented the Haldane map function internally).
 #'
-#' @param MatePlan data frame with the two columns indicating the crosses to estimates usefulness.
+#' @param MatePlan data frame with the two columns indicating the crosses to estimate usefulness.
 #' @param Markers matrix with markers information for all candidate parents,
 #' coded as 0,2. Missing values should be coded as NA.
 #' @param addEff column vector with additive marker effects.
