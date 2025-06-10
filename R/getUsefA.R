@@ -8,7 +8,7 @@
 # Written by Marco Antonio Peixoto
 #
 # First version: Mar-2022
-# Last update: Sep-2023
+# Last update: Jun-2025
 #
 # License: GPL-3
 #
@@ -169,12 +169,12 @@ getUsefA <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, propS
       Total_SNP <- Markers[Matepair, , drop = FALSE]
       SNPseg <- which(!colMeans(Total_SNP) %in% c(1, -1))
       SNPseg.Chr <- lapply(Map.Pos, intersect, Markers_names[SNPseg])
-      SNPseg.Chr_pos <- mapply(Map.Pos, SNPseg.Chr, FUN = function(.a, .b) which(.a %in% .b))
+      SNPseg.Chr_pos <- mapply(FUN = function(.a, .b) which(.a %in% .b),Map.Pos, SNPseg.Chr,SIMPLIFY = FALSE)
       parGen <- lapply(SNPseg.Chr, function(tmp) Markers[Matepair, tmp, drop = FALSE])
       D <- lapply(parGen, calc.info)
-      SNPseg.MCov <- mapply(SNPseg.Chr_pos, MCov, FUN = function(.a, .b) .b[.a, .a])
+      SNPseg.MCov <- mapply(FUN = function(.a, .b) .b[.a, .a], SNPseg.Chr_pos, MCov, SIMPLIFY = FALSE)
       VarCov <- Map("*", D, SNPseg.MCov)
-      SNPseg.EffA <- mapply(SNPseg.Chr_pos, Map.Eff, FUN = function(.a, .b) .b[.a])
+      SNPseg.EffA <- mapply(FUN = function(.a, .b) .b[.a], SNPseg.Chr_pos, Map.Eff, SIMPLIFY = FALSE)
       Pair.Var <- sum(mapply(VarCov, SNPseg.EffA,
         FUN = function(.a, .b) crossprod(.b, .a %*% .b)
       ))
@@ -252,7 +252,6 @@ getUsefA <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, propS
       return(fourD)
     }
 
-
    crospredPar = function(Ncross) {
       cross_variance <- vector("list", nrow(Ncross))
       for (i in seq_along(cross_variance)) {
@@ -260,12 +259,12 @@ getUsefA <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, propS
         Total_SNP <- Markers[Matepair, , drop = FALSE]
         SNPseg <- which(!colMeans(Total_SNP) %in% c(1, -1))
         SNPseg.Chr <- lapply(Map.Pos, intersect, Markers_names[SNPseg])
-        SNPseg.Chr_pos <- mapply(Map.Pos, SNPseg.Chr, FUN = function(.a, .b) which(.a %in% .b))
+        SNPseg.Chr_pos <- mapply(FUN = function(.a, .b) which(.a %in% .b),Map.Pos, SNPseg.Chr,SIMPLIFY = FALSE)
         parGen <- lapply(SNPseg.Chr, function(tmp) Markers[Matepair, tmp, drop = FALSE])
         D <- lapply(parGen, calc.info)
-        SNPseg.MCov <- mapply(SNPseg.Chr_pos, MCov, FUN = function(.a, .b) .b[.a, .a])
+        SNPseg.MCov <- mapply(FUN = function(.a, .b) .b[.a, .a], SNPseg.Chr_pos, MCov, SIMPLIFY = FALSE)
         VarCov <- Map("*", D, SNPseg.MCov)
-        SNPseg.EffA <- mapply(SNPseg.Chr_pos, Map.Eff, FUN = function(.a, .b) .b[.a])
+        SNPseg.EffA <- mapply(FUN = function(.a, .b) .b[.a], SNPseg.Chr_pos, Map.Eff, SIMPLIFY = FALSE)
         Pair.Var <- sum(mapply(VarCov, SNPseg.EffA,
                                FUN = function(.a, .b) crossprod(.b, as.matrix(.a) %*% .b)
         ))
