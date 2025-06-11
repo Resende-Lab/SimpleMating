@@ -8,7 +8,7 @@
 # Written by Marco Antonio Peixoto
 #
 # First version: Mar-2022
-# Last update: Sep-2023
+# Last update: Jun-2025
 #
 # License: GPL-3
 #
@@ -19,9 +19,9 @@
 #' @description
 #' Predicts usefulness component for a set of crosses. It accounts for only one
 #' trait controlled by additive effects. The variances were implemented according to Lehermeier et al. (2017). It accommodates Doubled-haploids (DH) and Recombinant
-#' inbred lines (RILs) types. The genetic map is used to built a recombination map for the population (we implemented the Haldane map function internally).
+#' inbred lines (RILs) types. The genetic map is used to build a recombination map for the population (we implemented the Haldane map function internally).
 #'
-#' @param MatePlan data frame with the two columns indicating the crosses to estimates usefulness.
+#' @param MatePlan data frame with the two columns indicating the crosses to estimate usefulness.
 #' @param Markers matrix with markers information for all candidate parents,
 #' coded as 0,2. Missing values should be coded as NA.
 #' @param addEff column vector with additive marker effects.
@@ -123,7 +123,7 @@ getUsefA <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, propS
   }
 
   if(is.null(linkDes)){
-  Map.In[,1] <- letters[Map.In[,1]]
+  #Map.In[,1] <- letters[Map.In[,1]]
   Markers_names <- colnames(Markers) <- rownames(EffA) <- Map.In[, 3]
   Map.Chr <- split(Map.In, Map.In[, 1, drop = FALSE])
   Map.Pos <- split(Markers_names, Map.In[, 1, drop = FALSE])
@@ -206,7 +206,7 @@ getUsefA <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, propS
 
   }else{
     
-    Map.In[,1] <- letters[Map.In[,1]]
+    #Map.In[,1] <- letters[Map.In[,1]]
     Markers_names <- rownames(EffA) <- colnames(Markers) <- rownames(linkDes) <- colnames(linkDes) <- Map.In[,2]
     Map.Pos <- split(Markers_names, Map.In[, 1, drop = FALSE])
     Map.Eff <- split(EffA, Map.In[, 1, drop = FALSE])
