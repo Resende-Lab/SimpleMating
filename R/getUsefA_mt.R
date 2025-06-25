@@ -169,10 +169,10 @@ getUsefA_mt <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, pr
       Total_SNP <- Markers[Matepair, , drop = FALSE]
       SNPseg <- which(!colMeans(Total_SNP) %in% c(1, -1))
       SNPseg.Chr <- lapply(Map.Pos, intersect, Markers_names[SNPseg])
-      SNPseg.Chr_pos <- mapply(Map.Pos, SNPseg.Chr, FUN = function(.a, .b) which(.a %in% .b))
+      SNPseg.Chr_pos <- mapply(Map.Pos, SNPseg.Chr, FUN = function(.a, .b) which(.a %in% .b), SIMPLIFY = FALSE)
       parGen <- lapply(SNPseg.Chr, function(tmp) Markers[Matepair, tmp, drop = FALSE])
       D <- lapply(parGen, calc.info)
-      SNPseg.MCov <- mapply(SNPseg.Chr_pos, MCov, FUN = function(.a, .b) .b[.a, .a])
+      SNPseg.MCov <- mapply(SNPseg.Chr_pos, MCov, FUN = function(.a, .b) .b[.a, .a], SIMPLIFY = FALSE)
       VarCov <- Map("*", D, SNPseg.MCov)
       SNPseg.EffA <- mapply(SNPseg.Chr_pos, Map.Eff, FUN = function(.a, .b) .b[.a, ], SIMPLIFY = FALSE)
       Mat.Var <- mapply(VarCov, SNPseg.EffA,
