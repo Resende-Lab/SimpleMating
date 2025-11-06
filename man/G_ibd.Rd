@@ -2,21 +2,30 @@
 % Please edit documentation in R/RcppExports.R
 \name{G_ibd}
 \alias{G_ibd}
-\title{Compute the IBD Genomic Relationship Matrix}
+\title{Process Haplotypes for Identity-by-Descent Matrix}
 \usage{
-G_ibd(Markers, ploidy)
+G_ibd(haps_vec, n_samples, ploidy)
 }
 \arguments{
-\item{Markers}{A numeric matrix of genotype data where rows represent markers
-and columns represent individuals. Values should range from 0 to ploidy.}
+\item{haps_vec}{A character vector containing haplotype identifiers.
+The vector should contain ploidy * n_samples elements, where consecutive
+groups of ploidy elements represent the haplotypes for each sample.}
 
-\item{ploidy}{Integer. it indicates the ploidy level.}
+\item{n_samples}{An integer indicating the number of samples/individuals.}
+
+\item{ploidy}{An integer indicating the ploidy level of the organism
+(e.g., 2 for diploid, 4 for tetraploid).}
 }
 \value{
-A symmetric numeric matrix of dimensions n x n (where n is the number
-of individuals) containing the genomic relationship coefficients.
+A symmetric numeric matrix of dimensions n_samples x n_samples
+containing the IBD relationship coefficients based on haplotype matching.
 }
 \description{
-Computes a IBD relationship matrix from IBD data.
+Computes an identity-by-descent (IBD) relationship matrix from
+haplotype data using the Allele Matching (AM) method. Counts matching
+haplotypes between individuals and scales by ploidy.
+}
+\details{
+Process Haplotypes for IBD Calculation
 }
 \keyword{internal}
