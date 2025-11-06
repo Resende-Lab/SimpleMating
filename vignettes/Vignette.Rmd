@@ -168,6 +168,8 @@ Parents <- rownames(lines_Geno)
 Cross_plan <- planCross(TargetPop = Parents,
                         MateDesign = "half")
 
+##---- 2.1. Change the Chr to numeric
+lines_GenMap$chr <- as.numeric(lines_GenMap$chr)
 
 # 3. Creating a relationship matrix based on markers
 relMat <- (lines_Geno %*% t(lines_Geno)) / ncol(lines_Geno)
@@ -244,6 +246,8 @@ Cross_plan <- planCross(TargetPop = Parents,
 # 4. Relationship matrix
 relMat <- (generic_Geno %*% t(generic_Geno)) / ncol(generic_Geno)
 
+##---- 4.1. Change the Chr to numeric
+generic_GenMap$chr <- as.numeric(generic_GenMap$chr)
 
 # 5.  The usefulness of trait number 1 - Phased
 usef_Phased <- getUsefAD(MatePlan = Cross_plan,
