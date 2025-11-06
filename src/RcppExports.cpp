@@ -11,15 +11,14 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // G_ibd
-NumericMatrix G_ibd(NumericMatrix geno, int ploidy, NumericVector p_ref);
-RcppExport SEXP _SimpleMating_G_ibd(SEXP genoSEXP, SEXP ploidySEXP, SEXP p_refSEXP) {
+NumericMatrix G_ibd(NumericMatrix Markers, int ploidy);
+RcppExport SEXP _SimpleMating_G_ibd(SEXP MarkersSEXP, SEXP ploidySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type geno(genoSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type Markers(MarkersSEXP);
     Rcpp::traits::input_parameter< int >::type ploidy(ploidySEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type p_ref(p_refSEXP);
-    rcpp_result_gen = Rcpp::wrap(G_ibd(geno, ploidy, p_ref));
+    rcpp_result_gen = Rcpp::wrap(G_ibd(Markers, ploidy));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -38,7 +37,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_SimpleMating_G_ibd", (DL_FUNC) &_SimpleMating_G_ibd, 3},
+    {"_SimpleMating_G_ibd", (DL_FUNC) &_SimpleMating_G_ibd, 2},
     {"_SimpleMating_process_haplotypes", (DL_FUNC) &_SimpleMating_process_haplotypes, 3},
     {NULL, NULL, 0}
 };

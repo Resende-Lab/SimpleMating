@@ -1,59 +1,65 @@
-// File: GIBD.cpp
+// File: G_ibd.cpp
 #include <Rcpp.h>
 using namespace Rcpp;
 
-//' Compute Genomic Relationship Matrix
+
+//' @title Compute the IBD Genomic Relationship Matrix
+//' @description Computes a IBD relationship matrix from IBD data.
 //'
-//' @title Compute Genomic Relationship Matrix
-//' @description Computes a genomic relationship matrix from genotype data using
-//' allele frequencies. This function calculates the centered and scaled
-//' relationship matrix based on the method described in VanRaden (2008).
-//' @param geno A numeric matrix of genotype data where rows represent markers
+//' @param Markers A numeric matrix of genotype data where rows represent markers
 //' and columns represent individuals. Values should range from 0 to ploidy.
-//' Missing values (NA) are allowed.
-//' @param ploidy An integer indicating the ploidy level of the organism
-//' (e.g., 2 for diploid, 4 for tetraploid).
-//' @param p_ref A numeric vector of reference allele frequencies for each marker.
-//' Must have length equal to the number of rows in geno.
+//' @param ploidy Integer. it indicates the ploidy level.
 //' @return A symmetric numeric matrix of dimensions n x n (where n is the number
 //' of individuals) containing the genomic relationship coefficients.
 //' @keywords internal
 // [[Rcpp::export]]
-NumericMatrix G_ibd(NumericMatrix geno, int ploidy, NumericVector p_ref) {
-  int m = geno.nrow();
-  int n = geno.ncol();
+NumericMatrix G_ibd(NumericMatrix Markers, int ploidy) {
+  int m = Markers.nrow();  // number of markers
+  int n = Markers.ncol();  // number of individuals
 
-  // Compute coefficient matrix (transposed)
+  // Compute allele frequency per marker (mean / ploidy)
+  NumericVector p_ref(m);
+  for (int j = 0; j < m; j++) {
+    double sum = 0.0;
+    int count = 0;
+    for (int i = 0; i < n; i++) {
+      if (!NumericMatrix::is_na(Markers(j, i))) {
+        sum += Markers(j, i);
+        count++;
+      }
+    }
+    p_ref[j] = (count > 0) ? (sum / count / ploidy) : 0.5;  // fallback if all NA
+  }
+
+  // Compute coefficient matrix (centered markers)
   NumericMatrix coeff(n, m);
-
-  for(int i = 0; i < n; i++) {
-    for(int j = 0; j < m; j++) {
-      if(NumericMatrix::is_na(geno(j, i))) {
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < m; j++) {
+      if (NumericMatrix::is_na(Markers(j, i))) {
         coeff(i, j) = 0.0;
       } else {
-        coeff(i, j) = geno(j, i) - ploidy * p_ref[j];
+        coeff(i, j) = Markers(j, i) - ploidy * p_ref[j];
       }
     }
   }
 
   // Compute scale factor
   double scale = 0.0;
-  for(int j = 0; j < m; j++) {
+  for (int j = 0; j < m; j++) {
     scale += p_ref[j] * (1.0 - p_ref[j]);
   }
   scale *= ploidy;
 
-  // Compute tcrossprod(coeff) / scale efficiently
+  // Compute G matrix = tcrossprod(coeff) / scale
   NumericMatrix result(n, n);
-
-  for(int i = 0; i < n; i++) {
-    for(int k = 0; k <= i; k++) {
+  for (int i = 0; i < n; i++) {
+    for (int k = 0; k <= i; k++) {
       double sum = 0.0;
-      for(int j = 0; j < m; j++) {
+      for (int j = 0; j < m; j++) {
         sum += coeff(i, j) * coeff(k, j);
       }
       result(i, k) = sum / scale;
-      if(i != k) {
+      if (i != k) {
         result(k, i) = result(i, k);
       }
     }
@@ -65,17 +71,14 @@ NumericMatrix G_ibd(NumericMatrix geno, int ploidy, NumericVector p_ref) {
 //' Process Haplotypes for IBD Calculation
 //'
 //' @title Process Haplotypes for Identity-by-Descent Matrix
-//' @description Computes an identity-by-descent (IBD) relationship matrix from
-//' haplotype data using the Allele Matching (AM) method. Counts matching
-//' haplotypes between individuals and scales by ploidy.
+//' @description Estimates the identity-by-descent (IBD) relationship matrix from
+//' haplotype data using the Allele Matching (AM) method.
 //' @param haps_vec A character vector containing haplotype identifiers.
 //' The vector should contain ploidy * n_samples elements, where consecutive
 //' groups of ploidy elements represent the haplotypes for each sample.
-//' @param n_samples An integer indicating the number of samples/individuals.
-//' @param ploidy An integer indicating the ploidy level of the organism
-//' (e.g., 2 for diploid, 4 for tetraploid).
-//' @return A symmetric numeric matrix of dimensions n_samples x n_samples
-//' containing the IBD relationship coefficients based on haplotype matching.
+//' @param n_samples Integer. It indicates the number of samples/individuals.
+//' @param ploidy Integer. It indicates the ploidy level
+//' @return IBD relationship coefficients.
 //' @keywords internal
 // [[Rcpp::export]]
 NumericMatrix process_haplotypes(CharacterVector haps_vec, int n_samples, int ploidy) {

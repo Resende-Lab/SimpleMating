@@ -2,31 +2,21 @@
 % Please edit documentation in R/RcppExports.R
 \name{G_ibd}
 \alias{G_ibd}
-\title{Compute Genomic Relationship Matrix}
+\title{Compute the IBD Genomic Relationship Matrix}
 \usage{
-G_ibd(geno, ploidy, p_ref)
+G_ibd(Markers, ploidy)
 }
 \arguments{
-\item{geno}{A numeric matrix of genotype data where rows represent markers
-and columns represent individuals. Values should range from 0 to ploidy.
-Missing values (NA) are allowed.}
+\item{Markers}{A numeric matrix of genotype data where rows represent markers
+and columns represent individuals. Values should range from 0 to ploidy.}
 
-\item{ploidy}{An integer indicating the ploidy level of the organism
-(e.g., 2 for diploid, 4 for tetraploid).}
-
-\item{p_ref}{A numeric vector of reference allele frequencies for each marker.
-Must have length equal to the number of rows in geno.}
+\item{ploidy}{Integer. it indicates the ploidy level.}
 }
 \value{
 A symmetric numeric matrix of dimensions n x n (where n is the number
 of individuals) containing the genomic relationship coefficients.
 }
 \description{
-Computes a genomic relationship matrix from genotype data using
-allele frequencies. This function calculates the centered and scaled
-relationship matrix based on the method described in VanRaden (2008).
-}
-\details{
-Compute Genomic Relationship Matrix
+Computes a IBD relationship matrix from IBD data.
 }
 \keyword{internal}

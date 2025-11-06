@@ -11,19 +11,16 @@ process_haplotypes(haps_vec, n_samples, ploidy)
 The vector should contain ploidy * n_samples elements, where consecutive
 groups of ploidy elements represent the haplotypes for each sample.}
 
-\item{n_samples}{An integer indicating the number of samples/individuals.}
+\item{n_samples}{Integer. It indicates the number of samples/individuals.}
 
-\item{ploidy}{An integer indicating the ploidy level of the organism
-(e.g., 2 for diploid, 4 for tetraploid).}
+\item{ploidy}{Integer. It indicates the ploidy level}
 }
 \value{
-A symmetric numeric matrix of dimensions n_samples x n_samples
-containing the IBD relationship coefficients based on haplotype matching.
+IBD relationship coefficients.
 }
 \description{
-Computes an identity-by-descent (IBD) relationship matrix from
-haplotype data using the Allele Matching (AM) method. Counts matching
-haplotypes between individuals and scales by ploidy.
+Estimates the identity-by-descent (IBD) relationship matrix from
+haplotype data using the Allele Matching (AM) method.
 }
 \details{
 Process Haplotypes for IBD Calculation
