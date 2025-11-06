@@ -1,4 +1,43 @@
-/doc/
-/Meta/
-.Renviron
+# Compiled files
+*.o
+*.so
+*.dll
+
+# R data files
+*.rdb
+*.rdx
+*.rds
+
+# RStudio files
 .Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+
+# R check
+*.Rcheck/
+
+# Package build
+*.tar.gz
+*.zip
+
+# Documentation
+/man/*.Rd
+docs/
+
+# Vignettes
+inst/doc
+vignettes/*.html
+vignettes/*.pdf
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Other
+src/*.o
+src/*.so
+src/*.dll
+src-i386/
+src-x64/
