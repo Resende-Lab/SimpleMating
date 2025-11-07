@@ -17,6 +17,22 @@
 #' containing the IBD relationship coefficients based on haplotype matching.
 #' @keywords internal
 G_ibd <- function(haps_vec, n_samples, ploidy) {
-    .Call('_SimpleMating_G_ibd', PACKAGE = 'SimpleMating', haps_vec, n_samples, ploidy)
+    .Call(`_SimpleMating_G_ibd`, haps_vec, n_samples, ploidy)
+}
+
+getTGVcpp <- function(markers, effA, effD, parent1_idx, parent2_idx, ploidy) {
+    .Call(`_SimpleMating_getTGVcpp`, markers, effA, effD, parent1_idx, parent2_idx, ploidy)
+}
+
+computeTGV_single_cpp <- function(markers, effA, effD, parent1_idx, parent2_idx, ploidy) {
+    .Call(`_SimpleMating_computeTGV_single_cpp`, markers, effA, effD, parent1_idx, parent2_idx, ploidy)
+}
+
+imputeMarkers_cpp <- function(markers) {
+    .Call(`_SimpleMating_imputeMarkers_cpp`, markers)
+}
+
+meltK_TGV_cpp <- function(X, namesK) {
+    .Call(`_SimpleMating_meltK_TGV_cpp`, X, namesK)
 }
 

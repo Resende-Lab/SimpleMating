@@ -23,9 +23,68 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// getTGVcpp
+NumericMatrix getTGVcpp(NumericMatrix markers, NumericMatrix effA, NumericMatrix effD, IntegerVector parent1_idx, IntegerVector parent2_idx, double ploidy);
+RcppExport SEXP _SimpleMating_getTGVcpp(SEXP markersSEXP, SEXP effASEXP, SEXP effDSEXP, SEXP parent1_idxSEXP, SEXP parent2_idxSEXP, SEXP ploidySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type markers(markersSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type effA(effASEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type effD(effDSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type parent1_idx(parent1_idxSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type parent2_idx(parent2_idxSEXP);
+    Rcpp::traits::input_parameter< double >::type ploidy(ploidySEXP);
+    rcpp_result_gen = Rcpp::wrap(getTGVcpp(markers, effA, effD, parent1_idx, parent2_idx, ploidy));
+    return rcpp_result_gen;
+END_RCPP
+}
+// computeTGV_single_cpp
+NumericVector computeTGV_single_cpp(NumericMatrix markers, NumericVector effA, NumericVector effD, IntegerVector parent1_idx, IntegerVector parent2_idx, double ploidy);
+RcppExport SEXP _SimpleMating_computeTGV_single_cpp(SEXP markersSEXP, SEXP effASEXP, SEXP effDSEXP, SEXP parent1_idxSEXP, SEXP parent2_idxSEXP, SEXP ploidySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type markers(markersSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type effA(effASEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type effD(effDSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type parent1_idx(parent1_idxSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type parent2_idx(parent2_idxSEXP);
+    Rcpp::traits::input_parameter< double >::type ploidy(ploidySEXP);
+    rcpp_result_gen = Rcpp::wrap(computeTGV_single_cpp(markers, effA, effD, parent1_idx, parent2_idx, ploidy));
+    return rcpp_result_gen;
+END_RCPP
+}
+// imputeMarkers_cpp
+NumericMatrix imputeMarkers_cpp(NumericMatrix markers);
+RcppExport SEXP _SimpleMating_imputeMarkers_cpp(SEXP markersSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type markers(markersSEXP);
+    rcpp_result_gen = Rcpp::wrap(imputeMarkers_cpp(markers));
+    return rcpp_result_gen;
+END_RCPP
+}
+// meltK_TGV_cpp
+DataFrame meltK_TGV_cpp(NumericMatrix X, CharacterVector namesK);
+RcppExport SEXP _SimpleMating_meltK_TGV_cpp(SEXP XSEXP, SEXP namesKSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type X(XSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type namesK(namesKSEXP);
+    rcpp_result_gen = Rcpp::wrap(meltK_TGV_cpp(X, namesK));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_SimpleMating_G_ibd", (DL_FUNC) &_SimpleMating_G_ibd, 3},
+    {"_SimpleMating_getTGVcpp", (DL_FUNC) &_SimpleMating_getTGVcpp, 6},
+    {"_SimpleMating_computeTGV_single_cpp", (DL_FUNC) &_SimpleMating_computeTGV_single_cpp, 6},
+    {"_SimpleMating_imputeMarkers_cpp", (DL_FUNC) &_SimpleMating_imputeMarkers_cpp, 1},
+    {"_SimpleMating_meltK_TGV_cpp", (DL_FUNC) &_SimpleMating_meltK_TGV_cpp, 2},
     {NULL, NULL, 0}
 };
 

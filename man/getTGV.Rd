@@ -12,7 +12,8 @@ getTGV(
   K,
   ploidy = 2,
   Weights = NULL,
-  Scale = TRUE
+  Scale = TRUE,
+  use_cpp_melt = TRUE
 )
 }
 \arguments{
@@ -32,6 +33,10 @@ coded as 0,1,2.}
 \item{Weights}{vector with the weights for each trait. Only used when more than one trait is given.}
 
 \item{Scale}{Boolean. If TRUE, the trait values will be scaled. The default is TRUE. It is only used when more than one trait is given.}
+
+\item{use_cpp_melt}{Logical. If TRUE, uses C++ implementation for melting
+the relationship matrix (faster). If FALSE, uses R implementation.
+Default is TRUE. This is an internal parameter for performance tuning.}
 }
 \value{
 A data frame with all possible crosses from the MatePlan (Parent1 and Parent2), their total genetic value (Y), and covariance from the relationship matrix (K).
@@ -81,7 +86,7 @@ head(MT_tgv, 20)
 \references{
 \emph{Falconer, DS & Mackay TFC (1996). Introduction to quantitative genetics. Pearson Education India.}
 
-\emph{Peixoto, Amadeu, Bhering, Ferrao, Munoz, & Resende Jr. (2024). SimpleMating:  R-package for prediction and optimization of breeding crosses using genomic selection. The Plant Genome, e20533.https://doi.org/10.1002/tpg2.20533}
+\emph{Peixoto, Amadeu, Bhering, Ferrao, Munoz, & Resende Jr. (2025). SimpleMating:  R-package for prediction and optimization of breeding crosses using genomic selection. The Plant Genome, e20533.https://doi.org/10.1002/tpg2.20533}
 }
 \author{
 Marco Antonio Peixoto, \email{marco.peixotom@gmail.com}
