@@ -125,7 +125,7 @@ getUsefA_mt <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, pr
   })
 
   if(is.null(linkDes)){
-  Map.In[,1] <- letters[Map.In[,1]]
+  Map.In[,1] <- factor(Map.In[,1], levels = unique(Map.In[,1])) #Map.In[,1] <- letters[Map.In[,1]]
   Markers_names <- rownames(addEff) <- colnames(Markers) <- Map.In[, 3]
   Map.Chr <- split(Map.In, Map.In[, 1, drop = FALSE])
   Map.Pos <- split(Markers_names, Map.In[, 1, drop = FALSE])
@@ -156,7 +156,7 @@ getUsefA_mt <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, pr
   }
 
   MCov <- setNames(MCov, names(rMat))
-  MCov = MCov[order(as.character(names(MCov)))]
+  #MCov = MCov[order(as.character(names(MCov)))]
   Markers <- Markers - 1
   calc.info <- function(Markers) {
     fourD <- crossprod(Markers[1, , drop = FALSE] - Markers[2, , drop = FALSE]) / 4
@@ -209,7 +209,7 @@ getUsefA_mt <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, pr
 
 
   }else{
-    Map.In[,1] <- letters[Map.In[,1]]
+    Map.In[,1] <- factor(Map.In[,1], levels = unique(Map.In[,1]))# Map.In[,1] <- letters[Map.In[,1]]
     Markers_names <- rownames(addEff) <- colnames(Markers) <- rownames(linkDes) <- colnames(linkDes) <- Map.In[,2]
     Map.Pos <- split(Markers_names, Map.In[, 1, drop = FALSE])
     Map.Eff <- split(data.frame(addEff), Map.In[, 1, drop = FALSE])
@@ -247,7 +247,7 @@ getUsefA_mt <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, pr
       }
     }
     MCov <- setNames(MCov, names(block_sizes))
-    MCov = MCov[order(as.character(names(MCov)))]
+    #MCov = MCov[order(as.character(names(MCov)))]
     Markers <- Markers - 1
     calc.info <- function(Markers) {
       fourD <- crossprod(Markers[1, , drop = FALSE] - Markers[2, , drop = FALSE]) / 4
@@ -353,3 +353,4 @@ meltKUsef <- function(X) {
   rownames(X) <- NULL
   return(X)
 }
+
