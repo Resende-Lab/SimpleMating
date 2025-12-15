@@ -110,7 +110,7 @@ getTGV <- function(MatePlan, Markers, addEff, domEff, K,
   colnames(MatePlan) <- c("Parent1", "Parent2", "Cross.ID")
   
   # Impute missing markers using Rcpp
-  Markers <- imputeMarkers_cpp(Markers)
+  Markers <- imputeMarkersCpp(Markers)
   
   # Get parent indices
   parent1_idx <- match(MatePlan$Parent1, rownames(Markers))

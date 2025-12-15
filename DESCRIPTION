@@ -1,6 +1,6 @@
 Package: SimpleMating
 Title: A R package to breeding crosses optimization
-Version: 0.0.9002
+Version: 0.1.0
 Authors@R: 
     c(person("Marco", "Peixoto", , "marco.peixotom@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-0564-7068")),
@@ -15,8 +15,9 @@ Imports:
      stats (>= 4.2.3),
      ggplot2 (>= 3.3.6),
      AGHmatrix (>= 2.1.0),
-     Rcpp
-LinkingTo: Rcpp
+     Rcpp,
+     mco
+LinkingTo: Rcpp, RcppArmadillo
 License: GPL-3
 Encoding: UTF-8
 URL: https://github.com/Resende-Lab/SimpleMating

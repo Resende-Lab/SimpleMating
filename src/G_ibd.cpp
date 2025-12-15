@@ -4,6 +4,7 @@ using namespace Rcpp;
 
 //' Process Haplotypes for IBD Calculation
 //'
+//' @name G_ibd
 //' @title Process Haplotypes for Identity-by-Descent Matrix
 //' @description Computes an identity-by-descent (IBD) relationship matrix from
 //' haplotype data using the Allele Matching (AM) method. Counts matching

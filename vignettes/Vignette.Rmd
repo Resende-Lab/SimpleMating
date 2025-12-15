@@ -169,7 +169,7 @@ Cross_plan <- planCross(TargetPop = Parents,
                         MateDesign = "half")
 
 ##---- 2.1. Change the Chr to numeric
-lines_GenMap$chr <- as.numeric(lines_GenMap$chr)
+#lines_GenMap$chr <- as.numeric(lines_GenMap$chr)
 
 # 3. Creating a relationship matrix based on markers
 relMat <- (lines_Geno %*% t(lines_Geno)) / ncol(lines_Geno)

@@ -77,14 +77,29 @@
 #' @export
 
 getMPV <- function(MatePlan, Criterion, K = NULL, Weights = NULL, Scale = TRUE) {
-  if (!("data.frame" %in% class(Criterion))) {
-    stop("Argument 'Criterion' is not a data frame.\n")
+  # Input validation
+  if (!inherits(Criterion, "data.frame")) {
+    stop("Argument 'Criterion' must be a data frame.")
   }
-
+  
+  if (!inherits(MatePlan, "data.frame") || ncol(MatePlan) < 2) {
+    stop("Argument 'MatePlan' must be a data frame with at least 2 columns.")
+  }
+  
+  n_traits <- ncol(Criterion) - 1
+  
+  if (n_traits > 1 && is.null(Weights)) {
+    stop("Multiple traits detected. Please provide 'Weights' argument.")
+  }
+  
+  if (!is.null(Weights) && length(Weights) != n_traits) {
+    stop(sprintf("Length of 'Weights' (%d) must match number of traits (%d).",
+                 length(Weights), n_traits))
+  }
   if (!is.null(Weights)) {
-    Crit_tmp <- Criterion[, 2:ncol(Criterion)]
-
-    if (Scale == TRUE) {
+    Crit_tmp <- as.matrix(Criterion[, -1, drop = FALSE])
+    
+    if (Scale) {
       Crit_tmp <- scale(Crit_tmp)
     }
     SI <- (Crit_tmp %*% Weights)
@@ -93,6 +108,11 @@ getMPV <- function(MatePlan, Criterion, K = NULL, Weights = NULL, Scale = TRUE) 
     Crit_tmp <- data.frame(Genotype = Criterion[, 1], Trait = Criterion[, 2])
   }
 
+  # Ensure MatePlan has proper column names
+  if (is.null(colnames(MatePlan))) {
+    colnames(MatePlan) <- c("Parent1", "Parent2")
+  }
+  
   MatePlan$Cross.ID <- paste0(MatePlan[, 1], "_", MatePlan[, 2])
   bvCriterion <- mpv(Crit_tmp)
   KCriterion <- meltK(K)

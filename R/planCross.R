@@ -8,7 +8,7 @@
 # Written by Marco Antonio Peixoto
 #
 # First version: Mar-2022
-# Last update: Sep-2023
+# Last update: Dec-2025
 #
 # License: GPL-3
 #
@@ -59,6 +59,7 @@
 #' head(plan2, 10)
 #' }
 #'
+#' @importFrom utils combn
 #'
 #' @references \emph{Peixoto, Amadeu, Bhering, Ferrao, Munoz, & Resende Jr. (2024). SimpleMating:  R-package for prediction and optimization of breeding crosses using genomic selection. The Plant Genome, e20533.https://doi.org/10.1002/tpg2.20533}
 #'
@@ -66,89 +67,94 @@
 
 
 planCross <- function(TargetPop, MateDesign = "half", TargetPop2 = NULL, Indiv2keep = NULL) {
+  
   if (!MateDesign %in% c("full_p", "full", "half", "half_p", "maxAvoid", "circularPlan")) {
-    stop(deparse("Please, choose a valid mate design plan. The options are: full_p, full, half_p, and half"))
+    stop("Please, choose a valid mate design plan. The options are: full_p, full, half_p, and half")
   }
-
+  
+  # Handle TargetPop2 case (North Carolina Design II)
   if (!is.null(TargetPop2)) {
-    group1 <- TargetPop
-    group2 <- TargetPop2
-    parent_comb <- matrix(nrow = 0, ncol = 2)
-
-    for (i in 1:length(group1)) {
-      for (j in 1:length(group2)) {
-        pair <- c(group1[i], group2[j])
-        parent_comb <- rbind(parent_comb, pair)
-      }
-    }
+    # Use expand.grid for vectorized combination
+    MatePlan <- expand.grid(Parent1 = TargetPop, 
+                            Parent2 = TargetPop2, 
+                            stringsAsFactors = FALSE)
+    
   } else {
+    # Filter individuals if needed
     if (!is.null(Indiv2keep)) {
-      group1 <- group2 <- TargetPop[TargetPop %in% Indiv2keep]
+      group <- TargetPop[TargetPop %in% Indiv2keep]
     } else {
-      group1 <- group2 <- TargetPop
+      group <- TargetPop
     }
-    parent_comb <- matrix(nrow = 0, ncol = 2)
+    
+    n <- length(group)
+    
     if (MateDesign == "half") {
-      ij <- 1
-      for (i in 1:(length(group1) - 1)) {
-        for (j in (i + 1):length(group2)) {
-          parent_comb <- rbind(parent_comb, c(group1[i], group2[j]))
-          ij + ij + 1
-        }
+      # Use combn for combinations without replacement
+      if (n > 1) {
+        combinations <- t(combn(n, 2))
+        MatePlan <- data.frame(
+          Parent1 = group[combinations[, 1]],
+          Parent2 = group[combinations[, 2]],
+          stringsAsFactors = FALSE
+        )
+      } else {
+        MatePlan <- data.frame(Parent1 = character(0), Parent2 = character(0))
       }
-      parent_comb <- unique(parent_comb)
+      
     } else if (MateDesign == "half_p") {
-      ij <- 1
-      for (i in 1:length(group1)) {
-        for (j in i:length(group2)) {
-          parent_comb <- rbind(parent_comb, c(group1[i], group2[j]))
-          ij + ij + 1
-        }
-      }
-      parent_comb <- unique(parent_comb)
-
+      # Combinations with replacement (includes selfs)
+      indices <- expand.grid(i = 1:n, j = 1:n)
+      indices <- indices[indices$j >= indices$i, ]
+      MatePlan <- data.frame(
+        Parent1 = group[indices$i],
+        Parent2 = group[indices$j],
+        stringsAsFactors = FALSE
+      )
+      
     } else if (MateDesign == "full") {
-      ij <- 1
-      for (i in 1:(length(group1) - 1)) {
-        for (j in (i + 1):length(group2)) {
-          parent_comb <- rbind(parent_comb, c(group1[i], group2[j]))
-          parent_comb <- rbind(parent_comb, c(group1[j], group2[i]))
-          ij + ij + 1
-        }
-      }
-      parent_comb <- unique(parent_comb)
-
+      # All pairs except selfs
+      indices <- expand.grid(i = 1:n, j = 1:n)
+      indices <- indices[indices$i != indices$j, ]
+      MatePlan <- data.frame(
+        Parent1 = group[indices$i],
+        Parent2 = group[indices$j],
+        stringsAsFactors = FALSE
+      )
+      
     } else if (MateDesign == "full_p") {
-      ij <- 1
-      for (i in 1:length(group1)) {
-        for (j in i:length(group2)) {
-          parent_comb <- rbind(parent_comb, c(group1[i], group2[j]))
-          parent_comb <- rbind(parent_comb, c(group1[j], group2[i]))
-          ij + ij + 1
-        }
+      # All pairs including selfs
+      MatePlan <- expand.grid(Parent1 = group, 
+                              Parent2 = group, 
+                              stringsAsFactors = FALSE)
+      
+    } else if (MateDesign == "maxAvoid") {
+      # Maximum avoidance of inbreeding
+      if (n %% 2 != 0) {
+        warning("Maximum avoidance requires even number of parents. Last parent will be excluded.")
+        group <- group[1:(n-1)]
+        n <- n - 1
       }
-      parent_comb <- unique(parent_comb)
-
-
-    } else if (MateDesign == "maxAvoid"){
-      Plan <- matrix(1:length(TargetPop), ncol = 2, byrow = TRUE)
-      orderTmp <- TargetPop[c(seq(1, length(TargetPop), by = 2), seq(2, length(TargetPop), by = 2))]
-      parent_comb <- cbind(orderTmp[Plan[, 1]], orderTmp[Plan[, 2]])
-
-    } else if (MateDesign == "circularPlan"){
-      Plan = matrix(rep(1:length(TargetPop), 2),ncol=2)
-      Plan[,1] <- Plan[,1] - 1
-      Plan[1,1] <- nrow(Plan)
-      parent_comb <- cbind(TargetPop[Plan[, 1]], TargetPop[Plan[, 2]])
-
+      Plan <- matrix(1:n, ncol = 2, byrow = TRUE)
+      orderTmp <- group[c(seq(1, n, by = 2), seq(2, n, by = 2))]
+      MatePlan <- data.frame(
+        Parent1 = orderTmp[Plan[, 1]],
+        Parent2 = orderTmp[Plan[, 2]],
+        stringsAsFactors = FALSE
+      )
+      
+    } else if (MateDesign == "circularPlan") {
+      # Circular mating plan
+      Plan <- matrix(rep(1:n, 2), ncol = 2)
+      Plan[, 1] <- c(n, 1:(n-1))
+      MatePlan <- data.frame(
+        Parent1 = group[Plan[, 1]],
+        Parent2 = group[Plan[, 2]],
+        stringsAsFactors = FALSE
+      )
     }
-
   }
-
-MatePlan <- data.frame(Parent1 = parent_comb[, 1], Parent2 = parent_comb[, 2])
-
-cat("Number of crosses generated:", nrow(MatePlan), "\n")
-
-return(MatePlan)
-
+  
+  cat("Number of potential crosses generated:", nrow(MatePlan), "\n")
+  return(MatePlan)
 }

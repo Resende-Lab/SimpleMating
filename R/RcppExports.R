@@ -3,6 +3,7 @@
 
 #' Process Haplotypes for IBD Calculation
 #'
+#' @name G_ibd
 #' @title Process Haplotypes for Identity-by-Descent Matrix
 #' @description Computes an identity-by-descent (IBD) relationship matrix from
 #' haplotype data using the Allele Matching (AM) method. Counts matching
@@ -28,11 +29,11 @@ computeTGV_single_cpp <- function(markers, effA, effD, parent1_idx, parent2_idx,
     .Call(`_SimpleMating_computeTGV_single_cpp`, markers, effA, effD, parent1_idx, parent2_idx, ploidy)
 }
 
-imputeMarkers_cpp <- function(markers) {
-    .Call(`_SimpleMating_imputeMarkers_cpp`, markers)
-}
-
 meltK_TGV_cpp <- function(X, namesK) {
     .Call(`_SimpleMating_meltK_TGV_cpp`, X, namesK)
+}
+
+imputeMarkersCpp <- function(markers) {
+    .Call(`_SimpleMating_imputeMarkersCpp`, markers)
 }
 
