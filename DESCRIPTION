@@ -16,7 +16,7 @@ Imports:
      ggplot2 (>= 3.3.6),
      Rcpp,
      mco
-LinkingTo: Rcpp, RcppArmadillo
+LinkingTo: Rcpp, RcppArmadillo, RcppEigen
 License: GPL-3
 Encoding: UTF-8
 URL: https://github.com/Resende-Lab/SimpleMating

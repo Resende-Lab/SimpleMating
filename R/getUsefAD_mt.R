@@ -127,7 +127,7 @@ getUsefAD_mt <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=N
     if(is.null(linkDes)){
     EffA <- as.matrix(addEff)
     EffD <- as.matrix(domEff)
-    Markers <- apply(Markers, 2, FUN = function(wna) sapply(wna, function(ina) ifelse(is.na(ina), mean(wna, na.rm = TRUE), ina)))
+    Markers <- imputeMarkersCpp(Markers)
     MarkersMean <- getDiplotypes(Markers = Markers)
 
     if (!any(gnames %in% rownames(MarkersMean))) {
@@ -157,7 +157,7 @@ getUsefAD_mt <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=N
     Map.Pos <- split(Markers_name, Map.In[, 1, drop = FALSE])
     Map.EffA <- split(data.frame(addEff), Map.In[, 1, drop = FALSE])
     Map.EffD <- split(data.frame(domEff), Map.In[, 1, drop = FALSE])
-    rMat <- lapply(Map.Chr, theta)
+    rMat <- lapply(Map.Chr, FUN = function(.a) thetaEigen(.a[,2]))
     MCov <- lapply(rMat, FUN = function(cFreq) 1 - (2 * cFreq))
     calc.Dijw <- function(Par_Phased, MCV) {
       Dg <- MCV * ((0.5 * crossprod(Par_Phased)) - tcrossprod(colMeans(Par_Phased)))
@@ -224,7 +224,7 @@ getUsefAD_mt <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=N
     }else{
       EffA <- as.matrix(addEff)
       EffD <- as.matrix(domEff)
-      Markers <- apply(Markers, 2, FUN = function(wna) sapply(wna, function(ina) ifelse(is.na(ina), mean(wna, na.rm = TRUE), ina)))
+      Markers <- imputeMarkersCpp(Markers)
       MarkersMean <- getDiplotypes(Markers = Markers)
 
       if (!any(gnames %in% rownames(MarkersMean))) {
@@ -332,7 +332,7 @@ getUsefAD_mt <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=N
     if(is.null(linkDes)){
     EffA <- as.matrix(addEff)
     EffD <- as.matrix(domEff)
-    Markers <- apply(Markers, 2, FUN = function(wna) sapply(wna, function(ina) ifelse(is.na(ina), mean(wna, na.rm = TRUE), ina)))
+    Markers <- imputeMarkersCpp(Markers)
     if (!any(gnames %in% rownames(Markers))) {
       stop("Some individuals from 'MatePlan' are missing in 'Markers'.\n")
     }
@@ -450,7 +450,7 @@ getUsefAD_mt <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=N
     }else{
       EffA <- as.matrix(addEff)
       EffD <- as.matrix(domEff)
-      Markers <- apply(Markers, 2, FUN = function(wna) sapply(wna, function(ina) ifelse(is.na(ina), mean(wna, na.rm = TRUE), ina)))
+      Markers <- imputeMarkersCpp(Markers)
       if (!any(gnames %in% rownames(Markers))) {
         stop("Some individuals from 'MatePlan' are missing in 'Markers'.\n")
       }

@@ -1,4 +1,6 @@
 // File: helpers.cpp
+// [[Rcpp::depends(RcppEigen)]]
+#include <RcppEigen.h>
 #include <Rcpp.h>
 using namespace Rcpp;
 
@@ -33,4 +35,18 @@ NumericMatrix imputeMarkersCpp(NumericMatrix markers) {
   }
   
   return result;
+}
+
+
+// Haldane – vectorised with Eigen
+// [[Rcpp::export]]
+Eigen::MatrixXd thetaEigen(const Eigen::VectorXd &dist) {
+  int n = dist.size();
+  Eigen::MatrixXd r(n,n);
+  for (int i=0;i<n;i++)
+    for (int j=0;j<n;j++) {
+      double d = std::abs(dist(i)-dist(j));
+      r(i,j) = 0.5 * (1.0 - std::exp(-2.0*d/100.0));
+    }
+    return r;
 }

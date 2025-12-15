@@ -116,9 +116,10 @@ getUsefA_mt <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, pr
   
   MatePlan$idcross <- paste0(MatePlan[, 1], "_", MatePlan[, 2])
   colnames(MatePlan) <- c("Parent1", "Parent2", "Cross.ID")
-  Markers <- apply(Markers, 2, FUN = function(wna) sapply(wna, function(ina) ifelse(is.na(ina), mean(wna, na.rm = TRUE), ina)))
+  Markers <- imputeMarkersCpp(Markers)
   EffA <- as.matrix(addEff)
   Index_Mean <- ((Markers %*% EffA) %*% Weights)
+  
   MatePlan$Mean <- apply(MatePlan, 1, function(tmp) {
     Mean_Cross <- (Index_Mean[rownames(Index_Mean) %in% tmp[1]] + Index_Mean[rownames(Index_Mean) %in% tmp[2]]) / 2
     return(round(Mean_Cross, digits = 5))
@@ -130,7 +131,8 @@ getUsefA_mt <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, pr
     Map.Chr <- split(Map.In, Map.In[, 1, drop = FALSE])
     Map.Pos <- split(Markers_names, Map.In[, 1, drop = FALSE])
     Map.Eff <- split(data.frame(addEff), Map.In[, 1, drop = FALSE])
-    rMat <- lapply(Map.Chr, theta)
+    rMat <- lapply(Map.Chr, FUN = function(.a) thetaEigen(.a[,2]))
+    
     if (Type == "DH") {
       if (Generation == 1) {
         MCov <- lapply(X = rMat, FUN = function(ctheta) 1 - (2 * ctheta))
@@ -246,7 +248,7 @@ getUsefA_mt <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, pr
       }
     }
     MCov <- setNames(MCov, names(block_sizes))
-    #MCov = MCov[order(as.character(names(MCov)))]
+
     Markers <- Markers - 1
     calc.info <- function(Markers) {
       fourD <- crossprod(Markers[1, , drop = FALSE] - Markers[2, , drop = FALSE]) / 4

@@ -1,4 +1,4 @@
-// File: getTGVcpp.cpp
+// File: getTGV.cpp
 #include <Rcpp.h>
 using namespace Rcpp;
 

@@ -2,6 +2,7 @@
 // Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 #include <RcppArmadillo.h>
+#include <RcppEigen.h>
 #include <Rcpp.h>
 
 using namespace Rcpp;
@@ -79,6 +80,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// thetaEigen
+Eigen::MatrixXd thetaEigen(const Eigen::VectorXd& dist);
+RcppExport SEXP _SimpleMating_thetaEigen(SEXP distSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type dist(distSEXP);
+    rcpp_result_gen = Rcpp::wrap(thetaEigen(dist));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_SimpleMating_G_ibd", (DL_FUNC) &_SimpleMating_G_ibd, 3},
@@ -86,6 +98,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SimpleMating_computeTGV_single_cpp", (DL_FUNC) &_SimpleMating_computeTGV_single_cpp, 6},
     {"_SimpleMating_meltK_TGV_cpp", (DL_FUNC) &_SimpleMating_meltK_TGV_cpp, 2},
     {"_SimpleMating_imputeMarkersCpp", (DL_FUNC) &_SimpleMating_imputeMarkersCpp, 1},
+    {"_SimpleMating_thetaEigen", (DL_FUNC) &_SimpleMating_thetaEigen, 1},
     {NULL, NULL, 0}
 };
 

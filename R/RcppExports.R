@@ -37,3 +37,7 @@ imputeMarkersCpp <- function(markers) {
     .Call(`_SimpleMating_imputeMarkersCpp`, markers)
 }
 
+thetaEigen <- function(dist) {
+    .Call(`_SimpleMating_thetaEigen`, dist)
+}
+

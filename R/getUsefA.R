@@ -111,7 +111,7 @@ getUsefA <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, propS
   MatePlan$idcross <- paste0(MatePlan[, 1], "_", MatePlan[, 2])
   colnames(MatePlan) <- c("Parent1", "Parent2", "Cross.ID")
   EffA <- as.matrix(addEff)
-  Markers <- apply(Markers, 2, FUN = function(wna) sapply(wna, function(ina) ifelse(is.na(ina), mean(wna, na.rm = TRUE), ina)))
+  Markers <- imputeMarkersCpp(Markers)
   est.bredv <- Markers %*% EffA
   MatePlan$Mean <- apply(MatePlan, 1, function(tmp) {
     Mean_Cross <- (est.bredv[rownames(est.bredv) %in% tmp[1]] + est.bredv[rownames(est.bredv) %in% tmp[2]]) / 2
@@ -128,7 +128,7 @@ getUsefA <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, propS
   Map.Chr <- split(Map.In, Map.In[, 1, drop = FALSE])
   Map.Pos <- split(Markers_names, Map.In[, 1, drop = FALSE])
   Map.Eff <- split(EffA, Map.In[, 1, drop = FALSE])
-  rMat <- lapply(Map.Chr, theta)
+  rMat <- lapply(Map.Chr, FUN = function(.a) thetaEigen(.a[,2]))
 
   if (Type == "DH") {
     if (Generation == 1) {
