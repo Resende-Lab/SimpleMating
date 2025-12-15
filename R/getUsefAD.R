@@ -147,8 +147,9 @@ getUsefAD <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=NULL
       Mean.tgv <- sum(tgv)
       MuT[j] <- round(Mean.tgv, digits = 5)
     }
+    
     MatePlan$Total.gv <- MuT
-    Map.In[,1] <- letters[Map.In[,1]]
+    Map.In[,1] <- factor(Map.In[,1], levels = unique(Map.In[,1])) 
     Markers_name <- names(domEff) <- names(addEff) <- colnames(Markers) <- Map.In[, 3]
     Map.Chr <- split(Map.In, Map.In[, 1, drop = FALSE])
     Map.Pos <- split(Markers_name, Map.In[, 1, drop = FALSE])
@@ -237,7 +238,7 @@ getUsefAD <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=NULL
         MuT[j] <- round(Mean.tgv, digits = 5)
       }
       MatePlan$Total.gv <- MuT
-      Map.In[,1] <- letters[Map.In[,1]]
+      Map.In[,1] <- factor(Map.In[,1], levels = unique(Map.In[,1])) 
       Markers_name <- names(domEff) <- names(addEff) <-colnames(linkDes) <- rownames(linkDes) <- colnames(Markers) <- Map.In[,2]
       Map.Pos <- split(Markers_name, Map.In[, 1, drop = FALSE])
       Map.EffA <- split(addEff, Map.In[, 1, drop = FALSE])
@@ -255,8 +256,7 @@ getUsefAD <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=NULL
 
       MCov <- lapply(rMat, FUN = function(cFreq) 1 - (2 * cFreq))
       MCov <- setNames(MCov, names(block_sizes))
-      MCov = MCov[order(as.character(names(MCov)))]
-
+     
       calDij <- function(Par_Phased, MCV) {
         Dg <- MCV * ((0.5 * crossprod(Par_Phased)) - tcrossprod(colMeans(Par_Phased)))
         return(Dg)
@@ -339,7 +339,7 @@ getUsefAD <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=NULL
       MuT[j] <- round(Mean.tgv, digits = 5)
     }
     MatePlan$Total.gv <- MuT
-    Map.In[,1] <- letters[Map.In[,1]]
+    Map.In[,1] <- factor(Map.In[,1], levels = unique(Map.In[,1])) 
     Markers_name <- names(domEff) <- names(addEff) <- colnames(Markers) <- Map.In[, 3]
     Map.Chr <- split(Map.In, Map.In[, 1, drop = FALSE])
     Map.Pos <- split(Markers_name, Map.In[, 1, drop = FALSE])
@@ -450,7 +450,7 @@ getUsefAD <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=NULL
       MuT[j] <- round(Mean.tgv, digits = 5)
     }
     MatePlan$Total.gv <- MuT
-    Map.In[,1] <- letters[Map.In[,1]]
+    Map.In[,1] <- factor(Map.In[,1], levels = unique(Map.In[,1])) 
     Markers_name <- names(domEff) <- names(addEff) <- colnames(Markers) <- colnames(linkDes) <- rownames(linkDes) <- Map.In[,2]
     Map.Pos <- split(Markers_name, Map.In[, 1, drop = FALSE])
     Map.EffA <- split(addEff, Map.In[, 1, drop = FALSE])
@@ -468,8 +468,7 @@ getUsefAD <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=NULL
 
     MCov <- lapply(rMat, FUN = function(cFreq) 1 - (2 * cFreq))
     MCov <- setNames(MCov, names(block_sizes))
-    MCov = MCov[order(as.character(names(MCov)))]
-
+    
     cros2cores <- list(`1` = MatePlan[, c(1:2)])
     Markers <- Markers - 1
     HDiag <- function(markersIn) {
