@@ -25,12 +25,8 @@ getTGVcpp <- function(markers, effA, effD, parent1_idx, parent2_idx, ploidy) {
     .Call(`_SimpleMating_getTGVcpp`, markers, effA, effD, parent1_idx, parent2_idx, ploidy)
 }
 
-computeTGV_single_cpp <- function(markers, effA, effD, parent1_idx, parent2_idx, ploidy) {
-    .Call(`_SimpleMating_computeTGV_single_cpp`, markers, effA, effD, parent1_idx, parent2_idx, ploidy)
-}
-
-meltK_TGV_cpp <- function(X, namesK) {
-    .Call(`_SimpleMating_meltK_TGV_cpp`, X, namesK)
+meltK_cpp <- function(X, namesK) {
+    .Call(`_SimpleMating_meltK_cpp`, X, namesK)
 }
 
 imputeMarkersCpp <- function(markers) {

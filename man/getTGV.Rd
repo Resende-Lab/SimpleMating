@@ -12,8 +12,7 @@ getTGV(
   K,
   ploidy = 2,
   Weights = NULL,
-  Scale = TRUE,
-  use_cpp_melt = TRUE
+  Scale = TRUE
 )
 }
 \arguments{
@@ -33,10 +32,6 @@ coded as 0,1,2.}
 \item{Weights}{vector with the weights for each trait. Only used when more than one trait is given.}
 
 \item{Scale}{Boolean. If TRUE, the trait values will be scaled. The default is TRUE. It is only used when more than one trait is given.}
-
-\item{use_cpp_melt}{Logical. If TRUE, uses C++ implementation for melting
-the relationship matrix (faster). If FALSE, uses R implementation.
-Default is TRUE. This is an internal parameter for performance tuning.}
 }
 \value{
 A data frame with all possible crosses from the MatePlan (Parent1 and Parent2), their total genetic value (Y), and covariance from the relationship matrix (K).

@@ -30,9 +30,7 @@
 #' @param ploidy data ploidy (generally an even number). Default=2.
 #' @param Weights vector with the weights for each trait. Only used when more than one trait is given.
 #' @param Scale Boolean. If TRUE, the trait values will be scaled. The default is TRUE. It is only used when more than one trait is given.
-#' @param use_cpp_melt Logical. If TRUE, uses C++ implementation for melting 
-#'   the relationship matrix (faster). If FALSE, uses R implementation. 
-#'   Default is TRUE. This is an internal parameter for performance tuning.
+#'
 #' @return A data frame with all possible crosses from the MatePlan (Parent1 and Parent2), their total genetic value (Y), and covariance from the relationship matrix (K).
 #'
 #' @author Marco Antonio Peixoto, \email{marco.peixotom@@gmail.com}
@@ -77,16 +75,12 @@
 #' @references \emph{Peixoto, Amadeu, Bhering, Ferrao, Munoz, & Resende Jr. (2025). SimpleMating:  R-package for prediction and optimization of breeding crosses using genomic selection. The Plant Genome, e20533.https://doi.org/10.1002/tpg2.20533}
 #'
 #' @importFrom stats na.omit
-#' @useDynLib SimpleMating, .registration = TRUE
-#' @importFrom Rcpp evalCpp
-#' @import Rcpp
 #' @export
 
 
-getTGV <- function(MatePlan, Markers, addEff, domEff, K, 
-                      ploidy = 2, Weights = NULL, Scale = TRUE,
-                      use_cpp_melt = TRUE) {
-  
+getTGV <- function (MatePlan, Markers, addEff, domEff, K, ploidy = 2, 
+                    Weights = NULL, Scale = TRUE) 
+{
   # Input validation
   if (!("data.frame" %in% class(MatePlan))) {
     stop("Argument 'MatePlan' is not a data frame.\n")
@@ -106,7 +100,8 @@ getTGV <- function(MatePlan, Markers, addEff, domEff, K,
   }
   
   # Create Cross.ID
-  MatePlan$Cross.ID <- paste0(MatePlan[, 1], "_", MatePlan[, 2])
+  MatePlan$Cross.ID <- paste0(MatePlan[, 1], "_", MatePlan[, 
+                                                           2])
   colnames(MatePlan) <- c("Parent1", "Parent2", "Cross.ID")
   
   # Impute missing markers using Rcpp
@@ -123,68 +118,53 @@ getTGV <- function(MatePlan, Markers, addEff, domEff, K,
   
   # Compute TGV based on whether Weights are provided
   if (!is.null(Weights)) {
+    
     # Multiple traits case
     EffA <- as.matrix(addEff)
     EffD <- as.matrix(domEff)
-    
     if (ncol(EffA) != length(Weights)) {
       stop("Number of columns in addEff must match length of Weights.\n")
     }
-    
     # Compute TGV for all traits using Rcpp
-    Mean.tgv <- getTGVcpp(Markers, EffA, EffD, parent1_idx, parent2_idx, ploidy)
+    Mean.tgv <- getTGVcpp(Markers, EffA, EffD, parent1_idx, 
+                          parent2_idx, ploidy)
     
     # Scale if requested
     if (Scale) {
       Mean.tgv <- scale(Mean.tgv) %*% Weights
-    } else {
+    }
+    else {
       Mean.tgv <- Mean.tgv %*% Weights
     }
-    
-    MatePlan$Mean <- as.vector(Mean.tgv)
-    
-  } else {
-    # Single trait case
-    EffA <- as.vector(addEff)
-    EffD <- as.vector(domEff)
+    MatePlan$Y <- as.vector(round(Mean.tgv, digits = 5))
+  }
+  
+  # Single trait case
+  else {
+    EffA <- as.matrix(addEff)
+    EffD <- as.matrix(domEff)
     
     # Compute TGV using Rcpp
-    MuT <- computeTGV_single_cpp(Markers, EffA, EffD, parent1_idx, parent2_idx, ploidy)
-    
-    MatePlan$Y <- round(MuT, digits = 5)
+    Mean.tgv <- getTGVcpp(Markers, EffA, EffD, parent1_idx, 
+                          parent2_idx, ploidy)
+    MatePlan$Y <- round(Mean.tgv, digits = 5)
   }
   
   # Melt K matrix using optimized function
-  KCriterion <- meltK_TGV_fast(K)
+  KCriterion <- meltK_fast(K)
   
   # Remove duplicates from KCriterion before merging
-  KCriterion <- KCriterion[!duplicated(KCriterion$Cross.ID), ]
+  KCriterion <- KCriterion[!duplicated(KCriterion$Cross.ID), 
+  ]
   
   # Merge with K criterion
-  Matingplan <- merge(MatePlan, KCriterion[, c("Cross.ID", "K")], by = "Cross.ID")
+  Matingplan <- merge(MatePlan, KCriterion[, c("Cross.ID", 
+                                               "K")], by = "Cross.ID")
   Matingplan <- Matingplan[, -1]
   rownames(Matingplan) <- NULL
-  
   cat(paste0("TGVs predicted for ", nrow(Matingplan), " crosses. \n"))
-  
   return(Matingplan)
 }
 
 
-# Optimized meltK_TGV function
-meltK_TGV_fast <- function(X) {
-  if (!is.matrix(X)) {
-    stop("X must be a matrix.\n")
-  }
-  
-  namesK <- rownames(X)
-  if (is.null(namesK)) {
-    namesK <- as.character(1:nrow(X))
-  }
-  
-  # Use Rcpp function for speed
-  result <- meltK_TGV_cpp(X, namesK)
-  
-  return(result)
-}
 
