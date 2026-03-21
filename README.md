@@ -23,7 +23,7 @@ Run it in R:
 ```{r}
 
 library(devtools)
-install_github('Resende-Lab/SimpleMating') # current version:  0.1.9001 (december 2nd, 2024)
+install_github('Resende-Lab/SimpleMating') # current version:  0.2.1000 (March, 2nd, 2026)
 
 ```
 
