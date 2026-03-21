@@ -115,7 +115,7 @@ getMPV <- function(MatePlan, Criterion, K = NULL, Weights = NULL, Scale = TRUE) 
   
   MatePlan$Cross.ID <- paste0(MatePlan[, 1], "_", MatePlan[, 2])
   bvCriterion <- mpv(Crit_tmp)
-  KCriterion <- meltK(K)
+  KCriterion <- meltK_cpp(K, namesK = colnames(K))
   cross2keep <- MatePlan$Cross.ID
 
   bvPed <- paste0(bvCriterion$Parent1, "_", bvCriterion$Parent2)
@@ -147,14 +147,3 @@ mpv <- function(data) {
   return(X)
 }
 
-
-meltK <- function(X) {
-  namesK <- rownames(X)
-  X <- cbind(which(!is.na(X), arr.ind = TRUE), na.omit(as.vector(X)))
-  X <- as.data.frame(X)
-  X[, 1] <- namesK[X[, 1]]
-  X[, 2] <- namesK[X[, 2]]
-  colnames(X) <- c("Parent1", "Parent2", "K")
-  rownames(X) <- NULL
-  return(X)
-}

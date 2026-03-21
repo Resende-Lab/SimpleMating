@@ -1,18 +1,14 @@
-#' `meltK_fast`
-#' Melt the relationship matrix in a faster way
+#' `getDiplotypes`
+#' Get diplotypes from phased haplotypes
 #' @noRd
-meltK_fast <- function(X) {
-  if (!is.matrix(X)) {
-    stop("X must be a matrix.\n")
+getDiplotypes = function (Markers) {
+  column_sums_list <- list()
+  nind <- nrow(Markers)
+  for (i in seq(1, nind, by = 2)) {
+    column_sums <- colSums(Markers[c(i, i + 1), ])
+    column_sums_list[[i]] <- column_sums
   }
-  
-  namesK <- rownames(X)
-  if (is.null(namesK)) {
-    namesK <- as.character(1:nrow(X))
-  }
-  
-  # Use Rcpp function for speed
-  result <- meltK_cpp(X, namesK)
-  
-  return(result)
+  diplotype <- do.call(rbind, column_sums_list)
+  rownames(diplotype) <- unique(sub("\\_.*", "", rownames(Markers)))
+  return(diplotype)
 }

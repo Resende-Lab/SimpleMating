@@ -151,7 +151,7 @@ getTGV <- function (MatePlan, Markers, addEff, domEff, K, ploidy = 2,
   }
   
   # Melt K matrix using optimized function
-  KCriterion <- meltK_fast(K)
+  KCriterion <- meltK_cpp(K, namesK = colnames(K))
   
   # Remove duplicates from KCriterion before merging
   KCriterion <- KCriterion[!duplicated(KCriterion$Cross.ID), 

@@ -25,19 +25,175 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// getTGVcpp
-NumericMatrix getTGVcpp(NumericMatrix markers, NumericMatrix effA, NumericMatrix effD, IntegerVector parent1_idx, IntegerVector parent2_idx, double ploidy);
-RcppExport SEXP _SimpleMating_getTGVcpp(SEXP markersSEXP, SEXP effASEXP, SEXP effDSEXP, SEXP parent1_idxSEXP, SEXP parent2_idxSEXP, SEXP ploidySEXP) {
+// calDij_cpp
+NumericMatrix calDij_cpp(NumericMatrix par_phased, NumericMatrix mcv);
+RcppExport SEXP _SimpleMating_calDij_cpp(SEXP par_phasedSEXP, SEXP mcvSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type par_phased(par_phasedSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type mcv(mcvSEXP);
+    rcpp_result_gen = Rcpp::wrap(calDij_cpp(par_phased, mcv));
+    return rcpp_result_gen;
+END_RCPP
+}
+// calcInfoCpp
+NumericMatrix calcInfoCpp(NumericMatrix markers);
+RcppExport SEXP _SimpleMating_calcInfoCpp(SEXP markersSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericMatrix >::type markers(markersSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type effA(effASEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type effD(effDSEXP);
-    Rcpp::traits::input_parameter< IntegerVector >::type parent1_idx(parent1_idxSEXP);
-    Rcpp::traits::input_parameter< IntegerVector >::type parent2_idx(parent2_idxSEXP);
-    Rcpp::traits::input_parameter< double >::type ploidy(ploidySEXP);
-    rcpp_result_gen = Rcpp::wrap(getTGVcpp(markers, effA, effD, parent1_idx, parent2_idx, ploidy));
+    rcpp_result_gen = Rcpp::wrap(calcInfoCpp(markers));
+    return rcpp_result_gen;
+END_RCPP
+}
+// compStVar_cpp
+double compStVar_cpp(NumericMatrix MatD, NumericVector eff);
+RcppExport SEXP _SimpleMating_compStVar_cpp(SEXP MatDSEXP, SEXP effSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type MatD(MatDSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type eff(effSEXP);
+    rcpp_result_gen = Rcpp::wrap(compStVar_cpp(MatD, eff));
+    return rcpp_result_gen;
+END_RCPP
+}
+// compMtVar_cpp
+double compMtVar_cpp(NumericMatrix mat, NumericMatrix eff, NumericVector weights);
+RcppExport SEXP _SimpleMating_compMtVar_cpp(SEXP matSEXP, SEXP effSEXP, SEXP weightsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type eff(effSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type weights(weightsSEXP);
+    rcpp_result_gen = Rcpp::wrap(compMtVar_cpp(mat, eff, weights));
+    return rcpp_result_gen;
+END_RCPP
+}
+// crossStAcpp
+List crossStAcpp(NumericMatrix markers, List parent_pairs, List mcov_chr_list, List map_pos_list, List effA_chr_list, IntegerVector markers_name_idx, CharacterVector parent1_names, CharacterVector parent2_names, int n_threads);
+RcppExport SEXP _SimpleMating_crossStAcpp(SEXP markersSEXP, SEXP parent_pairsSEXP, SEXP mcov_chr_listSEXP, SEXP map_pos_listSEXP, SEXP effA_chr_listSEXP, SEXP markers_name_idxSEXP, SEXP parent1_namesSEXP, SEXP parent2_namesSEXP, SEXP n_threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type markers(markersSEXP);
+    Rcpp::traits::input_parameter< List >::type parent_pairs(parent_pairsSEXP);
+    Rcpp::traits::input_parameter< List >::type mcov_chr_list(mcov_chr_listSEXP);
+    Rcpp::traits::input_parameter< List >::type map_pos_list(map_pos_listSEXP);
+    Rcpp::traits::input_parameter< List >::type effA_chr_list(effA_chr_listSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type markers_name_idx(markers_name_idxSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type parent1_names(parent1_namesSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type parent2_names(parent2_namesSEXP);
+    Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(crossStAcpp(markers, parent_pairs, mcov_chr_list, map_pos_list, effA_chr_list, markers_name_idx, parent1_names, parent2_names, n_threads));
+    return rcpp_result_gen;
+END_RCPP
+}
+// crossStADcpp
+List crossStADcpp(NumericMatrix markers, List parent1_rows_list, List parent2_rows_list, List mcov_chr_list, List pos_seg_list, List effA_chr_list, List effD_chr_list, CharacterVector parent1_names, CharacterVector parent2_names, int n_threads);
+RcppExport SEXP _SimpleMating_crossStADcpp(SEXP markersSEXP, SEXP parent1_rows_listSEXP, SEXP parent2_rows_listSEXP, SEXP mcov_chr_listSEXP, SEXP pos_seg_listSEXP, SEXP effA_chr_listSEXP, SEXP effD_chr_listSEXP, SEXP parent1_namesSEXP, SEXP parent2_namesSEXP, SEXP n_threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type markers(markersSEXP);
+    Rcpp::traits::input_parameter< List >::type parent1_rows_list(parent1_rows_listSEXP);
+    Rcpp::traits::input_parameter< List >::type parent2_rows_list(parent2_rows_listSEXP);
+    Rcpp::traits::input_parameter< List >::type mcov_chr_list(mcov_chr_listSEXP);
+    Rcpp::traits::input_parameter< List >::type pos_seg_list(pos_seg_listSEXP);
+    Rcpp::traits::input_parameter< List >::type effA_chr_list(effA_chr_listSEXP);
+    Rcpp::traits::input_parameter< List >::type effD_chr_list(effD_chr_listSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type parent1_names(parent1_namesSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type parent2_names(parent2_namesSEXP);
+    Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(crossStADcpp(markers, parent1_rows_list, parent2_rows_list, mcov_chr_list, pos_seg_list, effA_chr_list, effD_chr_list, parent1_names, parent2_names, n_threads));
+    return rcpp_result_gen;
+END_RCPP
+}
+// crossStADNPcpp
+List crossStADNPcpp(NumericMatrix markers, List parent1_rows_list, List parent2_rows_list, List mcov_chr_list, List mcovD_chr_list, List pos_seg_list, List effA_chr_list, List effD_chr_list, CharacterVector parent1_names, CharacterVector parent2_names, int n_threads);
+RcppExport SEXP _SimpleMating_crossStADNPcpp(SEXP markersSEXP, SEXP parent1_rows_listSEXP, SEXP parent2_rows_listSEXP, SEXP mcov_chr_listSEXP, SEXP mcovD_chr_listSEXP, SEXP pos_seg_listSEXP, SEXP effA_chr_listSEXP, SEXP effD_chr_listSEXP, SEXP parent1_namesSEXP, SEXP parent2_namesSEXP, SEXP n_threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type markers(markersSEXP);
+    Rcpp::traits::input_parameter< List >::type parent1_rows_list(parent1_rows_listSEXP);
+    Rcpp::traits::input_parameter< List >::type parent2_rows_list(parent2_rows_listSEXP);
+    Rcpp::traits::input_parameter< List >::type mcov_chr_list(mcov_chr_listSEXP);
+    Rcpp::traits::input_parameter< List >::type mcovD_chr_list(mcovD_chr_listSEXP);
+    Rcpp::traits::input_parameter< List >::type pos_seg_list(pos_seg_listSEXP);
+    Rcpp::traits::input_parameter< List >::type effA_chr_list(effA_chr_listSEXP);
+    Rcpp::traits::input_parameter< List >::type effD_chr_list(effD_chr_listSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type parent1_names(parent1_namesSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type parent2_names(parent2_namesSEXP);
+    Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(crossStADNPcpp(markers, parent1_rows_list, parent2_rows_list, mcov_chr_list, mcovD_chr_list, pos_seg_list, effA_chr_list, effD_chr_list, parent1_names, parent2_names, n_threads));
+    return rcpp_result_gen;
+END_RCPP
+}
+// crossMtAcpp
+List crossMtAcpp(NumericMatrix markers, List parent_pairs, List mcov_chr_list, List map_pos_list, List effA_chr_list, IntegerVector markers_name_idx, NumericVector weights, CharacterVector parent1_names, CharacterVector parent2_names, int n_threads);
+RcppExport SEXP _SimpleMating_crossMtAcpp(SEXP markersSEXP, SEXP parent_pairsSEXP, SEXP mcov_chr_listSEXP, SEXP map_pos_listSEXP, SEXP effA_chr_listSEXP, SEXP markers_name_idxSEXP, SEXP weightsSEXP, SEXP parent1_namesSEXP, SEXP parent2_namesSEXP, SEXP n_threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type markers(markersSEXP);
+    Rcpp::traits::input_parameter< List >::type parent_pairs(parent_pairsSEXP);
+    Rcpp::traits::input_parameter< List >::type mcov_chr_list(mcov_chr_listSEXP);
+    Rcpp::traits::input_parameter< List >::type map_pos_list(map_pos_listSEXP);
+    Rcpp::traits::input_parameter< List >::type effA_chr_list(effA_chr_listSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type markers_name_idx(markers_name_idxSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type parent1_names(parent1_namesSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type parent2_names(parent2_namesSEXP);
+    Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(crossMtAcpp(markers, parent_pairs, mcov_chr_list, map_pos_list, effA_chr_list, markers_name_idx, weights, parent1_names, parent2_names, n_threads));
+    return rcpp_result_gen;
+END_RCPP
+}
+// crossMtADcpp
+List crossMtADcpp(NumericMatrix markers, List parent1_rows_list, List parent2_rows_list, List mcov_chr_list, List pos_seg_list, List effA_chr_list, List effD_chr_list, NumericVector weights, CharacterVector parent1_names, CharacterVector parent2_names, int n_threads);
+RcppExport SEXP _SimpleMating_crossMtADcpp(SEXP markersSEXP, SEXP parent1_rows_listSEXP, SEXP parent2_rows_listSEXP, SEXP mcov_chr_listSEXP, SEXP pos_seg_listSEXP, SEXP effA_chr_listSEXP, SEXP effD_chr_listSEXP, SEXP weightsSEXP, SEXP parent1_namesSEXP, SEXP parent2_namesSEXP, SEXP n_threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type markers(markersSEXP);
+    Rcpp::traits::input_parameter< List >::type parent1_rows_list(parent1_rows_listSEXP);
+    Rcpp::traits::input_parameter< List >::type parent2_rows_list(parent2_rows_listSEXP);
+    Rcpp::traits::input_parameter< List >::type mcov_chr_list(mcov_chr_listSEXP);
+    Rcpp::traits::input_parameter< List >::type pos_seg_list(pos_seg_listSEXP);
+    Rcpp::traits::input_parameter< List >::type effA_chr_list(effA_chr_listSEXP);
+    Rcpp::traits::input_parameter< List >::type effD_chr_list(effD_chr_listSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type parent1_names(parent1_namesSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type parent2_names(parent2_namesSEXP);
+    Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(crossMtADcpp(markers, parent1_rows_list, parent2_rows_list, mcov_chr_list, pos_seg_list, effA_chr_list, effD_chr_list, weights, parent1_names, parent2_names, n_threads));
+    return rcpp_result_gen;
+END_RCPP
+}
+// crossMtADNPcpp
+List crossMtADNPcpp(NumericMatrix markers, List parent1_rows_list, List parent2_rows_list, List mcov_chr_list, List mcovD_chr_list, List pos_seg_list, List posD_seg_list, List effA_chr_list, List effD_chr_list, NumericVector weights, CharacterVector parent1_names, CharacterVector parent2_names, int n_threads);
+RcppExport SEXP _SimpleMating_crossMtADNPcpp(SEXP markersSEXP, SEXP parent1_rows_listSEXP, SEXP parent2_rows_listSEXP, SEXP mcov_chr_listSEXP, SEXP mcovD_chr_listSEXP, SEXP pos_seg_listSEXP, SEXP posD_seg_listSEXP, SEXP effA_chr_listSEXP, SEXP effD_chr_listSEXP, SEXP weightsSEXP, SEXP parent1_namesSEXP, SEXP parent2_namesSEXP, SEXP n_threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type markers(markersSEXP);
+    Rcpp::traits::input_parameter< List >::type parent1_rows_list(parent1_rows_listSEXP);
+    Rcpp::traits::input_parameter< List >::type parent2_rows_list(parent2_rows_listSEXP);
+    Rcpp::traits::input_parameter< List >::type mcov_chr_list(mcov_chr_listSEXP);
+    Rcpp::traits::input_parameter< List >::type mcovD_chr_list(mcovD_chr_listSEXP);
+    Rcpp::traits::input_parameter< List >::type pos_seg_list(pos_seg_listSEXP);
+    Rcpp::traits::input_parameter< List >::type posD_seg_list(posD_seg_listSEXP);
+    Rcpp::traits::input_parameter< List >::type effA_chr_list(effA_chr_listSEXP);
+    Rcpp::traits::input_parameter< List >::type effD_chr_list(effD_chr_listSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type parent1_names(parent1_namesSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type parent2_names(parent2_namesSEXP);
+    Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(crossMtADNPcpp(markers, parent1_rows_list, parent2_rows_list, mcov_chr_list, mcovD_chr_list, pos_seg_list, posD_seg_list, effA_chr_list, effD_chr_list, weights, parent1_names, parent2_names, n_threads));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -75,13 +231,39 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// getTGVcpp
+NumericMatrix getTGVcpp(NumericMatrix markers, NumericMatrix effA, NumericMatrix effD, IntegerVector parent1_idx, IntegerVector parent2_idx, double ploidy);
+RcppExport SEXP _SimpleMating_getTGVcpp(SEXP markersSEXP, SEXP effASEXP, SEXP effDSEXP, SEXP parent1_idxSEXP, SEXP parent2_idxSEXP, SEXP ploidySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type markers(markersSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type effA(effASEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type effD(effDSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type parent1_idx(parent1_idxSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type parent2_idx(parent2_idxSEXP);
+    Rcpp::traits::input_parameter< double >::type ploidy(ploidySEXP);
+    rcpp_result_gen = Rcpp::wrap(getTGVcpp(markers, effA, effD, parent1_idx, parent2_idx, ploidy));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_SimpleMating_G_ibd", (DL_FUNC) &_SimpleMating_G_ibd, 3},
-    {"_SimpleMating_getTGVcpp", (DL_FUNC) &_SimpleMating_getTGVcpp, 6},
+    {"_SimpleMating_calDij_cpp", (DL_FUNC) &_SimpleMating_calDij_cpp, 2},
+    {"_SimpleMating_calcInfoCpp", (DL_FUNC) &_SimpleMating_calcInfoCpp, 1},
+    {"_SimpleMating_compStVar_cpp", (DL_FUNC) &_SimpleMating_compStVar_cpp, 2},
+    {"_SimpleMating_compMtVar_cpp", (DL_FUNC) &_SimpleMating_compMtVar_cpp, 3},
+    {"_SimpleMating_crossStAcpp", (DL_FUNC) &_SimpleMating_crossStAcpp, 9},
+    {"_SimpleMating_crossStADcpp", (DL_FUNC) &_SimpleMating_crossStADcpp, 10},
+    {"_SimpleMating_crossStADNPcpp", (DL_FUNC) &_SimpleMating_crossStADNPcpp, 11},
+    {"_SimpleMating_crossMtAcpp", (DL_FUNC) &_SimpleMating_crossMtAcpp, 10},
+    {"_SimpleMating_crossMtADcpp", (DL_FUNC) &_SimpleMating_crossMtADcpp, 11},
+    {"_SimpleMating_crossMtADNPcpp", (DL_FUNC) &_SimpleMating_crossMtADNPcpp, 13},
     {"_SimpleMating_meltK_cpp", (DL_FUNC) &_SimpleMating_meltK_cpp, 2},
     {"_SimpleMating_imputeMarkersCpp", (DL_FUNC) &_SimpleMating_imputeMarkersCpp, 1},
     {"_SimpleMating_thetaEigen", (DL_FUNC) &_SimpleMating_thetaEigen, 1},
+    {"_SimpleMating_getTGVcpp", (DL_FUNC) &_SimpleMating_getTGVcpp, 6},
     {NULL, NULL, 0}
 };
 

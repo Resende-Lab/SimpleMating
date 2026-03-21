@@ -31,6 +31,7 @@
 #' @param propSel Value representing the proportion of the selected individuals. Default is 0.05.
 #' @param Type which kind of system of mating: "DH": doubled haploids lines or
 #'  "RIL": Recombinant inbred lines.
+#' @param Scale boolean. Scale the trait or not. Default is TRUE.
 #' @param Generation integer. Indicates the generation where the DH lines are generate or the RILs are extracted. According to Lehermeier et al. (2017)
 #' DH derived from F1 generation is '1' and RILs from F2 generation is '1'. Also, for infinite generation a value superior to 10 should be used.
 #' @param Weights row vector containing the weights for each trait.
@@ -91,7 +92,7 @@
 
 
 
-getUsefA_mt <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, propSel = 0.05, Type = 'DH', Generation = 1, Weights = NULL) {
+getUsefA_mt <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, propSel = 0.05, Type = 'DH', Generation = 1, Scale = TRUE, Weights = NULL, n_threads = 1, display_progress = TRUE) {
   
   if (!("data.frame" %in% class(MatePlan))) {
     stop("Argument 'MatePlan' is not a data frame.\n")
@@ -118,7 +119,14 @@ getUsefA_mt <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, pr
   colnames(MatePlan) <- c("Parent1", "Parent2", "Cross.ID")
   Markers <- imputeMarkersCpp(Markers)
   EffA <- as.matrix(addEff)
-  Index_Mean <- ((Markers %*% EffA) %*% Weights)
+  
+  # === Compute Mean ===
+  Index_tmp <- Markers %*% EffA
+  if (Scale) {
+    Index_Mean <- scale(Index_tmp) %*% Weights
+  } else {
+    Index_Mean <- Index_tmp %*% Weights
+  }
   
   MatePlan$Mean <- apply(MatePlan, 1, function(tmp) {
     Mean_Cross <- (Index_Mean[rownames(Index_Mean) %in% tmp[1]] + Index_Mean[rownames(Index_Mean) %in% tmp[2]]) / 2
@@ -159,40 +167,66 @@ getUsefA_mt <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, pr
     
     MCov <- setNames(MCov, names(rMat))
     Markers <- Markers - 1
-    calc.info <- function(Markers) {
-      fourD <- crossprod(Markers[1, , drop = FALSE] - Markers[2, , drop = FALSE]) / 4
-      return(fourD)
-    }
-    crospredPar <- function(Ncross) {
-      cross_variance <- vector("list", nrow(Ncross))
-      for (i in seq_along(cross_variance)) {
-        Matepair <- as.character(Ncross[i, ])
-        Total_SNP <- Markers[Matepair, , drop = FALSE]
-        SNPseg <- which(!colMeans(Total_SNP) %in% c(1, -1))
-        SNPseg.Chr <- lapply(Map.Pos, intersect, Markers_names[SNPseg])
-        SNPseg.Chr_pos <- mapply(Map.Pos, SNPseg.Chr, FUN = function(.a, .b) which(.a %in% .b), SIMPLIFY = FALSE)
-        parGen <- lapply(SNPseg.Chr, function(tmp) Markers[Matepair, tmp, drop = FALSE])
-        D <- lapply(parGen, calc.info)
-        SNPseg.MCov <- mapply(SNPseg.Chr_pos, MCov, FUN = function(.a, .b) .b[.a, .a], SIMPLIFY = FALSE)
-        VarCov <- Map("*", D, SNPseg.MCov)
-        SNPseg.EffA <- mapply(SNPseg.Chr_pos, Map.Eff, FUN = function(.a, .b) .b[.a, ], SIMPLIFY = FALSE)
-        Mat.Var <- mapply(VarCov, SNPseg.EffA,
-                          FUN = function(.a, .b) crossprod(as.matrix(.b), (t(.a) %*% as.matrix(.b))), SIMPLIFY = FALSE
-        )
-        Pair.Var <- Reduce("+", lapply(Mat.Var, FUN = function(.a, .b) {
-          crossprod(as.matrix(Weights), .a %*% as.matrix(Weights))
-        }))
-        cross_variance[[i]] <- data.frame(t(Matepair),
-                                          Variance = abs(Pair.Var),
-                                          stringsAsFactors = FALSE,
-                                          row.names = NULL
-        )
-      }
+    
+    predVarMtA <- function(nCross, n_threads = n_threads) {
+      n_crosses    <- nrow(nCross)
+      parent_pairs <- vector("list", n_crosses)
+      map_pos_list <- vector("list", n_crosses)
+      mcov_list    <- vector("list", n_crosses)
+      effA_list    <- vector("list", n_crosses)
       
-      do.call("rbind", cross_variance)
+      pb <- txtProgressBar(min = 0, max = n_crosses, style = 3)
+      for (i in 1:n_crosses) {
+        Matepair <- as.character(nCross[i, ])
+        parent_pairs[[i]] <- match(Matepair, rownames(Markers))
+        
+        Total_SNP      <- Markers[Matepair, , drop = FALSE]
+        SNPseg         <- which(!colMeans(Total_SNP) %in% c(1, -1))
+        SNPseg.Chr     <- lapply(Map.Pos, intersect, Markers_names[SNPseg])
+        # Within-chromosome positions: used to slice MCov and effects
+        SNPseg.Chr_pos <- mapply(Map.Pos, SNPseg.Chr,
+                                 FUN = function(.a, .b) which(.a %in% .b),
+                                 SIMPLIFY = FALSE)
+        # Global column positions: used by C++ to index into the full marker matrix
+        SNPseg.Chr_global <- mapply(Map.Pos, SNPseg.Chr,
+                                    FUN = function(.a, .b) match(.b, Markers_names),
+                                    SIMPLIFY = FALSE)
+        
+        map_pos_list[[i]] <- SNPseg.Chr_global
+        mcov_list[[i]]    <- mapply(SNPseg.Chr_pos, MCov,
+                                    FUN = function(.a, .b) if (length(.a) == 0) matrix(0, 0, 0) else matrix(.b[.a, .a, drop = FALSE], nrow = length(.a)),
+                                    SIMPLIFY = FALSE)
+        effA_list[[i]]    <- mapply(SNPseg.Chr_pos, Map.Eff,
+                                    FUN = function(.a, .b) as.matrix(.b[.a, , drop = FALSE]),
+                                    SIMPLIFY = FALSE)
+        if (display_progress) setTxtProgressBar(pb, i)
+      }
+      close(pb)
+      
+      result <- crossMtAcpp(
+        markers          = Markers,
+        parent_pairs     = parent_pairs,
+        mcov_chr_list    = mcov_list,
+        map_pos_list     = map_pos_list,
+        effA_chr_list    = effA_list,
+        markers_name_idx = seq_along(Markers_names),
+        weights          = Weights,
+        parent1_names    = nCross[, 1],
+        parent2_names    = nCross[, 2],
+        n_threads        = n_threads
+      )
+      
+      data.frame(
+        Parent1  = result$Parent1,
+        Parent2  = result$Parent2,
+        Variance = result$Variance,
+        stringsAsFactors = FALSE,
+        row.names = NULL
+      )
     }
+    
     cros2cores <- list(`1` = MatePlan[, c(1:2)])
-    tmp_var <- lapply(cros2cores, crospredPar)
+    tmp_var <- lapply(cros2cores, predVarMtA, n_threads = n_threads)
     MateVar <- do.call("rbind", tmp_var)
     MateVar$Cross.ID <- paste0(MateVar[, 1], "_", MateVar[, 2])
     MatePlan <- merge(MatePlan, MateVar[, -c(1:2)], by = "Cross.ID")
@@ -248,42 +282,68 @@ getUsefA_mt <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, pr
       }
     }
     MCov <- setNames(MCov, names(block_sizes))
-
+    
     Markers <- Markers - 1
-    calc.info <- function(Markers) {
-      fourD <- crossprod(Markers[1, , drop = FALSE] - Markers[2, , drop = FALSE]) / 4
-      return(fourD)
-    }
-    crospredPar <- function(Ncross) {
-      cross_variance <- vector("list", nrow(Ncross))
-      for (i in seq_along(cross_variance)) {
-        Matepair <- as.character(Ncross[i, ])
-        Total_SNP <- Markers[Matepair, , drop = FALSE]
-        SNPseg <- which(!colMeans(Total_SNP) %in% c(1, -1))
-        SNPseg.Chr <- lapply(Map.Pos, intersect, Markers_names[SNPseg])
-        SNPseg.Chr_pos <- mapply(Map.Pos, SNPseg.Chr, FUN = function(.a, .b) which(.a %in% .b))
-        parGen <- lapply(SNPseg.Chr, function(tmp) Markers[Matepair, tmp, drop = FALSE])
-        D <- lapply(parGen, calc.info)
-        SNPseg.MCov <- mapply(SNPseg.Chr_pos, MCov, FUN = function(.a, .b) .b[.a, .a])
-        VarCov <- Map("*", D, SNPseg.MCov)
-        SNPseg.EffA <- mapply(SNPseg.Chr_pos, Map.Eff, FUN = function(.a, .b) .b[.a, ], SIMPLIFY = FALSE)
-        Mat.Var <- mapply(VarCov, SNPseg.EffA,
-                          FUN = function(.a, .b) crossprod(as.matrix(.b), (t(.a) %*% as.matrix(.b))), SIMPLIFY = FALSE
-        )
-        Pair.Var <- Reduce("+", lapply(Mat.Var, FUN = function(.a, .b) {
-          crossprod(as.matrix(Weights), .a %*% as.matrix(Weights))
-        }))
-        cross_variance[[i]] <- data.frame(t(Matepair),
-                                          Variance = abs(Pair.Var),
-                                          stringsAsFactors = FALSE,
-                                          row.names = NULL
-        )
-      }
+    
+    predVarMtA <- function(nCross, n_threads = n_threads) {
+      n_crosses    <- nrow(nCross)
+      parent_pairs <- vector("list", n_crosses)
+      map_pos_list <- vector("list", n_crosses)
+      mcov_list    <- vector("list", n_crosses)
+      effA_list    <- vector("list", n_crosses)
       
-      do.call("rbind", cross_variance)
+      pb <- txtProgressBar(min = 0, max = n_crosses, style = 3)
+      for (i in 1:n_crosses) {
+        Matepair <- as.character(nCross[i, ])
+        parent_pairs[[i]] <- match(Matepair, rownames(Markers))
+        
+        Total_SNP      <- Markers[Matepair, , drop = FALSE]
+        SNPseg         <- which(!colMeans(Total_SNP) %in% c(1, -1))
+        SNPseg.Chr     <- lapply(Map.Pos, intersect, Markers_names[SNPseg])
+        # Within-chromosome positions: used to slice MCov and effects
+        SNPseg.Chr_pos <- mapply(Map.Pos, SNPseg.Chr,
+                                 FUN = function(.a, .b) which(.a %in% .b),
+                                 SIMPLIFY = FALSE)
+        # Global column positions: used by C++ to index into the full marker matrix
+        SNPseg.Chr_global <- mapply(Map.Pos, SNPseg.Chr,
+                                    FUN = function(.a, .b) match(.b, Markers_names),
+                                    SIMPLIFY = FALSE)
+        
+        map_pos_list[[i]] <- SNPseg.Chr_global
+        mcov_list[[i]]    <- mapply(SNPseg.Chr_pos, MCov,
+                                    FUN = function(.a, .b) if (length(.a) == 0) matrix(0, 0, 0) else matrix(.b[.a, .a, drop = FALSE], nrow = length(.a)),
+                                    SIMPLIFY = FALSE)
+        effA_list[[i]]    <- mapply(SNPseg.Chr_pos, Map.Eff,
+                                    FUN = function(.a, .b) as.matrix(.b[.a, , drop = FALSE]),
+                                    SIMPLIFY = FALSE)
+        if (display_progress) setTxtProgressBar(pb, i)
+      }
+      close(pb)
+      
+      result <- crossMtAcpp(
+        markers          = Markers,
+        parent_pairs     = parent_pairs,
+        mcov_chr_list    = mcov_list,
+        map_pos_list     = map_pos_list,
+        effA_chr_list    = effA_list,
+        markers_name_idx = seq_along(Markers_names),
+        weights          = Weights,
+        parent1_names    = nCross[, 1],
+        parent2_names    = nCross[, 2],
+        n_threads        = n_threads
+      )
+      
+      data.frame(
+        Parent1  = result$Parent1,
+        Parent2  = result$Parent2,
+        Variance = result$Variance,
+        stringsAsFactors = FALSE,
+        row.names = NULL
+      )
     }
+    
     cros2cores <- list(`1` = MatePlan[, c(1:2)])
-    tmp_var <- lapply(cros2cores, crospredPar)
+    tmp_var <- lapply(cros2cores, predVarMtA, n_threads = n_threads)
     MateVar <- do.call("rbind", tmp_var)
     MateVar$Cross.ID <- paste0(MateVar[, 1], "_", MateVar[, 2])
     MatePlan <- merge(MatePlan, MateVar[, -c(1:2)], by = "Cross.ID")
@@ -302,7 +362,7 @@ getUsefA_mt <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, pr
   }
   
   
-  melted_rel <- meltKUsef(K)
+  melted_rel <- meltK_cpp(K, namesK = colnames(K))
   par_K <- data.frame(
     Cross.ID = paste0(melted_rel$Parent2, "_", melted_rel$Parent1),
     K = melted_rel$K
@@ -320,37 +380,4 @@ getUsefA_mt <- function(MatePlan, Markers, addEff, K, Map.In, linkDes = NULL, pr
   
   return(crosses2opt)
   
-}
-
-
-#' `theta`
-#' Function to calculate the recombination matrix from a genetic map based on Haldane (1909).
-#'
-#' @param map data frame with three columns: chromosome number, chromosome position, and marker number
-#'
-#' @noRd
-
-
-theta <- function(map) {
-  distMat <- as.matrix(dist(map[, 2], upper = TRUE, diag = TRUE, method = "manhattan"))
-  return(0.5 * (1 - exp(-2 * (distMat/100))))
-}
-
-
-#' `meltK`
-#' Function to transform the relationship matrix into a three column data frame
-#'
-#' @param X relationship martrix
-#'
-#' @noRd
-
-meltKUsef <- function(X) {
-  namesK <- rownames(X)
-  X <- cbind(which(!is.na(X), arr.ind = TRUE), na.omit(as.vector(X)))
-  X <- as.data.frame(X)
-  X[, 1] <- namesK[X[, 1]]
-  X[, 2] <- namesK[X[, 2]]
-  colnames(X) <- c("Parent1", "Parent2", "K")
-  rownames(X) <- NULL
-  return(X)
 }

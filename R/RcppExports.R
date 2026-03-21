@@ -21,8 +21,44 @@ G_ibd <- function(haps_vec, n_samples, ploidy) {
     .Call(`_SimpleMating_G_ibd`, haps_vec, n_samples, ploidy)
 }
 
-getTGVcpp <- function(markers, effA, effD, parent1_idx, parent2_idx, ploidy) {
-    .Call(`_SimpleMating_getTGVcpp`, markers, effA, effD, parent1_idx, parent2_idx, ploidy)
+calDij_cpp <- function(par_phased, mcv) {
+    .Call(`_SimpleMating_calDij_cpp`, par_phased, mcv)
+}
+
+calcInfoCpp <- function(markers) {
+    .Call(`_SimpleMating_calcInfoCpp`, markers)
+}
+
+compStVar_cpp <- function(MatD, eff) {
+    .Call(`_SimpleMating_compStVar_cpp`, MatD, eff)
+}
+
+compMtVar_cpp <- function(mat, eff, weights) {
+    .Call(`_SimpleMating_compMtVar_cpp`, mat, eff, weights)
+}
+
+crossStAcpp <- function(markers, parent_pairs, mcov_chr_list, map_pos_list, effA_chr_list, markers_name_idx, parent1_names, parent2_names, n_threads = 1L) {
+    .Call(`_SimpleMating_crossStAcpp`, markers, parent_pairs, mcov_chr_list, map_pos_list, effA_chr_list, markers_name_idx, parent1_names, parent2_names, n_threads)
+}
+
+crossStADcpp <- function(markers, parent1_rows_list, parent2_rows_list, mcov_chr_list, pos_seg_list, effA_chr_list, effD_chr_list, parent1_names, parent2_names, n_threads = 1L) {
+    .Call(`_SimpleMating_crossStADcpp`, markers, parent1_rows_list, parent2_rows_list, mcov_chr_list, pos_seg_list, effA_chr_list, effD_chr_list, parent1_names, parent2_names, n_threads)
+}
+
+crossStADNPcpp <- function(markers, parent1_rows_list, parent2_rows_list, mcov_chr_list, mcovD_chr_list, pos_seg_list, effA_chr_list, effD_chr_list, parent1_names, parent2_names, n_threads = 1L) {
+    .Call(`_SimpleMating_crossStADNPcpp`, markers, parent1_rows_list, parent2_rows_list, mcov_chr_list, mcovD_chr_list, pos_seg_list, effA_chr_list, effD_chr_list, parent1_names, parent2_names, n_threads)
+}
+
+crossMtAcpp <- function(markers, parent_pairs, mcov_chr_list, map_pos_list, effA_chr_list, markers_name_idx, weights, parent1_names, parent2_names, n_threads = 1L) {
+    .Call(`_SimpleMating_crossMtAcpp`, markers, parent_pairs, mcov_chr_list, map_pos_list, effA_chr_list, markers_name_idx, weights, parent1_names, parent2_names, n_threads)
+}
+
+crossMtADcpp <- function(markers, parent1_rows_list, parent2_rows_list, mcov_chr_list, pos_seg_list, effA_chr_list, effD_chr_list, weights, parent1_names, parent2_names, n_threads = 1L) {
+    .Call(`_SimpleMating_crossMtADcpp`, markers, parent1_rows_list, parent2_rows_list, mcov_chr_list, pos_seg_list, effA_chr_list, effD_chr_list, weights, parent1_names, parent2_names, n_threads)
+}
+
+crossMtADNPcpp <- function(markers, parent1_rows_list, parent2_rows_list, mcov_chr_list, mcovD_chr_list, pos_seg_list, posD_seg_list, effA_chr_list, effD_chr_list, weights, parent1_names, parent2_names, n_threads = 1L) {
+    .Call(`_SimpleMating_crossMtADNPcpp`, markers, parent1_rows_list, parent2_rows_list, mcov_chr_list, mcovD_chr_list, pos_seg_list, posD_seg_list, effA_chr_list, effD_chr_list, weights, parent1_names, parent2_names, n_threads)
 }
 
 meltK_cpp <- function(X, namesK) {
@@ -35,5 +71,9 @@ imputeMarkersCpp <- function(markers) {
 
 thetaEigen <- function(dist) {
     .Call(`_SimpleMating_thetaEigen`, dist)
+}
+
+getTGVcpp <- function(markers, effA, effD, parent1_idx, parent2_idx, ploidy) {
+    .Call(`_SimpleMating_getTGVcpp`, markers, effA, effD, parent1_idx, parent2_idx, ploidy)
 }
 
