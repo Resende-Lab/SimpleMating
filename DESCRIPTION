@@ -1,6 +1,6 @@
 Package: SimpleMating
-Title: A R package to breeding crosses optimization
-Version: 0.2.1000
+Title: Optimization of Breeding Crosses Using Genetic Values and Mate Allocation
+Version: 0.2.1
 Authors@R: 
     c(person("Marco", "Peixoto", , "marco.peixotom@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-0564-7068")),
@@ -9,20 +9,29 @@ Authors@R:
       person("Luis", "Ferrao", role = "ctb"),
       person("Patricio", "Munoz", role = "ctb"),
       person("Marcio", "Resende", role = "ctb"))
-Description: SimpleMating is a two core package for cross optimization. First, it estimates the performance for a set of crosses, such as mid-parental value, cross total genetic value, and/or usefulness (using additive and/or non-additive effects), allowing for multi-trait scenarios. Furthermore, it uses a mate allocation algorithm to create a mating plan that aims to maximize a target criterion (mid-parental value, cross total genetic value, or usefulness) while constraining the next generation's inbreeding levels.
-Depends: R (>= 3.6.0)
+Description: Provides tools for optimizing breeding crosses in genetic improvement programs. 
+The package estimates cross performance metrics such as mid-parent value, total genetic value, 
+and usefulness, accounting for additive and non-additive effects in single- and multi-trait 
+settings. It also implements mate allocation algorithms to design mating plans that maximize 
+a target criterion while constraining inbreeding in the next generation.
+Depends: R (>= 3.6)
 Imports: 
-     stats (>= 4.2.3),
-     ggplot2 (>= 3.3.6),
-     Rcpp,
-     mco,
-     optiSel
-LinkingTo: Rcpp, RcppArmadillo, RcppEigen
+    stats,
+    ggplot2 (>= 3.3.6),
+    Rcpp,
+    mco,
+    optiSel
+LinkingTo: Rcpp
+SystemRequirements: C++11, OpenMP
 License: GPL-3
 Encoding: UTF-8
 URL: https://github.com/Resende-Lab/SimpleMating
+BugReports: https://github.com/Resende-Lab/SimpleMating/issues
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 VignetteBuilder: knitr
-Suggests: knitr, rmarkdown, AGHmatrix (>= 2.1.0)
+Suggests: 
+    knitr,
+    rmarkdown,
+    AGHmatrix (>= 2.1.0)
 LazyData: true
