@@ -10,10 +10,6 @@ Authors@R:
       person("Patricio", "Munoz", role = "ctb"),
       person("Marcio", "Resende", role = "ctb"))
 Description: Provides tools for optimizing breeding crosses in genetic improvement programs. 
-The package estimates cross performance metrics such as mid-parent value, total genetic value, 
-and usefulness, accounting for additive and non-additive effects in single- and multi-trait 
-settings. It also implements mate allocation algorithms to design mating plans that maximize 
-a target criterion while constraining inbreeding in the next generation.
 Depends: R (>= 3.6)
 Imports: 
     stats,
