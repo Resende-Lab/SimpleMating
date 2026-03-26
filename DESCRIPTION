@@ -11,13 +11,15 @@ Authors@R:
       person("Marcio", "Resende", role = "ctb"))
 Description: Provides tools for optimizing breeding crosses in genetic improvement programs. 
 Depends: R (>= 3.6)
-Imports: 
+Imports:
     stats,
     ggplot2 (>= 3.3.6),
     Rcpp,
+    RcppArmadillo,
+    RcppEigen,
     mco,
     optiSel
-LinkingTo: Rcpp
+LinkingTo: Rcpp, RcppArmadillo, RcppEigen
 SystemRequirements: C++11, OpenMP
 License: GPL-3
 Encoding: UTF-8
