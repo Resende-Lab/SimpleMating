@@ -35,6 +35,7 @@
 #' @param Method Which method should be used to calculates the progeny variances. The implemented methods are Phased and NonPhased.
 #' @param ploidy Data ploidy (generally an even number). Default=2.
 #' @param n_threads Indicates the number of threads internally used in rcpp. Default=1.
+#' @param display_progress Display the progress bar. Default is TRUE.
 #' 
 #' @return A data frame with means, variances, and usefulness for each pair of
 #' crosses presented in the MatePlan.
@@ -105,6 +106,7 @@
 #' @importFrom stats na.omit
 #' @importFrom stats dist
 #' @importFrom stats setNames
+#' @importFrom utils setTxtProgressBar txtProgressBar
 #'
 #' @export
 

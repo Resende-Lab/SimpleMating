@@ -32,7 +32,8 @@
 #' @param Method Which method should be used to calculates the progeny variances. The implemented methods are Phased and NonPhased.
 #' @param ploidy Data ploidy (generally an even number). Default=2.
 #' @param n_threads Indicates the number of threads internally used in rcpp. Default=1.
-#' #'
+#' @param display_progress Display the progress bar. Default is TRUE.
+#' 
 #' @return A data frame with means, variances, and usefulness for each pair of
 #' crosses presented in the MatePlan.
 #'
@@ -100,6 +101,7 @@
 #' @importFrom stats na.omit
 #' @importFrom stats dist
 #' @importFrom stats setNames
+#' @importFrom utils setTxtProgressBar txtProgressBar
 #'
 #' @export
 
@@ -219,8 +221,8 @@ getUsefAD <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=NULL
         # Call C++ function
         result <- crossStADcpp(
           markers = Markers,
-          parent1_rows = parent1_rows_list,
-          parent2_rows = parent2_rows_list,
+          parent1_rows_list = parent1_rows_list,
+          parent2_rows_list = parent2_rows_list,
           mcov_chr_list = mcov_chr_list,
           pos_seg_list = pos_seg_list,
           effA_chr_list = effA_chr_list,
@@ -363,8 +365,8 @@ getUsefAD <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=NULL
         # Call C++ function
         result <- crossStADcpp(
           markers = Markers,
-          parent1_rows = parent1_rows_list,
-          parent2_rows = parent2_rows_list,
+          parent1_rows_list = parent1_rows_list,
+          parent2_rows_list = parent2_rows_list,
           mcov_chr_list = mcov_chr_list,
           pos_seg_list = pos_seg_list,
           effA_chr_list = effA_chr_list,
@@ -542,8 +544,8 @@ getUsefAD <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=NULL
         # passed directly from R; no marker access needed inside C++)
         result <- crossStADNPcpp(
           markers        = Markers,
-          parent1_rows   = parent1_rows_list,
-          parent2_rows   = parent2_rows_list,
+          parent1_rows_list   = parent1_rows_list,
+          parent2_rows_list   = parent2_rows_list,
           mcov_chr_list  = mcov_chr_list,
           mcovD_chr_list = mcovD_chr_list,
           pos_seg_list   = pos_seg_list,
@@ -731,8 +733,8 @@ getUsefAD <- function(MatePlan, Markers, addEff, domEff, K, Map.In, linkDes=NULL
         # passed directly from R; no marker access needed inside C++)
         result <- crossStADNPcpp(
           markers        = Markers,
-          parent1_rows   = parent1_rows_list,
-          parent2_rows   = parent2_rows_list,
+          parent1_rows_list   = parent1_rows_list,
+          parent2_rows_list   = parent2_rows_list,
           mcov_chr_list  = mcov_chr_list,
           mcovD_chr_list = mcovD_chr_list,
           pos_seg_list   = pos_seg_list,

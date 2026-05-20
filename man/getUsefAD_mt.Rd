@@ -47,6 +47,8 @@ getUsefAD_mt(
 \item{ploidy}{Data ploidy (generally an even number). Default=2.}
 
 \item{n_threads}{Indicates the number of threads internally used in rcpp. Default=1.}
+
+\item{display_progress}{Display the progress bar. Default is TRUE.}
 }
 \value{
 A data frame with means, variances, and usefulness for each pair of

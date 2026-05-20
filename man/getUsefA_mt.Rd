@@ -45,6 +45,10 @@ DH derived from F1 generation is '1' and RILs from F2 generation is '1'. Also, f
 \item{Scale}{boolean. Scale the trait or not. Default is TRUE.}
 
 \item{Weights}{row vector containing the weights for each trait.}
+
+\item{n_threads}{Indicates the number of threads internally used in rcpp. Default = 1.}
+
+\item{display_progress}{Display the progress bar. Default is TRUE.}
 }
 \value{
 A data frame with means, variances, and usefulness for each pair of

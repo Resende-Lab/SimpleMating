@@ -10,17 +10,15 @@ Authors@R:
       person("Patricio", "Munoz", role = "ctb"),
       person("Marcio", "Resende", role = "ctb"))
 Description: Provides tools for optimizing breeding crosses in genetic improvement programs. 
-Depends: R (>= 3.6)
+Depends: R (>= 4.0)
 Imports:
     stats,
     ggplot2 (>= 3.3.6),
-    Rcpp,
-    RcppArmadillo,
-    RcppEigen,
+    Rcpp (>= 1.0.7),
     mco,
     optiSel
-LinkingTo: Rcpp, RcppArmadillo, RcppEigen
-SystemRequirements: C++11, OpenMP
+LinkingTo: Rcpp, RcppEigen
+SystemRequirements: OpenMP
 License: GPL-3
 Encoding: UTF-8
 URL: https://github.com/Resende-Lab/SimpleMating

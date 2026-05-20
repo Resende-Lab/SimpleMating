@@ -33,6 +33,8 @@
 #'  "RIL": Recombinant inbred lines.
 #' @param Generation integer. Indicates the generation where the DH lines are generate or the RILs are extracted. According to Lehermeier et al. (2017)
 #' DH derived from F1 generation is '1' and RILs from F2 generation is '1'. Also, for infinite generation a value superior to 10 should be used.
+#' @param n_threads Indicates the number of threads internally used in rcpp. Default=1.
+#' @param display_progress Display the progress bar. Default is TRUE.
 #'
 #' @return A data frame with means, variances, and usefulness for each pair of
 #' crosses presented in the MatePlan.
@@ -82,6 +84,7 @@
 #' @importFrom stats na.omit
 #' @importFrom stats dist
 #' @importFrom stats setNames
+#' @importFrom utils setTxtProgressBar txtProgressBar
 #'
 #' @export
 

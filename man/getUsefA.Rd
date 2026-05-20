@@ -39,6 +39,10 @@ coded as 0,2. Missing values should be coded as NA.}
 
 \item{Generation}{integer. Indicates the generation where the DH lines are generate or the RILs are extracted. According to Lehermeier et al. (2017)
 DH derived from F1 generation is '1' and RILs from F2 generation is '1'. Also, for infinite generation a value superior to 10 should be used.}
+
+\item{n_threads}{Indicates the number of threads internally used in rcpp. Default=1.}
+
+\item{display_progress}{Display the progress bar. Default is TRUE.}
 }
 \value{
 A data frame with means, variances, and usefulness for each pair of
