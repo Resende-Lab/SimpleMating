@@ -68,6 +68,7 @@ A data frame with four columns is required for this module. It encompasses Paren
 
 A detailed example of the application of **SimpleMating** is given in this [[vignette]](https://htmlpreview.github.io/?https://github.com/Resende-Lab/SimpleMating/blob/main/doc/Vignette.html)
 
+
 ***
 
 If you have any questions about the analyses, please, contact me!  
